@@ -42,6 +42,10 @@ export interface PayServerOptions {
   feed(since: number): LedgerEvent[];
   /** Law 12: the open-questions index. */
   questions(): QuestionsIndex;
+  /** paths.json: the ways to take part. */
+  paths?(): Promise<unknown>;
+  /** A job card for an option at a place on the World map (paths.json, Law 12 map). */
+  job?(option: string, node: string | null): Promise<Record<string, unknown>>;
   /** Per-client limits. `trustProxy` reads X-Forwarded-For; only behind a proxy that sets it. */
   limits?: { trustProxy?: boolean; getPerMinute?: number; payPerMinute?: number };
 }
@@ -112,8 +116,15 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
       return res.end(JSON.stringify({ since, events }, (_k, v) => (typeof v === "bigint" ? v.toString() : v)));
     }
-    if (req.method === "GET" && url.pathname === "/questions") return json(200, opts.questions(), { "cache-control": "no-store" });
-    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /feed?since=<event id>", "GET /questions"] });
+    if (req.method === "GET" && url.pathname === "/questions") return json(200, opts.questions(), { "cache-control": "no-store", "access-control-allow-origin": "*" });
+    if (req.method === "GET" && url.pathname === "/paths" && opts.paths) return json(200, await opts.paths(), { "cache-control": "max-age=60", "access-control-allow-origin": "*" });
+    if (req.method === "GET" && url.pathname === "/job" && opts.job) {
+      const option = (url.searchParams.get("do") ?? "").slice(0, 64), node = url.searchParams.get("node")?.slice(0, 200) ?? null;
+      if (!option) return json(400, { error: "name an option with ?do=<option id> from paths.json; add &node=<node id> for a place on the map" }, { "access-control-allow-origin": "*" });
+      const card = await opts.job(option, node);
+      return json(card["error"] ? 404 : 200, card, { "cache-control": "no-store", "access-control-allow-origin": "*" });
+    }
+    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /feed?since=<event id>", "GET /questions", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
     if (req.method !== "POST" || pr === null) return json(404, { error: "not found" });
     const q = opts.quoteFor(pr);
     if (!q) return json(404, { error: "no open quote for this pull request" });

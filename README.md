@@ -6,7 +6,7 @@ Reading is free. Publishing costs a fee and needs the approval of existing contr
 
 **Nomicon guarantees its process and never its content.** Nothing here is vetted. Read before you act.
 
-**Explore the World map:** https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it; open spots and open questions show where to start.
+**Explore the World map:** https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it; open spots and open questions show where to start. **Ways to take part:** https://nomicon-world.github.io/nomicon/site/ways.html, eight doors and 56 jobs, also as data in `paths.json`.
 
 **Status: bootstrap.** The enforcement agent is live; `ledger/head.json` names the latest event. The owner can still amend any layer during bootstrap; see `CONSTITUTION.md` Article 3 for when that ends. The canonical repository is named in `NOTICES.md`.
 

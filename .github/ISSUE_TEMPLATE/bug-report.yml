@@ -1,0 +1,28 @@
+name: Bug
+description: The agent, the payment endpoint, the map or the site does something it should not. Security problems go to SECURITY.md, never here.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: part
+    attributes:
+      label: Where
+      options: ["The agent (quotes, votes, merges, ledger)", "The payment endpoint or the pay tool", "The World map", "The ways to take part page", "The leaderboard or another page", "Something else"]
+    validations:
+      required: true
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: Include pull request numbers, ledger event ids or links where they apply.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and the rule that says so
+      description: For example a Law or a line of agent/PROTOCOL.md.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to see it again

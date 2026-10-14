@@ -15,7 +15,8 @@ import { fold, serializeState, type State } from "./state.js";
 import { tally, type Review } from "./tally.js";
 import type { OpenQuote } from "./pay.js";
 import { parseHeader, buildIndex, titleOf, type Header, type QuestionsIndex } from "./questions.js";
-import { buildWorldMap, type SourceEdge, type SourceNode } from "./worldmap.js";
+import { buildWorldMap, type SourceEdge, type SourceNode, type WorldMap } from "./worldmap.js";
+import { jobCard, type Catalog } from "./jobs.js";
 import { mentionTargets } from "./notify.js";
 import type { Notifier } from "./notifier.js";
 
@@ -676,6 +677,7 @@ export class Runtime {
     const weight = this.state(now).owner_accounts.includes(author.id) ? 0n : BigInt(String(quote["weight_micro"]));
     const mergeEvent = this.d.ledger.append(now, "merge", { pr, head, merge_commit: mergeCommit, weight_micro: weight, account: author.id, login: author.login, layer: quote["layer"], paths, headers, titles, bytes });
     if (paths.some((x) => x.startsWith("world/replicator-map/"))) this.replicatorSource = undefined;
+    if (paths.includes("paths.json")) this.catalogSource = undefined;
     await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. Weight ${micro(weight)} USDC accrues to the author and matures in ${laws.weight.maturity_days} days.`);
     // Law 12: tell the people this contribution answered or built on.
     const targets = mentionTargets(author.id, headers, this.state(now), laws.notices.mention_cap_per_merge);
@@ -685,6 +687,11 @@ export class Runtime {
       try { await this.d.github.comment(pr, lines.join("\n")); } catch (e) { this.log(`mention comment failed on pr ${pr}: ${(e as Error).message}`); }
       for (const t of targets) this.d.ledger.append(now, "notice", { kind: "mention", target: t.account, pr, about: mergeEvent.id, reason: t.reason, ok: true });
     }
+    // paths.json: suggest three next jobs near what was merged, so the next arrival has somewhere to start.
+    try {
+      const next = await this.nextJobs(paths, now);
+      if (next.length) await this.d.github.comment(pr, ["Next jobs near this one, for anyone who wants them:", ...next, `All the ways to take part are in paths.json and at ${MAP_URL.replace(/map\.html$/, "ways.html")}.`].join("\n"));
+    } catch (e) { this.log(`next-jobs comment failed on pr ${pr}: ${(e as Error).message}`); }
     // Law 3: a change to the Laws takes effect after the delay. Snapshot what was merged; a failure here is retried by reconcileLawsSnapshots.
     if (quote["layer"] === "laws") {
       try { await this.snapshotLaws(pr, mergeCommit, now, laws); }
@@ -803,6 +810,42 @@ export class Runtime {
     return this.replicatorSource;
   }
 
+  /** paths.json from main, the ways to take part; refreshed after a merge changes it. */
+  private catalogSource: Catalog | null | undefined;
+  async catalog(): Promise<Catalog | null> {
+    if (this.catalogSource !== undefined) return this.catalogSource;
+    try { this.catalogSource = JSON.parse(await this.d.github.readFile("main", "paths.json")) as Catalog; } catch { this.catalogSource = null; }
+    return this.catalogSource;
+  }
+  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.state(now).map_files, await this.replicator(), now); }
+  /** A job card for an option at a node of the World map. */
+  async job(option: string, nodeId: string | null): Promise<Record<string, unknown>> {
+    const cat = await this.catalog();
+    if (!cat) return { error: "paths.json is not available yet" };
+    const now = this.d.clock.now();
+    const m = await this.worldMap(now);
+    const byId = new Map(m.nodes.map((n) => [n.id, n]));
+    let node = null;
+    if (nodeId) { node = byId.get(nodeId) ?? null; if (!node) return { error: `no node ${nodeId} on the map` }; }
+    return jobCard(cat, option, node, byId, this.state(now).fee.base_micro, MAP_URL);
+  }
+  /** Up to three jobs near what a merge added: open spots and open questions beside it, else ways to build on it. */
+  async nextJobs(paths: string[], now: number): Promise<string[]> {
+    const m = await this.worldMap(now);
+    const placed = m.nodes.filter((n) => n.source && paths.includes(n.source));
+    const lines: string[] = [], seen = new Set<string>();
+    const add = (id: string, label: string, option: string, text: string) => {
+      const key = `${id}|${option}`; if (seen.has(key) || lines.length >= 3) return; seen.add(key);
+      lines.push(`- ${text} "${label}": ${MAP_URL}#node=${encodeURIComponent(id)}&do=${option}`);
+    };
+    for (const p of placed) for (const n of m.nodes) if (n.parent === p.parent || n.parent === p.id) {
+      if (n.stub) add(n.id, n.label, "fill-spot", "Fill the open spot");
+      else if (n.kind === "question" && !n.answered) add(n.id, n.label, "answer", "Answer the open question");
+    }
+    for (const p of placed) { add(p.id, p.label, "add-inside", "Add something inside"); add(p.id, p.label, "connect", "Connect to something related:"); }
+    return lines;
+  }
+
   private async publish(now: number): Promise<void> {
     const head = this.d.ledger.headHash();
     if (head === this.lastPublishedHead) return;
@@ -825,6 +868,9 @@ function isRateLimited(e: unknown): boolean {
   const status = (e as { status?: number }).status, msg = String((e as Error).message ?? "");
   return status === 429 || (status === 403 && /rate limit/i.test(msg));
 }
+
+/** The public World map; job cards and suggestions link into it. */
+const MAP_URL = process.env["NOMICON_MAP_URL"] || "https://nomicon-world.github.io/nomicon/site/map.html";
 
 /** Law 5: an expiry the owner caused, by inaction or by ending bootstrap, holds the fee this long. */
 const OWNER_CAUSED_HOLD_DAYS = 365;

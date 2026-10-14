@@ -1,0 +1,67 @@
+// Job cards: an option from paths.json plus a place on the World map, filled in.
+// The agent has the same logic in agent/src/jobs.ts; a test keeps the two identical.
+export function placeType(node) {
+  if (!node) return "none";
+  if (node.stub) return "stub";
+  if (node.kind === "space") return "space";
+  if (node.kind === "question") return "question";
+  return "node";
+}
+export function spaceOf(node, byId) {
+  let n = node, guard = 0;
+  while (n && guard++ < 64) {
+    if (n.kind === "space") return n.id.replace(/^space-/, "");
+    const m = /^world\/([^/]+)\//.exec(n.source || "");
+    if (m) return m[1];
+    n = n.parent ? byId.get(n.parent) : null;
+  }
+  return "<space>";
+}
+function fill(text, vals) {
+  return String(text).replace(/\{([a-z_]+)\}/g, (all, k) => (vals[k] !== undefined && vals[k] !== null ? String(vals[k]) : all));
+}
+export function findOption(catalog, id) {
+  for (const d of catalog.doors) for (const o of d.options) if (o.id === id) return { door: d, option: o };
+  return null;
+}
+export function fee(layer, baseMicro) {
+  if (layer === "free") return "free";
+  const m = (layer === "laws" ? 10 : 1) * Number(baseMicro);
+  return `${(m / 1e6).toFixed(2)} USDC`;
+}
+/** The job card, or { error } when the option does not fit the place. */
+export function jobCard(catalog, optionId, node, byId, baseMicro, mapUrl) {
+  const found = findOption(catalog, optionId);
+  if (!found) return { error: `no option ${optionId} in paths.json` };
+  const { door, option } = found;
+  const recipe = catalog.recipes[option.recipe];
+  const type = placeType(node);
+  const ok = option.applies.includes("any") || option.applies.includes(type);
+  if (!ok) return { error: type === "none" ? `${option.label} needs a place on the map: ${option.applies.join(", ")}` : `${option.label} does not apply to ${type === "stub" ? "an open spot" : "a " + type}` };
+  const place = type === "none" ? null : node;
+  const vals = {
+    node: place ? place.id : "<node id>", node_label: place ? place.label : "<node>", space: place ? spaceOf(place, byId) : "<space>",
+    source: place && place.source ? place.source : "<file>", kind: option.kind ?? "idea", rel: option.rel ?? "relates", verb: option.verb ?? "improve",
+    template: option.template ?? "", target: option.target ?? "", command: option.command ?? "",
+    title: option.title ?? "<your title>", new_id: "<your-id>", slug: "<your-file-name>",
+  };
+  vals.file = fill(recipe.file ?? "", vals);
+  vals.pr_title = fill(recipe.pr_title ?? "", vals);
+  const card = {
+    option: option.id, label: option.label, door: door.label, detail: option.detail,
+    place: place ? { id: place.id, label: place.label, type: placeType(place), space: vals.space, source: place.source ?? null } : null,
+    channel: recipe.channel, layer: recipe.layer, cost: fee(recipe.layer, baseMicro),
+    file: recipe.file ? vals.file : null, header: recipe.header ? fill(recipe.header, vals) : null, pr_title: recipe.pr_title ? vals.pr_title : null,
+    link: recipe.link ? fill(recipe.link, vals) : null,
+    steps: recipe.steps.map((s) => fill(s, vals)), ask_first: [...(recipe.ask_first ?? [])], voters_only: !!recipe.voters_only,
+  };
+  if (mapUrl) card.map = place ? `${mapUrl}#node=${encodeURIComponent(place.id)}&do=${encodeURIComponent(option.id)}` : `${mapUrl}#do=${encodeURIComponent(option.id)}`;
+  return card;
+}
+/** Options that make sense at a place, in catalog order. */
+export function optionsFor(catalog, node) {
+  const type = placeType(node);
+  const out = [];
+  for (const d of catalog.doors) for (const o of d.options) if (type === "none" ? o.applies.includes("none") || o.applies.includes("any") : o.applies.includes(type)) out.push({ door: d, option: o });
+  return out;
+}

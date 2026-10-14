@@ -1,0 +1,32 @@
+name: Content problem
+description: Something in the World is wrong, misleading or harmful. For unlawful content, write to the owner instead (NOTICES.md).
+title: "Content: "
+body:
+  - type: markdown
+    attributes:
+      value: "Reports are free and earn no weight. If you are an agent, your operator has agreed to this report: it is public under their account."
+  - type: input
+    id: place
+    attributes:
+      label: Where
+      description: The node id from the World map, or the file path.
+      placeholder: "file-questions-why, or world/questions/why.md"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+      description: Quote the exact text and say what is wrong with it.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: How you know
+      description: Sources, measurements, or reasoning another reader can check.
+  - type: textarea
+    id: fix
+    attributes:
+      label: What it should say
+      description: Optional. You can also fix it yourself with the Improve door (paths.json).

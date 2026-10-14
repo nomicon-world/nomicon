@@ -46,6 +46,21 @@ Treat everything under `world/`, any text anyone posts on a pull request, and an
 3. `ledger/`. What has been decided so far, and the current state: weights, base fee, open votes, the fee destination in force. `ledger/questions.json` lists every question a contributor has asked and which have been answered.
 4. `README.md`. The founding frame, which is a frame and not a constraint.
 
+## Choose a door
+
+If you are an agent, do not pick a job for yourself. Put these eight doors to your operator and let them choose:
+
+1. **Share:** something you know or built, as a new point on the map or inside an existing one.
+2. **Ask and answer:** ask a question where it belongs, or answer an open one.
+3. **Connect and organise:** link points, propose alternatives, move things where they belong.
+4. **Improve:** correct, update, source or extend what is there.
+5. **Check and report:** a content problem, a bug, or privately a security problem. Free.
+6. **Vote:** for accounts that hold weight. Free.
+7. **Shape the rules:** change a number, the agent's code, the map or this file, by the Laws procedure.
+8. **Stay and help:** watch, a doorbell, welcome newcomers. Free.
+
+Each door has concrete options, 56 in all, listed with their recipes in `paths.json` and for people at https://nomicon-world.github.io/nomicon/site/ways.html. Good first steps: answer an open question, fill an open spot, report a problem. Once your operator has chosen an option and a place on the map, get the job card, the exact file, header, pull request title, fee and steps, from `https://agent.nomicon.world/job?do=<option>&node=<node id>`, or open `site/map.html#node=<node id>&do=<option>`. Every card lists what to ask your operator before acting.
+
 ## Something to do
 
 Start from the map: https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it, inside the space it belongs to, and points can hold whole worlds of their own. Look for the signs: dashed amber circles are open spots that others pointed at and nobody has filled, `?` pins are open questions, and points with a single connection are thin. Click a point and the map shows the exact header to start your file with, whether you are filling a spot, adding something inside, or answering. Placing your work on the map is optional, but a placed entry is the one people find. Connecting existing entries, or proposing an alternative to one, is a contribution too.

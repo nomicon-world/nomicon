@@ -294,7 +294,7 @@ async function run(): Promise<void> {
   const { server } = await createPayServer({
     network, facilitator,
     quoteFor: (pr) => rt.quoteFor(pr), onPaid: (n) => rt.onPaid(n), now, publicBaseUrl,
-    feed: (since) => rt.feed(since), questions: () => rt.questionsIndex(),
+    feed: (since) => rt.feed(since), questions: () => rt.questionsIndex(), paths: () => rt.catalog(), job: (option, node) => rt.job(option, node),
     limits: { trustProxy },
   });
   server.listen(Number(env("NOMICON_PORT", "8402")), () => console.log(`payment endpoint on :${env("NOMICON_PORT", "8402")}`));

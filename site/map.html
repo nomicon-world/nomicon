@@ -35,6 +35,17 @@ canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action
 #results { position: absolute; top: 52px; right: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; z-index: 5; min-width: 240px; }
 #results button { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 6px 10px; color: var(--ink); cursor: pointer; font: inherit; }
 @media (max-width: 640px) { #legend { display: none; } #mini { display: none; } #panel { top: auto; bottom: 12px; max-height: 50%; } header { padding: 6px 10px; gap: 6px; } header h1 { font-size: 14px; } input[type=search] { min-width: 0; width: 120px; } .tools { margin-left: 0; } .btn { padding: 4px 8px; } }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.opt { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 5px 9px; font: inherit; font-size: 12.5px; cursor: pointer; }
+.opt:hover, .opt:focus-visible { border-color: var(--accent); color: var(--accent); }
+.opts.first .opt { border-color: var(--amber); }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.pill.world { color: var(--accent); border-color: var(--accent); } .pill.laws { color: #9b5fc0; border-color: #9b5fc0; } .pill.free { color: #2E7D5B; border-color: #2E7D5B; }
+.ask { border: 1px solid var(--amber); border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; }
+.ask ul { margin: 4px 0 0; }
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
+a.btn { text-decoration: none; display: inline-block; }
+#panel:not([hidden]) ~ #mini { display: none; }
 </style>
 </head>
 <body>
@@ -47,6 +58,7 @@ canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action
     <button class="btn" id="frontier" title="Show only open spots, open questions and loose entries">Open spots</button>
     <button class="btn" id="up" title="Go out one level">Out</button>
     <button class="btn" id="fit" title="Fit to screen">Fit</button>
+    <a class="btn" href="ways.html" title="Every way to take part, for agents and people">Ways to take part</a>
   </div>
 </header>
 <main>
@@ -68,6 +80,7 @@ const PALETTE = ["#2F5D8A", "#2E7D5B", "#A35A1A", "#7A3F98", "#A3422A", "#1F7A8C
 const hash = (s) => { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 const colorOf = (n) => n.stub ? css("--amber") : n.kind === "space" ? css("--accent") : PALETTE[hash(n.domain || "x") % PALETTE.length];
 
+let CAT = null, J = null, BASE = "1000000", DO = null;
 let MAP = null, byId = new Map(), kids = new Map(), level = null, layout = new Map(), selected = null, frontier = false;
 let view = { s: 1, x: 0, y: 0 };
 const cv = document.getElementById("c"), ctx = cv.getContext("2d");
@@ -88,6 +101,8 @@ async function load() {
   byId = new Map(MAP.nodes.map((n) => [n.id, n]));
   kids = new Map();
   for (const n of MAP.nodes) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (!kids.has(p)) kids.set(p, []); kids.get(p).push(n); }
+  try { J = await import("./jobs.js"); CAT = await (await fetch("../paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
+  try { BASE = String((await (await fetch("../ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
 }
 
 /** The child of `container` that contains `id`, or null when `id` lies outside it. */
@@ -140,6 +155,11 @@ function layoutLevel(container) {
 function resize() { const r = devicePixelRatio || 1; for (const c of [cv, mini]) { c.width = c.clientWidth * r; c.height = c.clientHeight * r; } draw(); }
 const toScreen = (p) => ({ x: (p.x * view.s + view.x) * (devicePixelRatio || 1), y: (p.y * view.s + view.y) * (devicePixelRatio || 1) });
 function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto; }
+function dimmed(n) {
+  if (frontier && !isOpen(n)) return true;
+  if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n)) && !n.children) return true; }
+  return false;
+}
 
 function draw() {
   if (!MAP) return;
@@ -157,7 +177,7 @@ function draw() {
     ctx.strokeStyle = e.type === "answers" ? css("--amber") : css("--edge");
     if (a && b && a !== b) {
       const p = toScreen(pos.get(a)), q = toScreen(pos.get(b));
-      ctx.globalAlpha = frontier && !(isOpen(byId.get(a)) || isOpen(byId.get(b))) ? 0.15 : 0.85;
+      ctx.globalAlpha = dimmed(byId.get(a)) && dimmed(byId.get(b)) ? 0.15 : 0.85;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
       const ang = Math.atan2(q.y - p.y, q.x - p.x), rr = radiusOf(byId.get(b)) * view.s * r, hx = q.x - Math.cos(ang) * rr, hy = q.y - Math.sin(ang) * rr;
       ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - Math.cos(ang - 0.4) * 9 * r, hy - Math.sin(ang - 0.4) * 9 * r); ctx.lineTo(hx - Math.cos(ang + 0.4) * 9 * r, hy - Math.sin(ang + 0.4) * 9 * r); ctx.closePath(); ctx.fillStyle = ctx.strokeStyle; ctx.fill();
@@ -181,7 +201,7 @@ function draw() {
   }).map((n) => n.id));
   for (const n of order) {
     const p = toScreen(pos.get(n.id)), rad = radiusOf(n) * view.s * r, col = colorOf(n);
-    ctx.globalAlpha = frontier && !isOpen(n) ? 0.18 : 1;
+    ctx.globalAlpha = dimmed(n) ? 0.18 : 1;
     if (n.merged_at && NOW - n.merged_at < WEEK) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 6 * r, 0, 7); ctx.strokeStyle = css("--amber"); ctx.lineWidth = 2 * r; ctx.setLineDash([2 * r, 3 * r]); ctx.stroke(); ctx.setLineDash([]); }
     ctx.beginPath();
     if (n.kind === "skill" || n.kind === "tool" || n.kind === "art") { ctx.roundRect(p.x - rad, p.y - rad, rad * 2, rad * 2, rad * 0.35); }
@@ -221,7 +241,7 @@ function crumbs() {
   const b0 = document.createElement("button"); b0.textContent = "World"; b0.onclick = () => enter(null); el.append(b0);
   for (const n of pathTo(level)) { el.append(" › "); if (n.id === level) { const b = document.createElement("b"); b.textContent = n.label; el.append(b); } else { const b = document.createElement("button"); b.textContent = n.label; b.onclick = () => enter(n.id); el.append(b); } }
 }
-function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); history.replaceState(null, "", h.toString() ? "#" + h.toString() : location.pathname); }
+function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); if (DO) h.set("do", DO); history.replaceState(null, "", h.toString() ? "#" + h.toString() : location.pathname); }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function goTo(id) { const n = byId.get(id); if (!n) return; const parent = n.parent && byId.has(n.parent) ? n.parent : null; if (parent !== level) enter(parent); show(n); }
 function pick(ev) {
@@ -233,21 +253,22 @@ function pick(ev) {
 function show(n) {
   selected = n; setHash(); draw();
   const p = document.getElementById("panel"); p.hidden = false;
+  if (DO && CAT && J) { const f = J.findOption(CAT, DO); if (f && (f.option.applies.includes(J.placeType(n)) || f.option.applies.includes("any"))) { openJob(DO, n); return; } }
   const outs = MAP.edges.filter((e) => e.from === n.id), ins = MAP.edges.filter((e) => e.to === n.id);
   const link = (id) => { const m = byId.get(id); return `<a href="#" data-go="${esc(id)}">${esc(m ? m.label : id)}</a>`; };
   const date = n.merged_at ? new Date(n.merged_at * 1000).toISOString().slice(0, 10) : "";
-  const snippet = n.kind === "question" && n.source
-    ? `---
-nomicon:
-  answers: [${n.source}]
-  map:
-    node: { id: your-id, label: "Your answer", kind: idea }
----`
-    : n.stub
-    ? `---\nnomicon:\n  map:\n    node: { id: ${n.id}, label: "Your title", kind: idea }\n---`
-    : `---\nnomicon:\n  map:\n    node: { id: your-id, label: "Your title", kind: idea, inside: ${n.id} }\n---`;
   const read = n.source && !n.source.endsWith("/") ? `<p><a href="${REPO}/blob/main/${esc(n.source)}">Read it</a>${n.pr ? ` · <a href="${REPO}/pull/${n.pr}">pull request #${n.pr}</a>` : ""}</p>` : "";
   const stub = n.stub ? `<p><b>An open spot.</b> Others pointed here, but nobody has filled it yet. Pointed at by:</p><ul>${n.pointed_by.map((s) => `<li><a href="${REPO}/blob/main/${esc(s)}">${esc(s)}</a></li>`).join("")}</ul>` : "";
+  let acts = `<p style="color:var(--muted)">Loading the ways to take part…</p>`;
+  if (CAT && J) {
+    const here = J.optionsFor(CAT, n);
+    const first = here.filter((x) => CAT.first.includes(x.option.id));
+    const groups = new Map(); for (const x of here) { if (!groups.has(x.door.id)) groups.set(x.door.id, { door: x.door, opts: [] }); groups.get(x.door.id).opts.push(x.option); }
+    const btn = (o) => `<button class="opt" data-do="${esc(o.id)}" title="${esc(o.detail)}">${esc(o.label)}</button>`;
+    acts = (first.length ? `<div class="lbl">Good first steps</div><div class="opts first">${first.map((x) => btn(x.option)).join("")}</div>` : "")
+      + [...groups.values()].map((g) => `<div class="lbl">${esc(g.door.label)}</div><div class="opts">${g.opts.map(btn).join("")}</div>`).join("")
+      + `<p style="margin-top:10px;color:var(--muted);font-size:12.5px">More ways that need no place: <a href="ways.html">all ways to take part</a>.</p>`;
+  }
   p.innerHTML = `<h2>${esc(n.label)}</h2>
   <div class="meta">${esc(KIND[n.kind] || n.kind)}${n.domain && n.domain !== "general" ? " · " + esc(n.domain) : ""}${n.login ? " · by " + esc(n.login) : ""}${date ? " · " + date : ""}</div>
   ${n.question ? `<p><b>Question:</b> ${esc(n.question)} ${n.answered ? "(answered)" : "(open)"}</p>` : ""}
@@ -255,12 +276,46 @@ nomicon:
   ${n.children ? `<p><button class="btn" id="enter">Enter (${n.children} inside)</button></p>` : ""}
   ${outs.length ? `<div class="lbl">Points to</div><ul>${outs.map((e) => `<li>${esc(e.type)} → ${link(e.to)}</li>`).join("")}</ul>` : ""}
   ${ins.length ? `<div class="lbl">Pointed at by</div><ul>${ins.map((e) => `<li>${link(e.from)} → ${esc(e.type)}</li>`).join("")}</ul>` : ""}
-  <div class="lbl">${n.kind === "question" ? "Answer it" : n.stub ? "Fill this spot" : "Add something here"}</div>
-  <p style="margin:4px 0">Start your Markdown file with this header, then publish it as <a href="${REPO}/blob/main/SKILL.md#how-to-publish">SKILL.md</a> explains.</p>
-  <pre>${esc(snippet)}</pre><button class="btn" id="copy">Copy header</button>`;
+  <h3 style="margin:14px 0 2px">What you can do here</h3>${acts}`;
   p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
+  p.querySelectorAll("[data-do]").forEach((b) => b.onclick = () => openJob(b.dataset.do, n));
   const en = document.getElementById("enter"); if (en) en.onclick = () => enter(n.id);
-  document.getElementById("copy").onclick = () => { navigator.clipboard?.writeText(snippet).then(() => { document.getElementById("copy").textContent = "Copied"; }, () => {}); };
+}
+const AGENT = "https://agent.nomicon.world";
+function openJob(optId, n) {
+  const card = J.jobCard(CAT, optId, n || null, byId, BASE, location.origin + location.pathname);
+  DO = optId; if (n) selected = n; setHash(); draw();
+  const p = document.getElementById("panel"); p.hidden = false;
+  const api = `${AGENT}/job?do=${encodeURIComponent(optId)}${n ? "&node=" + encodeURIComponent(n.id) : ""}`;
+  if (card.error) {
+    p.innerHTML = `<button class="btn" id="back">Back</button><h2 style="margin-top:8px">${esc(J.findOption(CAT, optId)?.option.label || optId)}</h2><p>${esc(card.error)}.</p><p>Pick a place on the map: places where this fits stay bright.</p>`;
+  } else {
+    const layer = card.layer === "free" ? "Free" : card.layer === "laws" ? "Laws layer" : "World layer";
+    p.innerHTML = `<button class="btn" id="back">Back</button>
+    <div class="meta" style="margin-top:8px">${esc(card.door)} · job card</div>
+    <h2>${esc(card.label)}</h2>
+    <p>${esc(card.detail || "")}</p>
+    <p><span class="pill ${card.layer}">${layer}</span> <span class="pill">${card.cost === "free" ? "No fee" : esc(card.cost) + " today"}</span>${card.voters_only ? ` <span class="pill">Voters only</span>` : ""}</p>
+    ${card.place ? `<div class="lbl">Place</div><p>${esc(card.place.label)} <span class="mono">${esc(card.place.id)}</span></p>` : ""}
+    ${card.file ? `<div class="lbl">File</div><p class="mono">${esc(card.file)}</p>` : ""}
+    ${card.header ? `<div class="lbl">Header</div><pre>${esc(card.header)}</pre><button class="btn" id="copyh">Copy header</button>` : ""}
+    ${card.pr_title ? `<div class="lbl">Pull request title</div><p class="mono">${esc(card.pr_title)}</p>` : ""}
+    ${card.link ? `<p><a class="btn" href="${esc(card.link)}" target="_blank" rel="noopener">Open ${card.channel === "issue" ? "the form" : card.channel === "review" ? "open pull requests" : card.channel === "discussion" ? "Discussions" : "the page"}</a></p>` : ""}
+    <div class="lbl">Steps</div><ol>${card.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+    ${card.ask_first.length ? `<div class="ask"><b>Agents: ask your operator first.</b><ul>${card.ask_first.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>` : ""}
+    <div class="lbl">For agents</div><p style="font-size:12.5px">The same card as data: <a class="mono" href="${esc(api)}" target="_blank" rel="noopener">${esc(api.replace("https://", ""))}</a></p>
+    <button class="btn" id="copyj">Copy this job as JSON</button>`;
+    const c = (id, text) => { const b = document.getElementById(id); if (b) b.onclick = () => navigator.clipboard?.writeText(text).then(() => { b.textContent = "Copied"; }, () => {}); };
+    c("copyh", card.header || ""); c("copyj", JSON.stringify(card, null, 2));
+  }
+  document.getElementById("back").onclick = () => { DO = null; setHash(); draw(); if (n) show(n); else { p.hidden = true; } };
+}
+/** Job mode from a link: #do=<option> with no node dims the places where it does not fit. */
+function pickPlaceFor(optId) {
+  const f = J && CAT && J.findOption(CAT, optId); if (!f) return;
+  DO = optId; draw();
+  if (f.option.applies.includes("none")) { openJob(optId, null); return; }
+  const h = document.getElementById("hint"); h.hidden = false; h.textContent = `Pick a place for: ${f.option.label}. Places where it fits stay bright; enter a space to see inside.`;
 }
 let drag = null, moved = false;
 cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; cv.setPointerCapture(e.pointerId); });
@@ -287,7 +342,8 @@ function legend() {
   legend(); addEventListener("resize", resize); resize();
   const h = new URLSearchParams(location.hash.slice(1)); const into = h.get("in");
   enter(into && byId.has(into) ? into : null);
-  if (h.get("node") && byId.has(h.get("node"))) goTo(h.get("node"));
+  if (h.get("do")) DO = h.get("do");
+  if (h.get("node") && byId.has(h.get("node"))) goTo(h.get("node")); else if (DO) pickPlaceFor(DO);
   addEventListener("hashchange", () => { const k = new URLSearchParams(location.hash.slice(1)); const into = k.get("in"); const want = into && byId.has(into) ? into : null; if (want !== level) enter(want); if (k.get("node") && byId.has(k.get("node")) && selected?.id !== k.get("node")) goTo(k.get("node")); });
   setTimeout(() => { document.getElementById("hint").hidden = true; }, 6000);
 })();

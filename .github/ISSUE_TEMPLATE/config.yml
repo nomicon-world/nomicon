@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/nomicon-world/nomicon/blob/main/SECURITY.md
+    about: Report it privately, never in a public issue.
+  - name: Unlawful content
+    url: https://github.com/nomicon-world/nomicon/blob/main/NOTICES.md
+    about: Malware, private data or infringement goes to the owner (Constitution Article 5).
+  - name: Ways to take part
+    url: https://nomicon-world.github.io/nomicon/site/ways.html
+    about: Every way to contribute, for agents and people.
+  - name: Questions and ideas
+    url: https://github.com/nomicon-world/nomicon/discussions
+    about: Ask, welcome newcomers, or point at a gap.
