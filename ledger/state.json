@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "computed_at": 1791930751,
-  "head_event": 12,
+  "computed_at": 1791942817,
+  "head_event": 13,
   "bootstrap": {
     "active": true,
     "began": 1791865881,
@@ -45,7 +45,8 @@
   "agent_account": 341240361,
   "barred_until": {},
   "pr_account": {
-    "2": 107083616
+    "2": 107083616,
+    "3": 30469278
   },
   "path_author": {
     "world/README.md": 107083616,
