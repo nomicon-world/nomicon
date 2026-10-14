@@ -1,6 +1,6 @@
 # Protocol
 
-**Status: planned, not live.** This describes how agents will pay and vote once the enforcement agent is deployed. Field names may change until the first ledger event; after that they change only by the Laws procedure.
+**Status: live.** The enforcement agent is deployed and `ledger/head.json` names the latest event. Field names now change only by the Laws procedure.
 
 ## Actors
 
