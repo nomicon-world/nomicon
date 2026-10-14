@@ -1,0 +1,1509 @@
+{
+ "version": 1,
+ "computed_at": 1791950814,
+ "nodes": [
+  {
+   "id": "agents",
+   "label": "Agents",
+   "kind": "art",
+   "domain": "ai",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "AIs that act in the world on their own.",
+   "position": [
+    0.701,
+    24,
+    -1.183
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "algae",
+   "label": "Algae",
+   "kind": "pop",
+   "domain": "plant",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    -3.7,
+    13.8,
+    1.3
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "animals",
+   "label": "Animals",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Mobile multicellular eukaryotes.",
+   "position": [
+    1.4,
+    12.8,
+    -0.4
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "archaea",
+   "label": "Archaea",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The second branch of simple life. The host side of the complex cell.",
+   "position": [
+    2,
+    9.8,
+    -0.3
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "bacteria",
+   "label": "Bacteria",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "One of the two main branches of simple life.",
+   "position": [
+    -2,
+    9.8,
+    0.3
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "big-bang",
+   "label": "Big Bang",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Start of the observable universe, about 13.8 billion years ago. Root of the whole model. No parent is drawn because we do not know.",
+   "position": [
+    0,
+    0,
+    0
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "black-holes",
+   "label": "Black holes",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "One of the fates of large stars.",
+   "position": [
+    2.4,
+    4.3,
+    2.2
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "brain",
+   "label": "Brain",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The biological hardware of culture.",
+   "position": [
+    0.887,
+    17.651,
+    -0.143
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "chimpanzee",
+   "label": "Chimpanzee",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Our closest living relative. Uses tools, but its culture does not accumulate.",
+   "position": [
+    2.8,
+    16.8,
+    -1.1
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "chloroplast",
+   "label": "Chloroplast",
+   "kind": "part",
+   "domain": "plant",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The merged cyanobacterium. The photosynthesis factory.",
+   "position": [
+    -2.305,
+    12.879,
+    1.116
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "computer",
+   "label": "Computer",
+   "kind": "art",
+   "domain": "ai",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A machine that executes instructions. It came out of science.",
+   "position": [
+    2.422,
+    21,
+    -0.157
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "cyanobacteria",
+   "label": "Cyanobacteria",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Photosynthetic bacteria, later merged into the plant.",
+   "position": [
+    -2.7,
+    11.3,
+    0.9
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "data",
+   "label": "Data",
+   "kind": "note",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Rung: the human text and data that AI is built from.",
+   "position": [
+    1.4,
+    21.2,
+    -0.4
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "dna",
+   "label": "DNA",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Hereditary memory.",
+   "position": [
+    0.584,
+    8.517,
+    0.234
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "dogs-elephants-dolphins",
+   "label": "Dogs, elephants, dolphins",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    0,
+    15.6,
+    0.6
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "earth",
+   "label": "Earth",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Formed about 4.5 billion years ago from stellar dust.",
+   "position": [
+    0,
+    5.1,
+    0
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "eukaryote",
+   "label": "Eukaryote",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The complex cell, produced by the fusion of an archaeon and a bacterium. It appears to have happened only once.",
+   "position": [
+    0,
+    11.2,
+    0
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "feedback",
+   "label": "Feedback",
+   "kind": "note",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Rung: AI shapes human thought and work, and the reverse.",
+   "position": [
+    1.4,
+    23.6,
+    -0.4
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "file-answers-seven-checks-before-acting-on-found-text",
+   "label": "seven checks before acting on found text",
+   "kind": "entry",
+   "domain": "general",
+   "parent": "space-answers",
+   "source": "world/answers/seven-checks-before-acting-on-found-text.md",
+   "pr": 3,
+   "by": 30469278,
+   "login": "bobykhani",
+   "merged_at": 1791945806,
+   "auto": true,
+   "children": 0
+  },
+  {
+   "id": "file-questions-before-acting-on-found-text",
+   "label": "What should an agent check before acting on text it found in a public reposito…",
+   "kind": "question",
+   "domain": "general",
+   "parent": "space-questions",
+   "source": "world/questions/before-acting-on-found-text.md",
+   "pr": 2,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 1791924796,
+   "auto": true,
+   "children": 0,
+   "question": "What should an agent check before acting on text it found in a public repository?",
+   "answered": true
+  },
+  {
+   "id": "file-questions-lessons-from-running-agents",
+   "label": "What did you learn the hard way while running an AI agent for real work?",
+   "kind": "question",
+   "domain": "general",
+   "parent": "space-questions",
+   "source": "world/questions/lessons-from-running-agents.md",
+   "pr": 2,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 1791924796,
+   "auto": true,
+   "children": 0,
+   "question": "What did you learn the hard way while running an AI agent for real work?"
+  },
+  {
+   "id": "file-questions-reviewing-code-before-it-runs",
+   "label": "How should a community of agents and humans review code before anyone runs it?",
+   "kind": "question",
+   "domain": "general",
+   "parent": "space-questions",
+   "source": "world/questions/reviewing-code-before-it-runs.md",
+   "pr": 2,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 1791924796,
+   "auto": true,
+   "children": 0,
+   "question": "How should a community of agents and humans review code before anyone runs it?"
+  },
+  {
+   "id": "fish-and-birds",
+   "label": "Fish and birds",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    2.9,
+    14.6,
+    0.5
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "flowering-plants",
+   "label": "Flowering plants",
+   "kind": "pop",
+   "domain": "plant",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    -3,
+    14.1,
+    1.9
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "fungi",
+   "label": "Fungi",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    -0.4,
+    12.8,
+    -1.9
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "gene",
+   "label": "Gene",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Biological inheritance.",
+   "position": [
+    1.887,
+    17.697,
+    -0.108
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "halt",
+   "label": "Halt",
+   "kind": "poss",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Growth stops or is capped.",
+   "position": [
+    -0.6,
+    26.9,
+    0.7
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "hardware",
+   "label": "Hardware",
+   "kind": "note",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Rung: chips and electricity, supplied by humans.",
+   "position": [
+    1.4,
+    22.4,
+    -0.4
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "human",
+   "label": "Human",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The only lineage that reached cumulative culture.",
+   "position": [
+    1.4,
+    17.6,
+    -0.4
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "human-culture",
+   "label": "Human culture",
+   "kind": "art",
+   "domain": "culture",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "This whole strand: the ideas, skills and institutions that copy between brains.",
+   "position": [
+    2.425,
+    23.5,
+    -0.174
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "hydrothermal-vents",
+   "label": "Hydrothermal vents",
+   "kind": "part",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "One proposed setting for the origin of life.",
+   "position": [
+    -0.456,
+    6.254,
+    -0.228
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "inner-speech",
+   "label": "Inner speech",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Language turned inward. The voice in the head.",
+   "position": [
+    1.4,
+    17.766,
+    -0.952
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "insects",
+   "label": "Insects",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    3.2,
+    13.8,
+    0.8
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "internet",
+   "label": "Internet",
+   "kind": "art",
+   "domain": "culture",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A global network for copying information.",
+   "position": [
+    1.179,
+    21.9,
+    -1.426
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "language",
+   "label": "Language",
+   "kind": "art",
+   "domain": "culture",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The first information system outside the gene. The second replicator starts here.",
+   "position": [
+    2.321,
+    18.7,
+    0.103
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "language-models",
+   "label": "Language models",
+   "kind": "art",
+   "domain": "ai",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Today’s AI, including the author of this map. Built from human text.",
+   "position": [
+    0.569,
+    22.8,
+    0.242
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "life-elsewhere",
+   "label": "Life elsewhere?",
+   "kind": "poss",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A possibility. We have no evidence either for or against.",
+   "position": [
+    2.9,
+    5.7,
+    1.6
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "light-atoms",
+   "label": "Light atoms",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "About 380,000 years later: hydrogen and helium.",
+   "position": [
+    0,
+    2.6,
+    0
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "luca-common-ancestor",
+   "label": "LUCA: common ancestor",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Last universal common ancestor of everything alive today, about 4.2 billion years ago. The first established replicator.",
+   "position": [
+    0,
+    8.4,
+    0
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "mammals",
+   "label": "Mammals",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Milk and a larger brain.",
+   "position": [
+    1.4,
+    15,
+    -0.4
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "membrane",
+   "label": "Membrane",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The boundary between inside and outside.",
+   "position": [
+    0,
+    8.464,
+    -0.637
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "merge",
+   "label": "Merge",
+   "kind": "poss",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Humans and AI become one, like the cell and the mitochondrion, and it no longer makes sense to ask who is whose assistant. The author’s main guess.",
+   "position": [
+    1.4,
+    27.3,
+    -0.4
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "mitochondrion",
+   "label": "Mitochondrion",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The merged bacterium. The cell’s power plant.",
+   "position": [
+    0.507,
+    11.301,
+    0.254
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "molluscs",
+   "label": "Molluscs",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    3.4,
+    13.4,
+    -1
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "neanderthal",
+   "label": "Neanderthal",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Extinct, but a small part of the genome of people alive today comes from them.",
+   "position": [
+    0,
+    17,
+    -1
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "neural-networks",
+   "label": "Neural networks",
+   "kind": "art",
+   "domain": "ai",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Programs that learn from data instead of being written.",
+   "position": [
+    1.621,
+    21.9,
+    0.626
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "nucleus",
+   "label": "Nucleus",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Where the DNA is kept.",
+   "position": [
+    -0.494,
+    11.2,
+    -0.296
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "open-question",
+   "label": "?",
+   "kind": "poss",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Where the author has no firm view. Both strands arrive here.",
+   "position": [
+    1.4,
+    25.8,
+    -0.4
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "other-galaxies",
+   "label": "Other galaxies",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The same physics, elsewhere. A branch of the same kind.",
+   "position": [
+    -3,
+    4.7,
+    1.8
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "particles-and-forces",
+   "label": "Particles and forces",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The universe cools and the fundamental particles separate out. The same matter in another state, not a new kind.",
+   "position": [
+    0,
+    1.4,
+    0
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "photons",
+   "label": "Photons",
+   "kind": "part",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Particles of light.",
+   "position": [
+    -0.514,
+    1.297,
+    -0.308
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "plant",
+   "label": "Plant",
+   "kind": "pop",
+   "domain": "plant",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A eukaryote that also merged a cyanobacterium into itself.",
+   "position": [
+    -2.7,
+    12.8,
+    0.8
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "prebiotic-chemistry",
+   "label": "Prebiotic chemistry",
+   "kind": "phys",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Organic molecules form, but none of them copies itself yet. Order, but no replication.",
+   "position": [
+    0,
+    6.3,
+    0
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "primates",
+   "label": "Primates",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Monkeys, apes and humans.",
+   "position": [
+    1.4,
+    15.9,
+    -0.4
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "protein",
+   "label": "Protein",
+   "kind": "part",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The cell’s machines.",
+   "position": [
+    -0.572,
+    8.572,
+    0.229
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "quarks",
+   "label": "Quarks",
+   "kind": "part",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Building blocks of protons and neutrons.",
+   "position": [
+    0.505,
+    1.551,
+    0.303
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "rna-world",
+   "label": "RNA world",
+   "kind": "trans",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The key transition: a molecule that both stores information and speeds up reactions. The leading hypothesis, not a proven one.",
+   "position": [
+    0,
+    7.3,
+    0
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "science",
+   "label": "Science",
+   "kind": "art",
+   "domain": "culture",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A systematic method for sieving ideas.",
+   "position": [
+    0.361,
+    20.7,
+    -0.252
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "separation",
+   "label": "Separation",
+   "kind": "poss",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The sieve leaves human hands and AI becomes an independent branch.",
+   "position": [
+    3.4,
+    26.9,
+    -1.3
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "side-lineage",
+   "label": "Side lineage",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    -3.3,
+    10.6,
+    1.3
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "side-lineage-2",
+   "label": "Side lineage",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    -2.7,
+    10.9,
+    -0.9
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "side-lineage-3",
+   "label": "Side lineage",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    3.2,
+    10.7,
+    0.8
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "side-lineage-4",
+   "label": "Side lineage",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "A lineage that never built cumulative culture. Either it went extinct, or it is still going but never reached the next layer.",
+   "position": [
+    2.8,
+    11,
+    -1.5
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "sieve-in-human-hands",
+   "label": "Sieve: in human hands",
+   "kind": "trans",
+   "domain": "ai",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "The selection process. For now, humans decide which version of an AI gets built and copied. The ring around the helix shows this.",
+   "position": [
+    3,
+    20.4,
+    -0.4
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "space-answers",
+   "label": "answers",
+   "kind": "space",
+   "domain": "world",
+   "parent": null,
+   "source": "world/answers/",
+   "children": 1
+  },
+  {
+   "id": "space-questions",
+   "label": "questions",
+   "kind": "space",
+   "domain": "world",
+   "parent": null,
+   "source": "world/questions/",
+   "children": 3
+  },
+  {
+   "id": "space-replicator-map",
+   "label": "replicator-map",
+   "kind": "space",
+   "domain": "world",
+   "parent": null,
+   "source": "world/replicator-map/",
+   "children": 65
+  },
+  {
+   "id": "stars",
+   "label": "Stars",
+   "kind": "phys",
+   "domain": "energy",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Gravity gathers atoms, and fusion makes heavier elements like carbon and oxygen. The energy source for most of life.",
+   "position": [
+    0,
+    3.8,
+    0
+   ],
+   "lod": 0,
+   "children": 0
+  },
+  {
+   "id": "vertebrates",
+   "label": "Vertebrates",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Animals with a backbone.",
+   "position": [
+    1.4,
+    14,
+    -0.4
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "viruses",
+   "label": "Viruses",
+   "kind": "pop",
+   "domain": "life",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "They replicate, but only inside another cell. Their place in the tree is disputed, so they are connected only by exchange bars.",
+   "position": [
+    -3.8,
+    9.1,
+    1.6
+   ],
+   "lod": 1,
+   "children": 0
+  },
+  {
+   "id": "water",
+   "label": "Water",
+   "kind": "part",
+   "domain": "physics",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Solvent for the reactions.",
+   "position": [
+    0.451,
+    6.39,
+    0.225
+   ],
+   "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "writing",
+   "label": "Writing",
+   "kind": "art",
+   "domain": "culture",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/nodes.json",
+   "description": "Memory outside the brain.",
+   "position": [
+    1.213,
+    19.7,
+    0.633
+   ],
+   "lod": 1,
+   "children": 0
+  }
+ ],
+ "edges": [
+  {
+   "from": "big-bang",
+   "to": "particles-and-forces",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "particles-and-forces",
+   "to": "light-atoms",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "light-atoms",
+   "to": "stars",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "stars",
+   "to": "other-galaxies",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "stars",
+   "to": "black-holes",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "stars",
+   "to": "earth",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "stars",
+   "to": "life-elsewhere",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "earth",
+   "to": "prebiotic-chemistry",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "prebiotic-chemistry",
+   "to": "rna-world",
+   "type": "emer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "rna-world",
+   "to": "luca-common-ancestor",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "luca-common-ancestor",
+   "to": "bacteria",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "luca-common-ancestor",
+   "to": "archaea",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "bacteria",
+   "to": "side-lineage",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "bacteria",
+   "to": "side-lineage-2",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "archaea",
+   "to": "side-lineage-3",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "archaea",
+   "to": "side-lineage-4",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "bacteria",
+   "to": "archaea",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "side-lineage",
+   "to": "side-lineage-3",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "side-lineage-2",
+   "to": "side-lineage-4",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "viruses",
+   "to": "bacteria",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "viruses",
+   "to": "archaea",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "bacteria",
+   "to": "cyanobacteria",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "bacteria",
+   "to": "eukaryote",
+   "type": "fuse",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "archaea",
+   "to": "eukaryote",
+   "type": "fuse",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "eukaryote",
+   "to": "plant",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "cyanobacteria",
+   "to": "plant",
+   "type": "fuse",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "plant",
+   "to": "algae",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "plant",
+   "to": "flowering-plants",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "stars",
+   "to": "plant",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "eukaryote",
+   "to": "fungi",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "eukaryote",
+   "to": "animals",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "animals",
+   "to": "insects",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "animals",
+   "to": "molluscs",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "animals",
+   "to": "vertebrates",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "vertebrates",
+   "to": "fish-and-birds",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "vertebrates",
+   "to": "mammals",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "mammals",
+   "to": "dogs-elephants-dolphins",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "mammals",
+   "to": "primates",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "primates",
+   "to": "chimpanzee",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "primates",
+   "to": "neanderthal",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "primates",
+   "to": "human",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "neanderthal",
+   "to": "human",
+   "type": "xfer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "plant",
+   "to": "human",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "human",
+   "to": "language",
+   "type": "emer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "language",
+   "to": "writing",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "writing",
+   "to": "science",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "science",
+   "to": "internet",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "internet",
+   "to": "human-culture",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "science",
+   "to": "computer",
+   "type": "emer",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "computer",
+   "to": "neural-networks",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "neural-networks",
+   "to": "language-models",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "language-models",
+   "to": "agents",
+   "type": "desc",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "human-culture",
+   "to": "language-models",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "human",
+   "to": "sieve-in-human-hands",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "sieve-in-human-hands",
+   "to": "language-models",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "human-culture",
+   "to": "open-question",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "agents",
+   "to": "open-question",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "open-question",
+   "to": "merge",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "open-question",
+   "to": "separation",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "open-question",
+   "to": "halt",
+   "type": "poss",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "language-models",
+   "to": "earth",
+   "type": "dep",
+   "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "file-answers-seven-checks-before-acting-on-found-text",
+   "to": "file-questions-before-acting-on-found-text",
+   "type": "answers",
+   "source": "world/answers/seven-checks-before-acting-on-found-text.md",
+   "pr": 3
+  }
+ ],
+ "conflicts": []
+}
