@@ -67,6 +67,8 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     if (f.question) nodes.get(id)!.question = f.question;
     nodeOfPath.set(f.path, id);
     for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", source: f.path, pr: f.pr });
+    // What this entry needs and nobody has written: each becomes an open spot until a file declares it.
+    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", source: f.path, pr: f.pr });
     for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, source: f.path, pr: f.pr });
   }
   // Answers draw an edge from the answer to its question, and mark the question answered.

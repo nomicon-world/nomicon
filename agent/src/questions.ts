@@ -14,7 +14,7 @@ import { parse as parseYaml } from "yaml";
 /** Law 12 map declarations: a file may be a node, may sit inside another node, and may claim edges. */
 export interface MapNode { id: string; label: string; kind: string; domain: string; inside?: string }
 export interface MapEdge { from?: string; to: string; type: string }
-export interface MapDecl { node?: MapNode; edges: MapEdge[]; place_under: string[] }
+export interface MapDecl { node?: MapNode; edges: MapEdge[]; place_under: string[]; needs: string[] }
 
 export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl }
 
@@ -27,7 +27,7 @@ function parseMap(v: unknown): MapDecl | undefined {
   if (!v || typeof v !== "object") return undefined;
   const o = v as Record<string, unknown>;
   const id = (x: unknown): string | undefined => (typeof x === "string" && MAP_ID.test(x.trim()) ? x.trim() : undefined);
-  const out: MapDecl = { edges: [], place_under: [] };
+  const out: MapDecl = { edges: [], place_under: [], needs: [] };
   const n = o["node"];
   if (n && typeof n === "object") {
     const no = n as Record<string, unknown>;
@@ -51,7 +51,8 @@ function parseMap(v: unknown): MapDecl | undefined {
     }
   }
   if (Array.isArray(o["place_under"])) out.place_under = o["place_under"].map(id).filter((x): x is string => !!x).slice(0, 10);
-  return out.node || out.edges.length || out.place_under.length ? out : undefined;
+  if (Array.isArray(o["needs"])) out.needs = o["needs"].map(id).filter((x): x is string => !!x).slice(0, 20);
+  return out.node || out.edges.length || out.place_under.length || out.needs.length ? out : undefined;
 }
 
 /** The first Markdown heading of a file, used as the label of a file that declares no node. */
