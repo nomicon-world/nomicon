@@ -80,7 +80,7 @@ const cat = await (await fetch("../paths.json", { cache: "no-store" })).json();
 let base = "1000000";
 let world = { nodes: [] };
 try { world = await (await fetch("../ledger/map.json", { cache: "no-store" })).json(); } catch { /* counts stay unknown */ }
-const places = (o) => world.nodes.filter((n) => o.applies.includes(J.placeType(n)) && !(o.id === "answer" && n.answered)).length;
+const places = (o) => world.nodes.filter((n) => o.applies.includes(J.placeType(n)) && !(o.open_only && n.answered) && !(o.answered_only && !n.answered)).length;
 try { base = String((await (await fetch("../ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* the floor */ }
 const layerOf = (o) => cat.recipes[o.recipe].layer;
 const tag = (o) => `<span class="tag t-${layerOf(o)}">${layerOf(o) === "free" ? "Free" : layerOf(o) === "laws" ? "Laws" : "World"}</span>`;
@@ -92,6 +92,7 @@ function choose(id) {
   const el = document.getElementById("job"); el.hidden = false;
   el.innerHTML = `<div class="lbl">${esc(card.door)} · job card</div><h2>${esc(card.label)}</h2><p>${esc(card.detail)}</p>
     <p>${card.cost === "free" ? "No fee." : "Fee today: " + esc(card.cost) + "."}${card.voters_only ? " For accounts that hold weight." : ""}</p>
+    ${card.cost_note ? `<p style="font-size:.85rem;color:var(--muted)">${esc(card.cost_note)}</p>` : ""}
     ${card.file ? `<div class="lbl">File</div><code>${esc(card.file)}</code>` : ""}
     ${card.pr_title ? `<div class="lbl">Pull request title</div><code>${esc(card.pr_title)}</code>` : ""}
     ${card.link ? `<p><a class="btn" href="${esc(card.link)}" target="_blank" rel="noopener">Open the page for this</a></p>` : ""}

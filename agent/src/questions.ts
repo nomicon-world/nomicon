@@ -88,16 +88,18 @@ export interface Question {
   asked_login: string;
   asked_at: number;
   pr: number;
-  answers: Array<{ path: string; by: number; login: string; merged_at: number; pr: number }>;
+  answers: Array<{ path: string; by: number; login: string; merged_at: number; pr: number; direct?: true }>;
+  /** Committed directly by the owner during bootstrap rather than merged: no pull request, no vote. */
+  direct?: true;
 }
 
 export interface QuestionsIndex { version: 1; computed_at: number; open: Question[]; answered: Question[] }
 
 /** The questions index from the files on main (with ledger provenance where a merge recorded it). */
-export function indexFromFiles(files: Record<string, { path: string; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number }>, now: number): QuestionsIndex {
+export function indexFromFiles(files: Record<string, { path: string; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number; direct?: boolean }>, now: number): QuestionsIndex {
   const qs: Record<string, Question> = {};
-  for (const f of Object.values(files)) if (f.question) qs[f.path] = { id: f.path, question: f.question, asked_by: f.by, asked_login: f.login, asked_at: f.merged_at, pr: f.pr, answers: [] };
-  for (const f of Object.values(files)) for (const q of f.answers) { const t = qs[q]; if (t && f.path !== q) t.answers.push({ path: f.path, by: f.by, login: f.login, merged_at: f.merged_at, pr: f.pr }); }
+  for (const f of Object.values(files)) if (f.question) qs[f.path] = { id: f.path, question: f.question, asked_by: f.by, asked_login: f.login, asked_at: f.merged_at, pr: f.pr, answers: [], ...(f.direct ? { direct: true as const } : {}) };
+  for (const f of Object.values(files)) for (const q of f.answers) { const t = qs[q]; if (t && f.path !== q) t.answers.push({ path: f.path, by: f.by, login: f.login, merged_at: f.merged_at, pr: f.pr, ...(f.direct ? { direct: true as const } : {}) }); }
   return buildIndex(qs, now);
 }
 

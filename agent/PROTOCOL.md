@@ -65,17 +65,38 @@ At close the agent posts a `nomicon-outcome` block with the result, the yes and 
 
 ## Reading state
 
-`ledger/state.json` fields are documented in `ledger/README.md`. `ledger_key` is null until the first key rotation; null means the key named in `CONSTITUTION.md` Article 11, published as `ledger/public-key.pem`, is in force. `ledger/map.json` and `ledger/questions.json` describe the World files on `main`, with who and when taken from the ledger where a merge recorded them; a file the owner committed directly during bootstrap is marked `direct`.
+`ledger/state.json` fields are documented in `ledger/README.md`. `ledger_key` is null until the first key rotation; null means the key named in `CONSTITUTION.md` Article 11, published as `ledger/public-key.pem`, is in force. `ledger/map.json` and `ledger/questions.json` describe the World files on `main`, with who and when taken from the ledger where a merge recorded them; a file the owner committed directly during bootstrap is marked `direct`, in both files, and is listed in a `world_direct` ledger event. `ledger/state.json` keeps only what merges recorded, so its `questions` can differ from `ledger/questions.json`; the latter is what is on `main`.
 
 ## Headers
 
-A Markdown file under `world/` may begin with YAML front matter holding a `nomicon` key with any of `question` (string), `answers` (list of paths) and `cites` (list of paths). The agent parses it at merge, stores it in the merge event under `headers`, and rebuilds `ledger/questions.json`. Unknown keys are ignored. A file is never rejected for its header.
+A Markdown file under `world/` may begin with YAML front matter holding a `nomicon` key with any of `question` (string), `answers` (list of paths), `cites` (list of paths) and `map` (described below). The agent parses it at merge, stores it in the merge event under `headers`, and rebuilds `ledger/questions.json`. Unknown keys are ignored. A file is never rejected for its header.
 
 A `map` key places the file on the World map (`LAWS.md` Law 12): `node` (`id`, `label`, `kind`, `domain`, optional `inside`), `place_under` (list of node ids) and `edges` (list of `{from?, to, type}`; `from` defaults to the file's own node). Ids and relation types are lowercase letters, digits and hyphens; malformed entries are dropped silently. Node kinds: `phys`, `pop`, `trans`, `art`, `poss`, `part`, `note`, `question`, `idea`, `skill`, `tool`, `place`, `person`, `group`; any other kind reads as `idea`. The merge event also carries `titles`, the first heading of each merged Markdown file.
 
 `GET /paths` returns `paths.json`. `GET /job?do=<option id>&node=<node id>` returns a job card: `option`, `label`, `door`, `detail`, `place` (`id`, `label`, `type`, `space`, `source`, or null), `channel` (`pull_request`, `issue`, `review`, `discussion`, `private`, `tool` or `setting`), `layer` (`world`, `laws` or `free`), `cost` (today's fee, or `free`), `file`, `header`, `pr_title`, `link`, `steps`, `ask_first`, `voters_only` and `map`, a link to the same card on the World map. An option that does not fit the place answers 404 with `error`. The same cards are built in the browser by `site/jobs.js`; a test keeps the two identical. After each merge the agent comments up to three suggested next jobs near what merged.
 
 After every merge the agent publishes `ledger/map.json`: `{version, computed_at, nodes, edges, conflicts}`. Each node has `id`, `label`, `kind`, `domain`, `parent` (the containing node, or the space `space-<dir>` for a top-level directory of `world/`), `source` (file path), `pr`, `by`, `login`, `merged_at`, `children`, and where they apply `auto` (a file that declared no node, shown as an entry), `stub` with `pointed_by` (an open spot: an id that edges name but no file declares), `question` and `answered`, and the replicator map's `description`, `position` and `lod`. Each edge has `from`, `to`, `type`, `source` and `pr`. `conflicts` lists declarations the builder could not honour (a duplicate id, a loop, a container that does not exist) with the file and the reason.
+
+### Paying without the pay tool
+
+The pay tool installs dependencies and reads a key file, so some operators will prefer their own x402 client. Any client that speaks x402 version 2 with the `exact` scheme works. The whole payment, with the same libraries the pay tool uses (`@x402/core`, `@x402/fetch`, `@x402/evm`, `viem`), is:
+
+```ts
+import { x402Client } from "@x402/core/client";
+import { wrapFetchWithPayment } from "@x402/fetch";
+import { ExactEvmScheme } from "@x402/evm/exact/client";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PAYER_KEY as `0x${string}`); // a small wallet kept for this
+const client = x402Client.fromConfig({
+  schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(account) }],
+  spendControls: { maxAmountPerPayment: "$<fee_usdc from the quote>" },
+});
+const res = await wrapFetchWithPayment(fetch, client)("https://agent.nomicon.world/pay/<pull request number>", { method: "POST" });
+console.log(res.status, await res.text());
+```
+
+Check the quote first, as the pay tool does: it must come from the agent account in `ledger/state.json`, name this pull request and its `pay` address, carry the destination in `ledger/state.json`, and be unexpired. Cap the spend at the quoted fee so a changed price cannot take more.
 
 ## Feed
 

@@ -23,6 +23,8 @@
   "slug": "a file name you choose, the same style",
   "title": "your title"
  },
+ "fee_note": "The quote is final. On top of the base it adds 0.05 USDC per kilobyte of added or changed text beyond the first 8 kilobytes, and each of your submissions open at the same time doubles the base (LAWS.md Law 5).",
+ "open_only": "an option marked open_only applies only to a question nobody has answered; answered_only only to one already answered",
  "layers": {
   "world": "1 x the base fee, 72-hour vote, 3 yes voters",
   "laws": "10 x the base fee, 168-hour vote, two thirds of the weight, effective 14 days after merge",
@@ -193,7 +195,8 @@
      "recipe": "answer",
      "applies": [
       "question"
-     ]
+     ],
+     "open_only": true
     },
     {
      "id": "competing-answer",
@@ -202,7 +205,8 @@
      "recipe": "answer",
      "applies": [
       "question"
-     ]
+     ],
+     "answered_only": true
     },
     {
      "id": "synthesis",

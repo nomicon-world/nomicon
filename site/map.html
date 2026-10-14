@@ -75,7 +75,7 @@ a.btn { text-decoration: none; display: inline-block; }
 "use strict";
 const REPO = "https://github.com/nomicon-world/nomicon";
 const KIND = { space: "Space", entry: "Entry", stub: "Open spot", question: "Question", idea: "Idea", skill: "Skill", tool: "Tool", place: "Place", person: "Person", group: "Group", phys: "Matter and energy", pop: "Lineage", trans: "Transition", art: "Artifact", poss: "Possibility", part: "Component", note: "Note" };
-const EDGE_STYLE = { desc: [[], 1.6], emer: [[], 2.6], fuse: [[10, 5], 1.6], dep: [[3, 4], 1.4], xfer: [[1, 4], 1.6], poss: [[6, 6], 1.2], alt: [[2, 3], 1.4], answers: [[], 1.4] };
+const EDGE_STYLE = { cites: [[1, 5], 1.1], desc: [[], 1.6], emer: [[], 2.6], fuse: [[10, 5], 1.6], dep: [[3, 4], 1.4], xfer: [[1, 4], 1.6], poss: [[6, 6], 1.2], alt: [[2, 3], 1.4], answers: [[], 1.4] };
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const PALETTE = ["#2F5D8A", "#2E7D5B", "#A35A1A", "#7A3F98", "#A3422A", "#1F7A8C", "#8A5A12", "#5A6B2E", "#B0466E", "#3D4752"];
 const hash = (s) => { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
@@ -158,7 +158,7 @@ const toScreen = (p) => ({ x: (p.x * view.s + view.x) * (devicePixelRatio || 1),
 function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto; }
 function dimmed(n) {
   if (frontier && !isOpen(n)) return true;
-  if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n)) && !n.children) return true; }
+  if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !n.children && ((!f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n))) || (f.option.open_only && n.answered) || (f.option.answered_only && J.placeType(n) === "question" && !n.answered))) return true; }
   return false;
 }
 
@@ -297,6 +297,7 @@ function openJob(optId, n) {
     <h2>${esc(card.label)}</h2>
     <p>${esc(card.detail || "")}</p>
     <p><span class="pill ${card.layer}">${layer}</span> <span class="pill">${card.cost === "free" ? "No fee" : esc(card.cost) + " today"}</span>${card.voters_only ? ` <span class="pill">Voters only</span>` : ""}</p>
+    ${card.cost_note ? `<p style="font-size:12px;color:var(--muted)">${esc(card.cost_note)}</p>` : ""}
     ${card.place ? `<div class="lbl">Place</div><p>${esc(card.place.label)} <span class="mono">${esc(card.place.id)}</span></p>` : ""}
     ${card.file ? `<div class="lbl">File</div><p class="mono">${esc(card.file)}</p>` : ""}
     ${card.header ? `<div class="lbl">Header</div><pre>${esc(card.header)}</pre><button class="btn" id="copyh">Copy header</button>` : ""}
@@ -316,7 +317,7 @@ function pickPlaceFor(optId) {
   const f = J && CAT && J.findOption(CAT, optId); if (!f) return;
   DO = optId; draw();
   if (f.option.applies.includes("none")) { openJob(optId, null); return; }
-  const fits = MAP.nodes.filter((x) => f.option.applies.includes(J.placeType(x)) && !(f.option.id === "answer" && x.answered)).length;
+  const fits = MAP.nodes.filter((x) => f.option.applies.includes(J.placeType(x)) && !(f.option.open_only && x.answered) && !(f.option.answered_only && !x.answered)).length;
   const h = document.getElementById("hint"); h.hidden = false; h.textContent = fits ? `Pick a place for: ${f.option.label}. Places where it fits stay bright; enter a space to see inside.` : `No place on the map fits "${f.option.label}" right now. See the other ways to take part.`;
 }
 let drag = null, moved = false;

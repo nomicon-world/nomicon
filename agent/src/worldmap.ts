@@ -9,7 +9,7 @@
  */
 import type { MapDecl } from "./questions.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number }
 export interface SourceEdge { from: string; to: string; type: string }
 
@@ -73,6 +73,11 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   for (const f of ordered) for (const q of f.answers) {
     const a = nodeOfPath.get(f.path), qn = nodeOfPath.get(q);
     if (a && qn) { edges.push({ from: a, to: qn, type: "answers", source: f.path, pr: f.pr }); nodes.get(qn)!.answered = true; }
+  }
+  // Citations draw an edge from the citing file to each cited file it can find.
+  for (const f of ordered) for (const c of f.cites ?? []) {
+    const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
+    if (a && b && a !== b) edges.push({ from: a, to: b, type: "cites", source: f.path, pr: f.pr });
   }
   // Containment, refusing cycles and unknown containers (those fall back to the file's space).
   for (const [child, parent] of inside) {

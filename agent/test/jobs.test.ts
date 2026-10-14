@@ -8,6 +8,7 @@ const catalog = JSON.parse(readFileSync(new URL("../../paths.json", import.meta.
 const nodes = [
   { id: "space-questions", label: "questions", kind: "space", parent: null, source: "world/questions/" },
   { id: "file-questions-why", label: "Why?", kind: "question", parent: "space-questions", source: "world/questions/why.md" },
+  { id: "file-questions-how", label: "How?", kind: "question", parent: "space-questions", source: "world/questions/how.md", answered: true },
   { id: "pdf-skill", label: "PDF skill", kind: "skill", parent: "space-skills", source: "world/skills/pdf.md" },
   { id: "space-skills", label: "skills", kind: "space", parent: null, source: "world/skills/" },
   { id: "ocr-skill", label: "ocr skill", kind: "stub", parent: "space-skills", source: null, stub: true },
@@ -45,6 +46,17 @@ describe("job cards", () => {
     const f = jobCard(catalog, "fill-spot", byId.get("ocr-skill") as never, byId as never, 1000000n);
     expect(f["header"]).toContain("node: { id: ocr-skill, label: \"ocr skill\"");
     expect(f["file"]).toBe("world/skills/ocr-skill.md");
+  });
+
+  it("send open questions to answer and answered ones to a competing answer, and carry the fee note on paid cards", () => {
+    const how = byId.get("file-questions-how") as never, why = byId.get("file-questions-why") as never;
+    expect(jobCard(catalog, "answer", how, byId as never, 1000000n)["error"]).toMatch(/competing answer/);
+    expect(jobCard(catalog, "competing-answer", why, byId as never, 1000000n)["error"]).toMatch(/Answer an open question/);
+    expect(jobCard(catalog, "competing-answer", how, byId as never, 1000000n)["error"]).toBeUndefined();
+    expect(optionsFor(catalog, how).map((x) => x.option.id)).not.toContain("answer");
+    expect(optionsFor(catalog, why).map((x) => x.option.id)).not.toContain("competing-answer");
+    expect(jobCard(catalog, "answer", why, byId as never, 1000000n)["cost_note"]).toMatch(/8 kilobytes/);
+    expect(jobCard(catalog, "report-bug", null, byId as never, 1000000n)["cost_note"]).toBeNull();
   });
 
   it("refuse an option that does not fit the place, and price the Laws layer at ten times", () => {

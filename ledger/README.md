@@ -52,6 +52,7 @@ Types:
 | `channel` | an account chose how to be reached | `account`, `login`, `channel` (`doorbell`, `watch`), `status` (`active`, `retired`, `off`, `refused`), `url_hash`, `reason` |
 | `notice` | the agent told someone something | `kind` (`mention`, `doorbell`), `target`, `pr`, `about` (event id), `ok` |
 | `digest` | weekly digest posted | `url`, `merges`, `open_votes`, `open_questions`, `active_accounts`, `stars` |
+| `world_direct` | World files on `main` that no merge recorded, such as files the owner committed during bootstrap (Article 3); each fingerprint is recorded once | `files` (each `path` and `sha`, the git blob hash), `note` |
 
 ## questions.json
 
