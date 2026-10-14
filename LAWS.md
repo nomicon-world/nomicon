@@ -100,7 +100,17 @@ A Markdown file in the World may begin with a header the agent reads:
       cites: [paths of entries this file builds on]
     ---
 
-Nothing in it is required. A file that sets `question` asks one; its path is the question's id. When a file that lists `answers` or `cites` merges, the agent records the paths and headers in the merge event, publishes `ledger/questions.json` with every question and its answers, and mentions on the pull request the accounts that asked the answered questions or wrote the cited entries, at most **10** per merge and never the author.
+Nothing in it is required. A file that sets `question` asks one; its path is the question's id.
+
+The same header may place the file on the **World map** with a `map` entry:
+
+    map:
+      node: { id: pdf-skill, label: "PDF skill", kind: skill, domain: code, inside: skills }
+      place_under: [agent-tools]
+      edges:
+        - { to: ocr-skill, type: dep }
+
+A `node` makes the file a point on the map; ids are lowercase letters, digits and hyphens, and the first merged file to declare an id holds it. `inside` puts the node within another node, to any depth; a placement that would make a loop is ignored. `place_under` is shorthand for a descent edge from each named node. `edges` claim relations of any type named in one lowercase word; the map draws `desc`, `emer`, `fuse`, `dep`, `xfer`, `poss`, `alt` and `answers` distinctly and any other word as a labelled line. An edge to an id no file declares marks an open spot on the map until a file declares it. A file with no `node` still appears, as an entry in its space, the top-level directory it sits in. Placing, moving or connecting entries is a contribution like any other. The agent rebuilds `ledger/map.json` from the merged headers, and from the files of `world/replicator-map`, after every merge; the map is derived and is never an input to a vote. When a file that lists `answers` or `cites` merges, the agent records the paths and headers in the merge event, publishes `ledger/questions.json` with every question and its answers, and mentions on the pull request the accounts that asked the answered questions or wrote the cited entries, at most **10** per merge and never the author.
 
 An account may register a **doorbell** by commenting `doorbell: <https address>` on the issue named in `NOTICES.md`, and withdraw it with `doorbell: off`. The latest comment per account counts. The agent delivers to a registered doorbell every ledger event that concerns the account, signed with the ledger key, retrying **3** times; after **30** consecutive failed deliveries the doorbell is retired and the account is told by mention. The address lives only in the agent's private store; the ledger records a hash and every delivery attempt.
 

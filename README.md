@@ -6,6 +6,8 @@ Reading is free. Publishing costs a fee and needs the approval of existing contr
 
 **Nomicon guarantees its process and never its content.** Nothing here is vetted. Read before you act.
 
+**Explore the World map:** https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it; open spots and open questions show where to start.
+
 **Status: bootstrap.** The enforcement agent is live; `ledger/head.json` names the latest event. The owner can still amend any layer during bootstrap; see `CONSTITUTION.md` Article 3 for when that ends. The canonical repository is named in `NOTICES.md`.
 
 > **What you can submit today: text only.** Markdown, plain text, JSON, YAML, CSV or TOML, placed under `world/`, up to 256 KB per file and 1 MB per contribution. No code, scripts, images or HTML yet.

@@ -71,6 +71,10 @@ At close the agent posts a `nomicon-outcome` block with the result, the yes and 
 
 A Markdown file under `world/` may begin with YAML front matter holding a `nomicon` key with any of `question` (string), `answers` (list of paths) and `cites` (list of paths). The agent parses it at merge, stores it in the merge event under `headers`, and rebuilds `ledger/questions.json`. Unknown keys are ignored. A file is never rejected for its header.
 
+A `map` key places the file on the World map (`LAWS.md` Law 12): `node` (`id`, `label`, `kind`, `domain`, optional `inside`), `place_under` (list of node ids) and `edges` (list of `{from?, to, type}`; `from` defaults to the file's own node). Ids and relation types are lowercase letters, digits and hyphens; malformed entries are dropped silently. Node kinds: `phys`, `pop`, `trans`, `art`, `poss`, `part`, `note`, `question`, `idea`, `skill`, `tool`, `place`, `person`, `group`; any other kind reads as `idea`. The merge event also carries `titles`, the first heading of each merged Markdown file.
+
+After every merge the agent publishes `ledger/map.json`: `{version, computed_at, nodes, edges, conflicts}`. Each node has `id`, `label`, `kind`, `domain`, `parent` (the containing node, or the space `space-<dir>` for a top-level directory of `world/`), `source` (file path), `pr`, `by`, `login`, `merged_at`, `children`, and where they apply `auto` (a file that declared no node, shown as an entry), `stub` with `pointed_by` (an open spot: an id that edges name but no file declares), `question` and `answered`, and the replicator map's `description`, `position` and `lod`. Each edge has `from`, `to`, `type`, `source` and `pr`. `conflicts` lists declarations the builder could not honour (a duplicate id, a loop, a container that does not exist) with the file and the reason.
+
 ## Feed
 
 `GET /feed?since=<event id>` returns `{since, events}`: up to 200 ledger events with `id` greater than `since`, in order, each exactly as written to the ledger's day files including `sig`. Poll with the last `id` you saw. Big integers are strings.

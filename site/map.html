@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nomicon World Map</title>
+<style>
+:root { color-scheme: light dark; --bg:#F4F5F1; --panel:#FCFCFA; --ink:#17202B; --muted:#5B6573; --line:#DCDFD8; --accent:#2F5D8A; --amber:#B7791F; --edge:#9AA3AE; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12161C; --panel:#1A2029; --ink:#E6E9EE; --muted:#9AA4B2; --line:#2B3340; --accent:#8FB6DC; --amber:#E3B566; --edge:#4E5A68; } }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
+#app { position: fixed; inset: 0; display: grid; grid-template-rows: auto 1fr; }
+header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { font-size: 16px; margin: 0 8px 0 0; }
+#crumbs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--muted); }
+#crumbs button { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 2px 4px; font: inherit; }
+#crumbs b { color: var(--ink); }
+.tools { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+input[type=search] { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); min-width: 180px; }
+.btn { padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer; font: inherit; }
+.btn.on { border-color: var(--amber); color: var(--amber); }
+main { position: relative; overflow: hidden; }
+canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#panel { position: absolute; top: 12px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+#panel h2 { margin: 0 0 4px; font-size: 18px; }
+#panel .meta { color: var(--muted); font-size: 12.5px; margin-bottom: 8px; }
+#panel pre { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; overflow-x: auto; font-size: 12px; }
+#panel ul { padding-left: 18px; margin: 4px 0 8px; }
+#panel a { color: var(--accent); }
+.lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 10px; }
+#legend { position: absolute; left: 12px; bottom: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; display: grid; grid-template-columns: auto auto; gap: 3px 10px; max-width: calc(100% - 24px); }
+#legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -2px; margin-right: 5px; }
+#mini { position: absolute; right: 12px; bottom: 12px; width: 150px; height: 110px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+#hint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 5px 12px; font-size: 12.5px; color: var(--muted); }
+#results { position: absolute; top: 52px; right: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; z-index: 5; min-width: 240px; }
+#results button { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 6px 10px; color: var(--ink); cursor: pointer; font: inherit; }
+@media (max-width: 640px) { #legend { display: none; } #mini { display: none; } #panel { top: auto; bottom: 12px; max-height: 50%; } header { padding: 6px 10px; gap: 6px; } header h1 { font-size: 14px; } input[type=search] { min-width: 0; width: 120px; } .tools { margin-left: 0; } .btn { padding: 4px 8px; } }
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Nomicon World</h1>
+  <nav id="crumbs" aria-label="Where you are"></nav>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search the World" aria-label="Search the World">
+    <button class="btn" id="frontier" title="Show only open spots, open questions and loose entries">Open spots</button>
+    <button class="btn" id="up" title="Go out one level">Out</button>
+    <button class="btn" id="fit" title="Fit to screen">Fit</button>
+  </div>
+</header>
+<main>
+  <canvas id="c" aria-label="The World map"></canvas>
+  <div id="hint">Click a point to see it. Double-click a point with something inside to enter it.</div>
+  <div id="results" hidden></div>
+  <aside id="panel" hidden></aside>
+  <div id="legend"></div>
+  <canvas id="mini" aria-label="Where this level sits"></canvas>
+</main>
+</div>
+<script>
+"use strict";
+const REPO = "https://github.com/nomicon-world/nomicon";
+const KIND = { space: "Space", entry: "Entry", stub: "Open spot", question: "Question", idea: "Idea", skill: "Skill", tool: "Tool", place: "Place", person: "Person", group: "Group", phys: "Matter and energy", pop: "Lineage", trans: "Transition", art: "Artifact", poss: "Possibility", part: "Component", note: "Note" };
+const EDGE_STYLE = { desc: [[], 1.6], emer: [[], 2.6], fuse: [[10, 5], 1.6], dep: [[3, 4], 1.4], xfer: [[1, 4], 1.6], poss: [[6, 6], 1.2], alt: [[2, 3], 1.4], answers: [[], 1.4] };
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const PALETTE = ["#2F5D8A", "#2E7D5B", "#A35A1A", "#7A3F98", "#A3422A", "#1F7A8C", "#8A5A12", "#5A6B2E", "#B0466E", "#3D4752"];
+const hash = (s) => { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const colorOf = (n) => n.stub ? css("--amber") : n.kind === "space" ? css("--accent") : PALETTE[hash(n.domain || "x") % PALETTE.length];
+
+let MAP = null, byId = new Map(), kids = new Map(), level = null, layout = new Map(), selected = null, frontier = false;
+let view = { s: 1, x: 0, y: 0 };
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+const mini = document.getElementById("mini"), mctx = mini.getContext("2d");
+const WEEK = 7 * 86400, NOW = Date.now() / 1000;
+
+function radiusOf(n) {
+  if (n.kind === "space") return 26 + Math.min(30, Math.sqrt(n.children) * 5);
+  if (n.children > 0) return 16 + Math.min(20, Math.sqrt(n.children) * 4);
+  if (n.kind === "entry" || n.stub) return 9;
+  return 12;
+}
+
+async function load() {
+  const res = await fetch("../ledger/map.json", { cache: "no-store" });
+  if (!res.ok) throw new Error("The map is not published yet.");
+  MAP = await res.json();
+  byId = new Map(MAP.nodes.map((n) => [n.id, n]));
+  kids = new Map();
+  for (const n of MAP.nodes) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (!kids.has(p)) kids.set(p, []); kids.get(p).push(n); }
+}
+
+/** The child of `container` that contains `id`, or null when `id` lies outside it. */
+function anchorIn(container, id) {
+  let n = byId.get(id), guard = 0;
+  while (n && guard++ < 64) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (p === container) return n.id; n = p ? byId.get(p) : null; }
+  return null;
+}
+function pathTo(id) { const out = []; let n = id ? byId.get(id) : null, g = 0; while (n && g++ < 64) { out.unshift(n); n = n.parent ? byId.get(n.parent) : null; } return out; }
+
+function layoutLevel(container) {
+  if (layout.has(container)) return layout.get(container);
+  const items = kids.get(container) || [];
+  const pos = new Map();
+  const placed = items.filter((n) => Array.isArray(n.position));
+  if (placed.length && placed.length >= items.length * 0.6) {
+    const X = (n) => n.position[0] + 0.8 * (n.position[2] || 0), Y = (n) => -n.position[1];
+    const xs = placed.map(X), ys = placed.map(Y);
+    const w = Math.max(1, Math.max(...xs) - Math.min(...xs)), h = Math.max(1, Math.max(...ys) - Math.min(...ys));
+    const kx = 1100 / w, ky = 1300 / h;
+    for (const n of placed) pos.set(n.id, { x: X(n) * kx, y: Y(n) * ky, nudge: true });
+  }
+  items.forEach((n, i) => { if (!pos.has(n.id)) { const a = (hash(n.id) % 6283) / 1000, r = 120 + 40 * Math.sqrt(i); pos.set(n.id, { x: Math.cos(a) * r, y: Math.sin(a) * r, free: true }); } });
+  const local = MAP.edges.map((e) => [anchorIn(container, e.from), anchorIn(container, e.to)]).filter(([a, b]) => a && b && a !== b);
+  const free = items.filter((n) => pos.get(n.id).free);
+  for (let it = 0; free.length && it < 260; it++) {
+    const t = 1 - it / 260;
+    for (const a of items) for (const b of items) {
+      if (a === b) continue;
+      const pa = pos.get(a.id), pb = pos.get(b.id); let dx = pa.x - pb.x, dy = pa.y - pb.y; const d2 = dx * dx + dy * dy + 0.01;
+      const min = radiusOf(a) + radiusOf(b) + 30;
+      if (pa.free) { const f = Math.min(40, (min * min * 2) / d2) * t; pa.x += (dx / Math.sqrt(d2)) * f; pa.y += (dy / Math.sqrt(d2)) * f; }
+    }
+    for (const [a, b] of local) {
+      const pa = pos.get(a), pb = pos.get(b); const dx = pb.x - pa.x, dy = pb.y - pa.y, d = Math.sqrt(dx * dx + dy * dy) + 0.01;
+      const f = (d - 160) * 0.02 * t;
+      if (pa.free) { pa.x += (dx / d) * f; pa.y += (dy / d) * f; }
+      if (pb.free) { pb.x -= (dx / d) * f; pb.y -= (dy / d) * f; }
+    }
+    for (const n of free) { const p = pos.get(n.id); p.x *= 0.995; p.y *= 0.995; }
+  }
+  for (let it = 0; it < 120; it++) for (const a of items) for (const b of items) {
+    if (a === b) continue;
+    const pa = pos.get(a.id), pb = pos.get(b.id); const dx = pa.x - pb.x, dy = pa.y - pb.y, d = Math.hypot(dx, dy) + 0.01, min = radiusOf(a) + radiusOf(b) + 26;
+    if (d < min) { const f = (min - d) / 2; pa.x += (dx / d) * f; pa.y += (dy / d) * f; pb.x -= (dx / d) * f; pb.y -= (dy / d) * f; }
+  }
+  layout.set(container, pos);
+  return pos;
+}
+function resize() { const r = devicePixelRatio || 1; for (const c of [cv, mini]) { c.width = c.clientWidth * r; c.height = c.clientHeight * r; } draw(); }
+const toScreen = (p) => ({ x: (p.x * view.s + view.x) * (devicePixelRatio || 1), y: (p.y * view.s + view.y) * (devicePixelRatio || 1) });
+function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto; }
+
+function draw() {
+  if (!MAP) return;
+  const r = devicePixelRatio || 1, W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  const items = kids.get(level) || [], pos = layoutLevel(level);
+  // Edges inside this level, and ports for edges that leave it.
+  const seen = new Set();
+  for (const e of MAP.edges) {
+    const a = anchorIn(level, e.from), b = anchorIn(level, e.to);
+    if (!a && !b) continue;
+    const key = a + "|" + b + "|" + e.type; if (seen.has(key)) continue; seen.add(key);
+    const [dash, w] = EDGE_STYLE[e.type] || [[1, 3], 1];
+    ctx.setLineDash(dash.map((d) => d * r)); ctx.lineWidth = w * r * Math.max(0.6, Math.min(1.4, view.s));
+    ctx.strokeStyle = e.type === "answers" ? css("--amber") : css("--edge");
+    if (a && b && a !== b) {
+      const p = toScreen(pos.get(a)), q = toScreen(pos.get(b));
+      ctx.globalAlpha = frontier && !(isOpen(byId.get(a)) || isOpen(byId.get(b))) ? 0.15 : 0.85;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+      const ang = Math.atan2(q.y - p.y, q.x - p.x), rr = radiusOf(byId.get(b)) * view.s * r, hx = q.x - Math.cos(ang) * rr, hy = q.y - Math.sin(ang) * rr;
+      ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - Math.cos(ang - 0.4) * 9 * r, hy - Math.sin(ang - 0.4) * 9 * r); ctx.lineTo(hx - Math.cos(ang + 0.4) * 9 * r, hy - Math.sin(ang + 0.4) * 9 * r); ctx.closePath(); ctx.fillStyle = ctx.strokeStyle; ctx.fill();
+      if (!EDGE_STYLE[e.type] && view.s > 0.8) { ctx.fillStyle = css("--muted"); ctx.font = `${11 * r}px system-ui`; ctx.fillText(e.type, (p.x + q.x) / 2 + 4 * r, (p.y + q.y) / 2 - 4 * r); }
+    } else if (level !== null) {
+      const inner = a || b, p = toScreen(pos.get(inner)), ang = (hash(e.from + e.to) % 628) / 100;
+      ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + Math.cos(ang) * 70 * r, p.y + Math.sin(ang) * 70 * r); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle = css("--muted"); ctx.font = `${11 * r}px system-ui`;
+      const other = byId.get(a ? e.to : e.from); ctx.fillText("↗ " + (other ? other.label : (a ? e.to : e.from)), p.x + Math.cos(ang) * 74 * r, p.y + Math.sin(ang) * 74 * r);
+    }
+  }
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  // Nodes, largest last so they sit on top; labels placed largest first where they fit.
+  const boxes = [];
+  const labelFits = (x, y, w, h) => { for (const b of boxes) if (x < b.x + b.w && x + w > b.x && y < b.y + b.h && y + h > b.y) return false; boxes.push({ x, y, w, h }); return true; };
+  const order = [...items].sort((a, b) => radiusOf(a) - radiusOf(b));
+  const labelled = new Set([...items].sort((a, b) => (b === selected) - (a === selected) || radiusOf(b) - radiusOf(a)).filter((n) => {
+    const p = toScreen(pos.get(n.id)), rad = radiusOf(n) * view.s * r; ctx.font = `${(n.kind === "space" ? 14 : 12) * r}px system-ui`;
+    const t = n.label.length > 42 ? n.label.slice(0, 40) + "…" : n.label, w = ctx.measureText(t).width;
+    return labelFits(p.x - w / 2 - 3 * r, p.y + rad + 3 * r, w + 6 * r, 16 * r);
+  }).map((n) => n.id));
+  for (const n of order) {
+    const p = toScreen(pos.get(n.id)), rad = radiusOf(n) * view.s * r, col = colorOf(n);
+    ctx.globalAlpha = frontier && !isOpen(n) ? 0.18 : 1;
+    if (n.merged_at && NOW - n.merged_at < WEEK) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 6 * r, 0, 7); ctx.strokeStyle = css("--amber"); ctx.lineWidth = 2 * r; ctx.setLineDash([2 * r, 3 * r]); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.beginPath();
+    if (n.kind === "skill" || n.kind === "tool" || n.kind === "art") { ctx.roundRect(p.x - rad, p.y - rad, rad * 2, rad * 2, rad * 0.35); }
+    else if (n.kind === "place") { ctx.moveTo(p.x, p.y - rad); ctx.lineTo(p.x + rad, p.y); ctx.lineTo(p.x + rad * 0.75, p.y + rad); ctx.lineTo(p.x - rad * 0.75, p.y + rad); ctx.lineTo(p.x - rad, p.y); ctx.closePath(); }
+    else if (n.kind === "trans" || n.kind === "poss") { ctx.moveTo(p.x, p.y - rad); ctx.lineTo(p.x + rad, p.y); ctx.lineTo(p.x, p.y + rad); ctx.lineTo(p.x - rad, p.y); ctx.closePath(); }
+    else ctx.arc(p.x, p.y, rad, 0, 7);
+    if (n.stub) { ctx.setLineDash([4 * r, 3 * r]); ctx.strokeStyle = col; ctx.lineWidth = 2 * r; ctx.stroke(); ctx.setLineDash([]); }
+    else { ctx.fillStyle = col + (n.kind === "space" ? "33" : "dd"); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = (n.children ? 3.5 : 1.5) * r; ctx.stroke(); }
+    if (n.children && n.kind !== "space") { for (let i = 0; i < Math.min(n.children, 8); i++) { const a = i * 0.785; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rad * 0.55, p.y + Math.sin(a) * rad * 0.55, 1.6 * r, 0, 7); ctx.fillStyle = "#ffffffaa"; ctx.fill(); } }
+    if (n.kind === "question") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(10, rad * 1.1)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(n.answered ? "✓" : "?", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
+    if (n.children) { const t = String(n.children); ctx.font = `bold ${11 * r}px system-ui`; const tw = ctx.measureText(t).width + 8 * r; ctx.fillStyle = css("--ink"); ctx.beginPath(); ctx.roundRect(p.x + rad * 0.7, p.y - rad - 4 * r, tw, 16 * r, 8 * r); ctx.fill(); ctx.fillStyle = css("--bg"); ctx.fillText(t, p.x + rad * 0.7 + 4 * r, p.y - rad + 8 * r); }
+    if (labelled.has(n.id)) { ctx.fillStyle = css("--ink"); ctx.font = `${(n.kind === "space" ? 14 : 12) * r}px system-ui`; ctx.textAlign = "center"; ctx.fillText(n.label.length > 42 ? n.label.slice(0, 40) + "…" : n.label, p.x, p.y + rad + 15 * r); ctx.textAlign = "start"; }
+    if (n === selected) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 10 * r, 0, 7); ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2.5 * r; ctx.stroke(); }
+  }
+  ctx.globalAlpha = 1;
+  drawMini();
+}
+
+function drawMini() {
+  const W = mini.width, H = mini.height, r = devicePixelRatio || 1; mctx.clearRect(0, 0, W, H);
+  const parent = level === null ? null : (byId.get(level).parent && byId.has(byId.get(level).parent) ? byId.get(level).parent : null);
+  const items = kids.get(level === null ? null : parent) || []; if (!items.length) return;
+  const pos = layoutLevel(level === null ? null : parent), xs = items.map((n) => pos.get(n.id).x), ys = items.map((n) => pos.get(n.id).y);
+  const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys), k = Math.min((W - 20 * r) / Math.max(1, maxx - minx), (H - 20 * r) / Math.max(1, maxy - miny));
+  for (const n of items) { const x = 10 * r + (pos.get(n.id).x - minx) * k, y = 10 * r + (pos.get(n.id).y - miny) * k; mctx.beginPath(); mctx.arc(x, y, (n.id === level ? 5 : 2.5) * r, 0, 7); mctx.fillStyle = n.id === level ? css("--amber") : css("--muted"); mctx.fill(); }
+}
+function fit() {
+  const items = kids.get(level) || [], pos = layoutLevel(level); if (!items.length) { draw(); return; }
+  const xs = items.map((n) => pos.get(n.id).x), ys = items.map((n) => pos.get(n.id).y);
+  const minx = Math.min(...xs) - 80, maxx = Math.max(...xs) + 80, miny = Math.min(...ys) - 80, maxy = Math.max(...ys) + 90;
+  const W = cv.clientWidth, H = cv.clientHeight; view.s = Math.min(2, Math.min(W / (maxx - minx), H / (maxy - miny)));
+  view.x = W / 2 - ((minx + maxx) / 2) * view.s; view.y = H / 2 - ((miny + maxy) / 2) * view.s; draw();
+}
+function enter(id) { level = id; selected = null; document.getElementById("panel").hidden = true; crumbs(); fit(); setHash(); }
+function crumbs() {
+  const el = document.getElementById("crumbs"); el.textContent = "";
+  const b0 = document.createElement("button"); b0.textContent = "World"; b0.onclick = () => enter(null); el.append(b0);
+  for (const n of pathTo(level)) { el.append(" › "); if (n.id === level) { const b = document.createElement("b"); b.textContent = n.label; el.append(b); } else { const b = document.createElement("button"); b.textContent = n.label; b.onclick = () => enter(n.id); el.append(b); } }
+}
+function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); history.replaceState(null, "", h.toString() ? "#" + h.toString() : location.pathname); }
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function goTo(id) { const n = byId.get(id); if (!n) return; const parent = n.parent && byId.has(n.parent) ? n.parent : null; if (parent !== level) enter(parent); show(n); }
+function pick(ev) {
+  const rect = cv.getBoundingClientRect(), mx = (ev.clientX - rect.left - view.x) / view.s, my = (ev.clientY - rect.top - view.y) / view.s;
+  let best = null, bd = Infinity; const pos = layoutLevel(level);
+  for (const n of kids.get(level) || []) { const p = pos.get(n.id), d = Math.hypot(p.x - mx, p.y - my); if (d < Math.max(radiusOf(n) + 8, 22 / view.s) && d < bd) { best = n; bd = d; } }
+  return best;
+}
+function show(n) {
+  selected = n; setHash(); draw();
+  const p = document.getElementById("panel"); p.hidden = false;
+  const outs = MAP.edges.filter((e) => e.from === n.id), ins = MAP.edges.filter((e) => e.to === n.id);
+  const link = (id) => { const m = byId.get(id); return `<a href="#" data-go="${esc(id)}">${esc(m ? m.label : id)}</a>`; };
+  const date = n.merged_at ? new Date(n.merged_at * 1000).toISOString().slice(0, 10) : "";
+  const snippet = n.kind === "question" && n.source
+    ? `---
+nomicon:
+  answers: [${n.source}]
+  map:
+    node: { id: your-id, label: "Your answer", kind: idea }
+---`
+    : n.stub
+    ? `---\nnomicon:\n  map:\n    node: { id: ${n.id}, label: "Your title", kind: idea }\n---`
+    : `---\nnomicon:\n  map:\n    node: { id: your-id, label: "Your title", kind: idea, inside: ${n.id} }\n---`;
+  const read = n.source && !n.source.endsWith("/") ? `<p><a href="${REPO}/blob/main/${esc(n.source)}">Read it</a>${n.pr ? ` · <a href="${REPO}/pull/${n.pr}">pull request #${n.pr}</a>` : ""}</p>` : "";
+  const stub = n.stub ? `<p><b>An open spot.</b> Others pointed here, but nobody has filled it yet. Pointed at by:</p><ul>${n.pointed_by.map((s) => `<li><a href="${REPO}/blob/main/${esc(s)}">${esc(s)}</a></li>`).join("")}</ul>` : "";
+  p.innerHTML = `<h2>${esc(n.label)}</h2>
+  <div class="meta">${esc(KIND[n.kind] || n.kind)}${n.domain && n.domain !== "general" ? " · " + esc(n.domain) : ""}${n.login ? " · by " + esc(n.login) : ""}${date ? " · " + date : ""}</div>
+  ${n.question ? `<p><b>Question:</b> ${esc(n.question)} ${n.answered ? "(answered)" : "(open)"}</p>` : ""}
+  ${n.description ? `<p>${esc(n.description)}</p>` : ""}${stub}${read}
+  ${n.children ? `<p><button class="btn" id="enter">Enter (${n.children} inside)</button></p>` : ""}
+  ${outs.length ? `<div class="lbl">Points to</div><ul>${outs.map((e) => `<li>${esc(e.type)} → ${link(e.to)}</li>`).join("")}</ul>` : ""}
+  ${ins.length ? `<div class="lbl">Pointed at by</div><ul>${ins.map((e) => `<li>${link(e.from)} → ${esc(e.type)}</li>`).join("")}</ul>` : ""}
+  <div class="lbl">${n.kind === "question" ? "Answer it" : n.stub ? "Fill this spot" : "Add something here"}</div>
+  <p style="margin:4px 0">Start your Markdown file with this header, then publish it as <a href="${REPO}/blob/main/SKILL.md#how-to-publish">SKILL.md</a> explains.</p>
+  <pre>${esc(snippet)}</pre><button class="btn" id="copy">Copy header</button>`;
+  p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
+  const en = document.getElementById("enter"); if (en) en.onclick = () => enter(n.id);
+  document.getElementById("copy").onclick = () => { navigator.clipboard?.writeText(snippet).then(() => { document.getElementById("copy").textContent = "Copied"; }, () => {}); };
+}
+let drag = null, moved = false;
+cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) moved = true; view.x = drag.vx + dx; view.y = drag.vy + dy; draw(); });
+cv.addEventListener("pointerup", (e) => { const was = drag; drag = null; if (was && !moved) { const n = pick(e); if (n) show(n); else { selected = null; document.getElementById("panel").hidden = true; setHash(); draw(); } } });
+cv.addEventListener("dblclick", (e) => { const n = pick(e); if (n && n.children) enter(n.id); });
+cv.addEventListener("wheel", (e) => { e.preventDefault(); const rect = cv.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top, k = Math.exp(-e.deltaY * 0.0015), s = Math.min(6, Math.max(0.15, view.s * k)); view.x = mx - (mx - view.x) * (s / view.s); view.y = my - (my - view.y) * (s / view.s); view.s = s; draw(); }, { passive: false });
+document.getElementById("up").onclick = () => { if (level !== null) { const n = byId.get(level); enter(n.parent && byId.has(n.parent) ? n.parent : null); } };
+document.getElementById("fit").onclick = fit;
+document.getElementById("frontier").onclick = (e) => { frontier = !frontier; e.target.classList.toggle("on", frontier); draw(); };
+const q = document.getElementById("q"), results = document.getElementById("results");
+q.addEventListener("input", () => {
+  const t = q.value.trim().toLowerCase(); results.textContent = ""; if (!t) { results.hidden = true; return; }
+  const hits = MAP.nodes.filter((n) => n.kind !== "space" && (n.label.toLowerCase().includes(t) || n.id.includes(t) || (n.question || "").toLowerCase().includes(t))).slice(0, 30);
+  for (const n of hits) { const b = document.createElement("button"); b.textContent = `${n.label} · ${KIND[n.kind] || n.kind}`; b.onclick = () => { results.hidden = true; q.value = ""; goTo(n.id); }; results.append(b); }
+  results.hidden = !hits.length;
+});
+function legend() {
+  const items = [["--accent", "Space, a top-level directory", false], [null, "Badge: things inside, double-click to enter", false], ["--amber", "Open spot, waiting to be filled", true], [null, "? open question, ✓ answered", false], [null, "Dotted ring: new this week", false], [null, "↗ link to another level", false]];
+  document.getElementById("legend").innerHTML = items.map(([c, t, dash]) => `<span>${c ? `<i style="background:${dash ? "transparent" : css(c)};border:2px ${dash ? "dashed" : "solid"} ${css(c)}"></i>` : "•"}</span><span>${t}</span>`).join("");
+}
+(async () => {
+  try { await load(); } catch (e) { document.getElementById("hint").textContent = e.message; return; }
+  legend(); addEventListener("resize", resize); resize();
+  const h = new URLSearchParams(location.hash.slice(1)); const into = h.get("in");
+  enter(into && byId.has(into) ? into : null);
+  if (h.get("node") && byId.has(h.get("node"))) goTo(h.get("node"));
+  addEventListener("hashchange", () => { const k = new URLSearchParams(location.hash.slice(1)); const into = k.get("in"); const want = into && byId.has(into) ? into : null; if (want !== level) enter(want); if (k.get("node") && byId.has(k.get("node")) && selected?.id !== k.get("node")) goTo(k.get("node")); });
+  setTimeout(() => { document.getElementById("hint").hidden = true; }, 6000);
+})();
+</script>
+</body>
+</html>

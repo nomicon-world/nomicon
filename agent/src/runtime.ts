@@ -14,7 +14,8 @@ import type { ChainPort, Clock, GitHubPort, PaymentNotice, PriceOracle, PullInfo
 import { fold, serializeState, type State } from "./state.js";
 import { tally, type Review } from "./tally.js";
 import type { OpenQuote } from "./pay.js";
-import { parseHeader, buildIndex, type Header, type QuestionsIndex } from "./questions.js";
+import { parseHeader, buildIndex, titleOf, type Header, type QuestionsIndex } from "./questions.js";
+import { buildWorldMap, type SourceEdge, type SourceNode } from "./worldmap.js";
 import { mentionTargets } from "./notify.js";
 import type { Notifier } from "./notifier.js";
 
@@ -654,6 +655,7 @@ export class Runtime {
     // Law 12: record what was merged and any headers, so questions and citations replay from the ledger alone.
     const paths: string[] = [];
     const headers: Record<string, Header> = {};
+    const titles: Record<string, string> = {};
     let bytes = 0;
     try {
       const files = await this.d.github.listFiles(pr);
@@ -662,14 +664,18 @@ export class Runtime {
         paths.push(f.path);
         bytes += f.bytesChanged;
         if (f.path.startsWith("world/") && f.path.toLowerCase().endsWith(".md")) {
-          const h = parseHeader(await this.d.github.readFile(mergeCommit, f.path));
+          const content = await this.d.github.readFile(mergeCommit, f.path);
+          const h = parseHeader(content);
           if (h) headers[f.path] = h;
+          const t = titleOf(content);
+          if (t) titles[f.path] = t;
         }
       }
     } catch (e) { this.log(`could not read merged files of pr ${pr}: ${(e as Error).message}`); }
     // Article 6: the owner may publish like anyone, paying the fee, and earns no weight by doing so.
     const weight = this.state(now).owner_accounts.includes(author.id) ? 0n : BigInt(String(quote["weight_micro"]));
-    const mergeEvent = this.d.ledger.append(now, "merge", { pr, head, merge_commit: mergeCommit, weight_micro: weight, account: author.id, login: author.login, layer: quote["layer"], paths, headers, bytes });
+    const mergeEvent = this.d.ledger.append(now, "merge", { pr, head, merge_commit: mergeCommit, weight_micro: weight, account: author.id, login: author.login, layer: quote["layer"], paths, headers, titles, bytes });
+    if (paths.some((x) => x.startsWith("world/replicator-map/"))) this.replicatorSource = undefined;
     await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. Weight ${micro(weight)} USDC accrues to the author and matures in ${laws.weight.maturity_days} days.`);
     // Law 12: tell the people this contribution answered or built on.
     const targets = mentionTargets(author.id, headers, this.state(now), laws.notices.mention_cap_per_merge);
@@ -784,6 +790,19 @@ export class Runtime {
     return current;
   }
 
+  /** world/replicator-map read from main, one more source of the World map; refreshed after a merge touches it. */
+  private replicatorSource: { nodes: SourceNode[]; edges: SourceEdge[] } | null | undefined;
+  private async replicator(): Promise<{ nodes: SourceNode[]; edges: SourceEdge[] } | null> {
+    if (this.replicatorSource !== undefined) return this.replicatorSource;
+    try {
+      const [n, r] = await Promise.all([this.d.github.readFile("main", "world/replicator-map/nodes.json"), this.d.github.readFile("main", "world/replicator-map/relations.json")]);
+      const nodes = (JSON.parse(n) as { nodes?: SourceNode[] }).nodes ?? [];
+      const edges = ((JSON.parse(r) as { relations?: Array<SourceEdge & { hidden?: boolean }> }).relations ?? []).map((e) => ({ from: e.from, to: e.to, type: e.type }));
+      this.replicatorSource = { nodes, edges };
+    } catch { this.replicatorSource = null; }
+    return this.replicatorSource;
+  }
+
   private async publish(now: number): Promise<void> {
     const head = this.d.ledger.headHash();
     if (head === this.lastPublishedHead) return;
@@ -795,6 +814,7 @@ export class Runtime {
       { path: "ledger/head.json", content: this.d.ledger.headJson() },
       { path: "ledger/state.json", content: serializeState(state) },
       { path: "ledger/questions.json", content: JSON.stringify(buildIndex(state.questions, now), null, 2) + "\n" },
+      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(state.map_files, await this.replicator(), now), null, 1) + "\n" },
     ], `ledger: event ${this.d.ledger.head}`);
     this.d.ledger.markPublished(names);
     this.lastPublishedHead = head;

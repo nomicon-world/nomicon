@@ -6,6 +6,7 @@ import type { LedgerEvent } from "./ledger.js";
 import type { Laws } from "./laws.js";
 import { weightsAt, type Merge } from "./weight.js";
 import type { Question } from "./questions.js";
+import type { MapFile } from "./worldmap.js";
 
 export interface HeldFee { account: number; layer: "world" | "laws"; micro: bigint; until: number; pr: number }
 /** A held fee applied to a later submission: consumed by that submission's merge or rejection, held again on its expiry (Law 5). */
@@ -42,6 +43,8 @@ export interface State {
   path_author: Record<string, number>;
   /** Questions asked in merged files, keyed by the asking file's path (Law 12). */
   questions: Record<string, Question>;
+  /** Every merged World Markdown file with its map declarations (Law 12); published as ledger/map.json, not in state.json. */
+  map_files: Record<string, MapFile>;
   /** How each account chose to be reached (Law 12). */
   channels: Record<string, { doorbell?: "active" | "retired" | "off"; watch?: boolean }>;
 }
@@ -52,7 +55,7 @@ export function emptyState(): State {
     bootstrap: { active: false, began: null, ends_by: null },
     fee: { base_micro: 1_000_000n, destination: null, last_adjusted_at: null },
     weights: {}, weighted_accounts: 0, open_votes: [], held_fees: [], held_in_use: {}, pending_owner_accounts: [], deployed_agent: null, ledger_key: null,
-    merges: [], logins: {}, last_vote_at: {}, owner_accounts: [], agent_account: null, barred_until: {}, pr_account: {}, path_author: {}, questions: {}, channels: {},
+    merges: [], logins: {}, last_vote_at: {}, owner_accounts: [], agent_account: null, barred_until: {}, pr_account: {}, path_author: {}, questions: {}, map_files: {}, channels: {},
   };
 }
 
@@ -121,6 +124,12 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
       const paths = (e["paths"] as string[] | undefined) ?? [];
       const headers = (e["headers"] as Record<string, { question?: string; answers?: string[]; cites?: string[] }> | undefined) ?? {};
       for (const p of paths) s.path_author[p] = acct;
+      const titles = (e["titles"] as Record<string, string> | undefined) ?? {};
+      for (const p of paths) {
+        if (!p.startsWith("world/") || !p.toLowerCase().endsWith(".md")) continue;
+        const h = headers[p] as { question?: string; answers?: string[]; map?: MapFile["map"] } | undefined;
+        s.map_files[p] = { path: p, ...(titles[p] ? { title: titles[p] } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], pr: num(e["pr"]), by: acct, login, merged_at: e.at };
+      }
       for (const [p, h] of Object.entries(headers)) {
         if (h.question && !s.questions[p]) s.questions[p] = { id: p, question: h.question, asked_by: acct, asked_login: login, asked_at: e.at, pr: num(e["pr"]), answers: [] };
         for (const qid of h.answers ?? []) {
@@ -209,5 +218,5 @@ export function fold(events: LedgerEvent[], now: number, laws: Laws): State {
 }
 
 export function serializeState(s: State): string {
-  return JSON.stringify(s, (_k, v) => (typeof v === "bigint" ? v.toString() : v), 2) + "\n";
+  return JSON.stringify(s, (k, v) => (k === "map_files" ? undefined : typeof v === "bigint" ? v.toString() : v), 2) + "\n";
 }

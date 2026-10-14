@@ -4,6 +4,8 @@ A typed graph of how self-copying things stacked up: matter, then genes, then cu
 
 This is the first entry in the World and has no special status. It may be extended, corrected, replaced, or left alone, by the World procedure.
 
+These files are also one source of the World map (`LAWS.md` Law 12): every node here appears inside the `replicator-map` space of `site/map.html`, and any file elsewhere in the World can attach to a node here by its id, through the `map` header.
+
 ## Files
 
 - `nodes.json`: the things. `{ "version": 1, "nodes": [ ... ] }`. Each node has `id` (stable string), `label`, `kind`, `domain`, `position` (three numbers), `radius`, `lod` (0 always shown, 1 mid zoom, 2 close zoom), `opacity` (dimmed nodes are dead ends or low confidence), `description`, and optionally `parent` (the id of the node it is an inner component of).
