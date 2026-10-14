@@ -9,7 +9,7 @@
  */
 import type { MapDecl } from "./questions.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number }
 export interface SourceEdge { from: string; to: string; type: string }
 
@@ -17,7 +17,7 @@ export interface WorldNode {
   id: string; label: string; kind: string; domain: string; parent: string | null;
   source: string | null; pr?: number; by?: number; login?: string; merged_at?: number;
   description?: string; position?: number[]; lod?: number;
-  auto?: true; stub?: true; pointed_by?: string[]; question?: string; answered?: boolean; children: number;
+  auto?: true; stub?: true; direct?: true; pointed_by?: string[]; question?: string; answered?: boolean; children: number;
 }
 export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number }
 export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }> }
@@ -49,7 +49,7 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   for (const f of ordered) {
     const sp = spaceOf(f.path); if (!sp) continue;
     ensureSpace(sp);
-    const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at };
+    const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at, ...(f.direct ? { direct: true as const } : {}) };
     const decl = f.map?.node;
     let id: string;
     if (decl && nodes.has(decl.id) && nodes.get(decl.id)!.source !== f.path && !nodes.get(decl.id)!.stub) {

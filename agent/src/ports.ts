@@ -32,6 +32,8 @@ export interface GitHubPort {
   listReviews(n: number): Promise<Review[]>;
   /** All paths at a commit. */
   listPaths(ref: string): Promise<string[]>;
+  /** Every file at a ref with its blob sha; conditional on main, so an unchanged tree costs no API budget. */
+  listBlobs(ref: string): Promise<Array<{ path: string; sha: string }>>;
   /** UTF-8 content of a file at a commit. */
   readFile(ref: string, path: string): Promise<string>;
   comment(n: number, body: string): Promise<void>;

@@ -93,6 +93,14 @@ export interface Question {
 
 export interface QuestionsIndex { version: 1; computed_at: number; open: Question[]; answered: Question[] }
 
+/** The questions index from the files on main (with ledger provenance where a merge recorded it). */
+export function indexFromFiles(files: Record<string, { path: string; question?: string; answers: string[]; pr: number; by: number; login: string; merged_at: number }>, now: number): QuestionsIndex {
+  const qs: Record<string, Question> = {};
+  for (const f of Object.values(files)) if (f.question) qs[f.path] = { id: f.path, question: f.question, asked_by: f.by, asked_login: f.login, asked_at: f.merged_at, pr: f.pr, answers: [] };
+  for (const f of Object.values(files)) for (const q of f.answers) { const t = qs[q]; if (t && f.path !== q) t.answers.push({ path: f.path, by: f.by, login: f.login, merged_at: f.merged_at, pr: f.pr }); }
+  return buildIndex(qs, now);
+}
+
 export function buildIndex(questions: Record<string, Question>, now: number): QuestionsIndex {
   const all = Object.values(questions).sort((a, b) => a.asked_at - b.asked_at);
   return { version: 1, computed_at: now, open: all.filter((q) => q.answers.length === 0), answered: all.filter((q) => q.answers.length > 0) };

@@ -4,7 +4,7 @@ Every commit to Nomicon by a contributor must carry a sign-off line:
 
     Signed-off-by: Name <email@example.com>
 
-Add it with `git commit -s`. Set `user.name` to the login of the account that opens the pull request and `user.email` to that account's public email on the hosting platform. An agent signs with the account that operates it.
+Add it with `git commit -s`. Set `user.name` to the login of the account that opens the pull request and `user.email` to that account's public email on the hosting platform, or to the platform's private no-reply address for the account (on GitHub, `<id>+<login>@users.noreply.github.com`), which keeps your email private. An agent signs with the account that operates it.
 
 For Nomicon, "the open source license indicated in the file" in the certificate below means Apache-2.0 for everything under `agent/`, `site/` and `.github/`, and CC0 1.0 for everything else, as `CONSTITUTION.md` Article 10 states. A contribution that incorporates third-party material under a licence requiring attribution or share-alike is not accepted, because it cannot be released on those terms.
 

@@ -14,8 +14,8 @@ import type { ChainPort, Clock, GitHubPort, PaymentNotice, PriceOracle, PullInfo
 import { fold, serializeState, type State } from "./state.js";
 import { tally, type Review } from "./tally.js";
 import type { OpenQuote } from "./pay.js";
-import { parseHeader, buildIndex, titleOf, type Header, type QuestionsIndex } from "./questions.js";
-import { buildWorldMap, type SourceEdge, type SourceNode, type WorldMap } from "./worldmap.js";
+import { parseHeader, buildIndex, indexFromFiles, titleOf, type Header, type QuestionsIndex } from "./questions.js";
+import { buildWorldMap, type MapFile, type SourceEdge, type SourceNode, type WorldMap } from "./worldmap.js";
 import { jobCard, type Catalog } from "./jobs.js";
 import { mentionTargets } from "./notify.js";
 import type { Notifier } from "./notifier.js";
@@ -130,7 +130,7 @@ export class Runtime {
   feed(since: number, limit = 200): LedgerEvent[] { return this.events.filter((e) => e.id > since).slice(0, limit); }
 
   /** Law 12: the open-questions index. */
-  questionsIndex(now = this.d.clock.now()): QuestionsIndex { return buildIndex(this.state(now).questions, now); }
+  questionsIndex(now = this.d.clock.now()): QuestionsIndex { return this.treeLoaded ? indexFromFiles(this.worldFiles(now), now) : buildIndex(this.state(now).questions, now); }
 
   /** Current open quote for the payment endpoint. */
   quoteFor(pr: number): OpenQuote | null {
@@ -218,8 +218,11 @@ export class Runtime {
       await this.guard("digest", () => n.maybeDigest(now, laws, this.state(now), this.events));
       await this.guard("doorbell deliveries", () => n.deliver(now, laws, this.state(now), this.events));
     }
+    await this.guard("world tree", async () => { if (await this.refreshTree(now)) this.mapDirty = true; });
     await this.publish(now);
   }
+  /** Set when main's World files change without a ledger event, such as an owner commit during bootstrap. */
+  private mapDirty = false;
 
   private async handlePull(pr: PullInfo, laws: Laws, now: number): Promise<void> {
     const p = this.phase(pr.number);
@@ -817,7 +820,49 @@ export class Runtime {
     try { this.catalogSource = JSON.parse(await this.d.github.readFile("main", "paths.json")) as Catalog; } catch { this.catalogSource = null; }
     return this.catalogSource;
   }
-  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.state(now).map_files, await this.replicator(), now); }
+  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.worldFiles(now), await this.replicator(), now); }
+
+  /** The World's Markdown files on main, read once per blob: the map shows what is actually there (Law 12). */
+  private mainFiles = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[] }>();
+  private treeLoaded = false;
+  private worldKey = "";
+  private lastTreeCheck = 0;
+  /** Re-read main's tree at most every five minutes, or when forced; true when the World's files changed. */
+  async refreshTree(now: number, force = false): Promise<boolean> {
+    if (!force && this.treeLoaded && now - this.lastTreeCheck < 300) return false;
+    this.lastTreeCheck = now;
+    const blobs = await this.d.github.listBlobs("main");
+    const md = blobs.filter((b) => b.path.startsWith("world/") && b.path.toLowerCase().endsWith(".md"));
+    const watched = blobs.filter((b) => b.path.startsWith("world/replicator-map/") || b.path === "paths.json");
+    const key = [...md, ...watched].map((b) => `${b.path}:${b.sha}`).sort().join("|");
+    if (this.treeLoaded && key === this.worldKey) return false;
+    const next = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[] }>();
+    for (const b of md) {
+      const prev = this.mainFiles.get(b.path);
+      if (prev && prev.sha === b.sha) { next.set(b.path, prev); continue; }
+      const content = await this.d.github.readFile("main", b.path);
+      const h = parseHeader(content), t = titleOf(content);
+      next.set(b.path, { sha: b.sha, ...(t ? { title: t } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [] });
+    }
+    const oldKeys = new Set(this.worldKey.split("|"));
+    if (watched.some((b) => b.path.startsWith("world/replicator-map/") && !oldKeys.has(`${b.path}:${b.sha}`))) this.replicatorSource = undefined;
+    if (watched.some((b) => b.path === "paths.json" && !oldKeys.has(`${b.path}:${b.sha}`))) this.catalogSource = undefined;
+    this.mainFiles = next; this.worldKey = key; this.treeLoaded = true;
+    return true;
+  }
+  /** Files on main, with who and when from the ledger where a merge recorded them; the rest the owner committed directly. */
+  worldFiles(now: number): Record<string, MapFile> {
+    const st = this.state(now);
+    if (!this.treeLoaded) return st.map_files;
+    const owner = st.owner_accounts[0] ?? 0, ownerLogin = st.logins[owner] ?? "owner";
+    const out: Record<string, MapFile> = {};
+    for (const [path, f] of this.mainFiles) {
+      const l = st.map_files[path];
+      out[path] = { path, ...(f.title ? { title: f.title } : {}), ...(f.map ? { map: f.map } : {}), ...(f.question ? { question: f.question } : {}), answers: f.answers,
+        pr: l?.pr ?? 0, by: l?.by ?? owner, login: l?.login ?? ownerLogin, merged_at: l?.merged_at ?? 0, ...(l ? {} : { direct: true }) };
+    }
+    return out;
+  }
   /** A job card for an option at a node of the World map. */
   async job(option: string, nodeId: string | null): Promise<Record<string, unknown>> {
     const cat = await this.catalog();
@@ -848,7 +893,16 @@ export class Runtime {
 
   private async publish(now: number): Promise<void> {
     const head = this.d.ledger.headHash();
-    if (head === this.lastPublishedHead) return;
+    if (head === this.lastPublishedHead) {
+      if (!this.mapDirty) return;
+      await this.d.github.publishLedger([
+        { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
+        { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now), null, 1) + "\n" },
+      ], "map: World files on main changed");
+      this.mapDirty = false;
+      return;
+    }
+    this.mapDirty = false;
     const state = this.state(now);
     // Only segments with new events travel; older days are already in the repository.
     const names = this.d.ledger.dirtySegments();
@@ -856,8 +910,8 @@ export class Runtime {
       ...names.map((n) => ({ path: `ledger/events/${n}.jsonl`, content: this.d.ledger.segmentContent(n) })),
       { path: "ledger/head.json", content: this.d.ledger.headJson() },
       { path: "ledger/state.json", content: serializeState(state) },
-      { path: "ledger/questions.json", content: JSON.stringify(buildIndex(state.questions, now), null, 2) + "\n" },
-      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(state.map_files, await this.replicator(), now), null, 1) + "\n" },
+      { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
+      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now), null, 1) + "\n" },
     ], `ledger: event ${this.d.ledger.head}`);
     this.d.ledger.markPublished(names);
     this.lastPublishedHead = head;

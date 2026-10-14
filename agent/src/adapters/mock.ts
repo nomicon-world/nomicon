@@ -66,6 +66,10 @@ export class FakeGitHub implements GitHubPort {
   async listCommits(n: number): Promise<PullCommit[]> { return this.pulls.get(n)!.commits; }
   async listReviews(n: number): Promise<Review[]> { return this.pulls.get(n)!.reviews; }
   async listPaths(): Promise<string[]> { return this.basePaths; }
+  async listBlobs(): Promise<Array<{ path: string; sha: string }>> {
+    const h = (s: string) => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x.toString(16); };
+    return Object.entries(this.repoFiles).map(([path, c]) => ({ path, sha: h(c) }));
+  }
   async readFile(ref: string, path: string): Promise<string> {
     for (const p of this.pulls.values()) if ((p.headSha === ref || p.mergeCommit === ref) && p.contents[path] !== undefined) return p.contents[path]!;
     if (this.repoFiles[path] !== undefined) return this.repoFiles[path]!;

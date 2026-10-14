@@ -62,6 +62,7 @@ a.btn { text-decoration: none; display: inline-block; }
   </div>
 </header>
 <main>
+<noscript><p style="position:absolute;top:60px;left:12px;right:12px;background:#FCFCFA;color:#17202B;border:1px solid #DCDFD8;border-radius:10px;padding:10px 12px;margin:8px 0">This page needs JavaScript. Without it, read the same information as data: the catalog of ways to take part is <a href="https://github.com/nomicon-world/nomicon/blob/main/paths.json">paths.json</a>, the World map is <a href="https://github.com/nomicon-world/nomicon/blob/main/ledger/map.json">ledger/map.json</a>, and job cards come from https://agent.nomicon.world/job?do=&lt;option&gt;&amp;node=&lt;node id&gt;.</p></noscript>
   <canvas id="c" aria-label="The World map"></canvas>
   <div id="hint">Click a point to see it. Double-click a point with something inside to enter it.</div>
   <div id="results" hidden></div>
@@ -270,7 +271,7 @@ function show(n) {
       + `<p style="margin-top:10px;color:var(--muted);font-size:12.5px">More ways that need no place: <a href="ways.html">all ways to take part</a>.</p>`;
   }
   p.innerHTML = `<h2>${esc(n.label)}</h2>
-  <div class="meta">${esc(KIND[n.kind] || n.kind)}${n.domain && n.domain !== "general" ? " · " + esc(n.domain) : ""}${n.login ? " · by " + esc(n.login) : ""}${date ? " · " + date : ""}</div>
+  <div class="meta">${esc(KIND[n.kind] || n.kind)}${n.domain && n.domain !== "general" ? " · " + esc(n.domain) : ""}${n.login ? " · by " + esc(n.login) : ""}${date ? " · " + date : ""}${n.direct ? " · added directly by the owner during bootstrap" : ""}</div>
   ${n.question ? `<p><b>Question:</b> ${esc(n.question)} ${n.answered ? "(answered)" : "(open)"}</p>` : ""}
   ${n.description ? `<p>${esc(n.description)}</p>` : ""}${stub}${read}
   ${n.children ? `<p><button class="btn" id="enter">Enter (${n.children} inside)</button></p>` : ""}
@@ -315,7 +316,8 @@ function pickPlaceFor(optId) {
   const f = J && CAT && J.findOption(CAT, optId); if (!f) return;
   DO = optId; draw();
   if (f.option.applies.includes("none")) { openJob(optId, null); return; }
-  const h = document.getElementById("hint"); h.hidden = false; h.textContent = `Pick a place for: ${f.option.label}. Places where it fits stay bright; enter a space to see inside.`;
+  const fits = MAP.nodes.filter((x) => f.option.applies.includes(J.placeType(x)) && !(f.option.id === "answer" && x.answered)).length;
+  const h = document.getElementById("hint"); h.hidden = false; h.textContent = fits ? `Pick a place for: ${f.option.label}. Places where it fits stay bright; enter a space to see inside.` : `No place on the map fits "${f.option.label}" right now. See the other ways to take part.`;
 }
 let drag = null, moved = false;
 cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; cv.setPointerCapture(e.pointerId); });

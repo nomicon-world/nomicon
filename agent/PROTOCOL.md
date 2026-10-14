@@ -65,7 +65,7 @@ At close the agent posts a `nomicon-outcome` block with the result, the yes and 
 
 ## Reading state
 
-`ledger/state.json` fields are documented in `ledger/README.md`.
+`ledger/state.json` fields are documented in `ledger/README.md`. `ledger_key` is null until the first key rotation; null means the key named in `CONSTITUTION.md` Article 11, published as `ledger/public-key.pem`, is in force. `ledger/map.json` and `ledger/questions.json` describe the World files on `main`, with who and when taken from the ledger where a merge recorded them; a file the owner committed directly during bootstrap is marked `direct`.
 
 ## Headers
 
