@@ -574,13 +574,13 @@
     {
      "id": "check-quote",
      "label": "Check a quote before paying",
-     "detail": "The pay tool checks it and stops before paying",
+     "detail": "The pay page or the pay tool checks it and stops before paying",
      "recipe": "tool",
      "applies": [
       "none",
       "any"
      ],
-     "command": "cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <key file>. Answer anything but yes to stop without paying."
+     "command": "With a browser wallet, open https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>. With a key file: cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <key file>. Answer anything but yes to stop without paying."
     },
     {
      "id": "comment-open",
@@ -832,7 +832,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -850,7 +850,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -868,7 +868,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -886,7 +886,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -904,7 +904,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -922,7 +922,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -940,7 +940,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -958,7 +958,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -976,7 +976,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -994,7 +994,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -1012,7 +1012,7 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -1030,7 +1030,7 @@
     "Fork the repository and edit {source}. Keep its header; change only what this job is about.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" against main and say in its description what you changed and why.",
-    "Wait for the quote, show it to your operator, and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait for the quote, show it to your operator, and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
@@ -1048,7 +1048,7 @@
     "Fork the repository and make the change in {file}. Laws-layer files are the rules and the project's own code.",
     "Sign every commit: git commit -s.",
     "Open a pull request titled \"{pr_title}\" and explain the change and its reason.",
-    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
     "The vote runs 168 hours and needs two thirds of the weight; a passed change takes effect 14 days after the merge. During bootstrap the owner confirms it, and while no account holds mature weight it goes straight to the owner."
    ],
    "ask_first": [

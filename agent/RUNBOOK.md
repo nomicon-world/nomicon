@@ -43,6 +43,7 @@ Every command runs on the server with the agent's environment. With Docker: `doc
 | `pending` | Nothing. Lists what waits on the owner: screening holds and their deadlines, closed votes awaiting confirmation, paid contributions in the queue, and continuity clocks. |
 | `confirm <pr> "<reason>"` / `reject <pr> "<reason>" [--bar]` | A bootstrap decision on a closed vote (Article 3). `reject` holds the fee; with `--bar`, bars the account 90 days. |
 | `release <pr> "<reason>"` / `hold-reject <pr> <ground> "<reason>"` | Resolves a screening hold; the ground is one of the Article 4 grounds, and the reason names no person. `hold-reject` bars the account 90 days. |
+| `correct <event id> "<evidence>"` | Article 8: records a `correction` event saying what an earlier event got wrong and how we know. The earlier event stays, as the ledger is permanent. |
 | `lift-bar <account id> "<reason>"` | Lifts a bar after the account responded (Law 10). |
 | `takedown <pr,pr> <ground> <sha256 of the notice>` | Article 5: revokes the weight of the listed merges and records the notice's hash. See the procedure below. |
 | `rotate-destination <address> "<reason>"` | Article 7: the fee destination from now on. |

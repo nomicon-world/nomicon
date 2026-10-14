@@ -73,5 +73,17 @@ Recomputed from the event files by the replay tool.
 | `open_votes` | list of `{pr, closes, laws_hash}` |
 | `held_fees`, `held_in_use` (held fees applied to submissions still undecided, by pull request) | list of `{account, layer, micro, until}` |
 | `deployed_agent` | commit hash |
+| `version` | format version of this file |
+| `pending_owner_accounts` | owner accounts named and not yet in force, with `effective_at` (Article 6) |
+| `ledger_key` | public key signing now after a rotation; null means the key in `ledger/public-key.pem` (Article 11) |
+| `merges` | every merge: `pr`, `account`, `mergedAt`, `weightMicro`, and `revoked` after a takedown |
+| `logins` | account id to the login last seen |
+| `last_vote_at` | account id to the time of its last vote (Law 4 decay) |
+| `owner_accounts`, `agent_account` | the accounts in force |
+| `barred_until` | account id to the end of a bar (Law 10) |
+| `pr_account` | pull request to the account that opened it |
+| `path_author` | each merged path to the account that merged it; files the owner committed directly are not here but in `world_direct` events |
+| `questions` | questions and answers as merges recorded them; `ledger/questions.json` adds what is on `main` (see `agent/PROTOCOL.md`) |
+| `channels` | how each account chose to be reached (Law 12) |
 
 Anyone can recompute `state.json` from the event files and the rules with the replay tool in `agent/`. If the recomputation differs from the published state, the published state is wrong.

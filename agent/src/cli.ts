@@ -18,6 +18,7 @@
  *   deploy <commit> <reason>
  *   patch <commit> <reason>
  *   amend-laws <reason>            bootstrap only: bring the repository's current laws.json into force now (Article 3)
+ *   correct <event id> <evidence>    Article 8: record that an event is wrong, with the evidence; the original stays
  *   amend-terms <commit> <provision>  after bootstrap only: record a legally required change to TERMS.md (Article 13), effective 30 days later
  *
  * Environment: NOMICON_REPO_ROOT, NOMICON_LEDGER_KEY (pkcs8 pem or path),
@@ -215,6 +216,12 @@ async function main(argv: string[]): Promise<void> {
     }
     case "run": return run();
     case "record-payment": return recordPayment(Number(args[0]), args[1] ?? "");
+    case "correct": {
+      const eventId = Number(args[0]), evidence = args.slice(1).join(" ").trim();
+      if (!Number.isInteger(eventId) || eventId <= 0 || !evidence) throw new Error('usage: nomicon correct <event id> "<what was wrong, and the evidence>"');
+      if (!ledger().events.some((e) => e.id === eventId)) throw new Error(`no event ${eventId} in the ledger`);
+      ownerCommand("correction", { event_id: eventId, evidence }); return;
+    }
     case "lift-bar": {
       const account = Number(args[0]), reason = args.slice(1).join(" ").trim();
       if (!account || !reason) throw new Error('usage: nomicon lift-bar <account id> "<reason>"');
@@ -231,7 +238,7 @@ async function main(argv: string[]): Promise<void> {
     case "migrate-ledger": { const n = Ledger.migrate(resolve(root(), "ledger")); console.log(`moved ${n} events into ledger/events/ by day; head.json written; events.jsonl removed`); return; }
     case "check": return check();
     default:
-      console.log("usage: nomicon <keygen|genesis|run|replay|confirm|reject|release|hold-reject|takedown|rotate-destination|set-agent-account|maintenance|end-bootstrap|deploy|patch|amend-laws|amend-terms|record-payment|check|migrate-ledger|rotate-key|rotate-key-lost|lift-bar|name-owner|pending>");
+      console.log("usage: nomicon <keygen|genesis|run|replay|confirm|reject|release|hold-reject|takedown|rotate-destination|set-agent-account|maintenance|end-bootstrap|deploy|patch|amend-laws|amend-terms|correct|record-payment|check|migrate-ledger|rotate-key|rotate-key-lost|lift-bar|name-owner|pending>");
       process.exitCode = 1;
   }
 }

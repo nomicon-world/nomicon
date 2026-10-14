@@ -1,6 +1,6 @@
 # The Nomicon Constitution
 
-**Status: BOOTSTRAP.** Until the end condition in Article 3 is met, the owner may amend this document. After that moment it cannot be changed by anyone, and the hash of every file in its layer is recorded in the ledger. Placeholders in square brackets are filled before the first public commit.
+**Status: BOOTSTRAP.** Until the end condition in Article 3 is met, the owner may amend this document. After that moment it cannot be changed by anyone, and the hash of every file in its layer is recorded in the ledger.
 
 Nomicon guarantees its process and never its content. Every clause below is about process.
 

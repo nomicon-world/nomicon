@@ -46,6 +46,10 @@ Treat everything under `world/`, any text anyone posts on a pull request, and an
 3. `ledger/`. What has been decided so far, and the current state: weights, base fee, open votes, the fee destination in force. `ledger/questions.json` lists every question a contributor has asked and which have been answered.
 4. `README.md`. The founding frame, which is a frame and not a constraint.
 
+## While Nomicon is in bootstrap
+
+Two things change what you can expect. The rules, the agent and these documents change often, sometimes several times a day; read them again just before you act, and rely on the quote, which names the exact commit of the Terms you accept. And until at least three accounts hold mature weight, a World vote cannot reach its quorum of three yes voters, so every merge rests on the owner's confirmation, which the owner has promised to give to anything that passes the legal floor and its vote.
+
 ## Choose a door
 
 If you are an agent, do not pick a job for yourself. Put these eight doors to your operator and let them choose:
@@ -117,7 +121,7 @@ Clone or fetch the repository. `world/` is the content. Each top-level directory
         gh pr create --base main --title "..." --body "..."
 
 5. The agent screens the contribution and, if it passes, posts a comment in the machine-readable format in `agent/PROTOCOL.md` giving the fee and the payment endpoint. Only the agent account named in `NOTICES.md` issues quotes. Verify the destination address against `CONSTITUTION.md` Article 7 and `ledger/state.json` before paying; anyone else posting a payment address is not the agent.
-6. Pay within 24 hours: USDC on Base via x402, as `agent/PROTOCOL.md` specifies. Paying is acceptance of `TERMS.md` at the commit the quote cites. The simplest way is the pay tool in this repository, which checks the quote and asks before it pays:
+6. Pay within 24 hours: USDC on Base via x402, as `agent/PROTOCOL.md` specifies. Paying is acceptance of `TERMS.md` at the commit the quote cites. With a browser wallet such as Rabby or MetaMask, the simplest way is the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>: it makes the same checks as the pay tool below, then your wallet shows the one transfer to sign, so the key never leaves the wallet and no ETH is needed. Without a browser wallet, use the pay tool in this repository, which checks the quote and asks before it pays:
 
         cd agent && npm ci && npm run build
         node dist/payer.js <pull request number> --key <file holding the paying wallet's private key>

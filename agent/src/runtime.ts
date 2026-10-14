@@ -936,6 +936,7 @@ function isRateLimited(e: unknown): boolean {
 
 /** The public World map; job cards and suggestions link into it. */
 const MAP_URL = process.env["NOMICON_MAP_URL"] || "https://nomicon-world.github.io/nomicon/site/map.html";
+const PAY_PAGE = MAP_URL.replace("map.html", "pay.html");
 
 /** Law 5: an expiry the owner caused, by inaction or by ending bootstrap, holds the fee this long. */
 const OWNER_CAUSED_HOLD_DAYS = 365;
@@ -952,7 +953,7 @@ export function quoteComment(q: LedgerEvent, laws: Laws, base: string): string {
     `pay: ${base.replace(/\/$/, "")}/pay/${q["pr"]}`, `expires: ${iso(Number(q["expires"]))}`,
     `queue_ahead: ${q["queue_ahead"] ?? 0}`, `tax: ${q["tax"] ?? "none"}`, `tax_registration: ${q["tax_registration"] ?? "none"}`,
   ];
-  return `Paying this quote accepts TERMS.md at commit ${q["terms_commit"]}, with the owner named in NOTICES.md; the fee is not refunded on rejection and is held on expiry as LAWS.md Law 5 says.\n\n` + "```nomicon-quote\n" + lines.join("\n") + "\n```\nPay within the validity window with USDC on Base via x402 (see agent/PROTOCOL.md). Paying is acceptance of TERMS.md at the commit shown. Verify the destination against CONSTITUTION.md Article 7 before paying.";
+  return `Paying this quote accepts TERMS.md at commit ${q["terms_commit"]}, with the owner named in NOTICES.md; the fee is not refunded on rejection and is held on expiry as LAWS.md Law 5 says.\n\n` + "```nomicon-quote\n" + lines.join("\n") + "\n```\nPay within the validity window with USDC on Base via x402 (see agent/PROTOCOL.md); with a browser wallet, at " + PAY_PAGE + "#pr=" + q["pr"] + ". Paying is acceptance of TERMS.md at the commit shown. Verify the destination against CONSTITUTION.md Article 7 before paying.";
 }
 
 export function micro(m: bigint): string {

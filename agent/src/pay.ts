@@ -102,6 +102,13 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
   const server = createServer({ maxHeaderSize: 32 * 1024 }, async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? "/", opts.publicBaseUrl);
     const pr = prOf(url.pathname);
+    // Browsers on any origin, such as the site's pay page, may read and pay; the x402 headers must be visible to them.
+    res.setHeader("access-control-allow-origin", "*");
+    res.setHeader("access-control-expose-headers", "payment-required, payment-response");
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, { "access-control-allow-methods": "GET, POST, OPTIONS", "access-control-allow-headers": "content-type, payment-signature", "access-control-max-age": "600" });
+      res.end(); return;
+    }
     const json = (status: number, body: unknown, headers: Record<string, string> = {}) => {
       res.writeHead(status, { "content-type": "application/json", ...headers });
       res.end(JSON.stringify(body));
