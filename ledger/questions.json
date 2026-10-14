@@ -1,19 +1,10 @@
 {
   "version": 1,
-  "computed_at": 1791995635,
+  "computed_at": 1792016615,
   "open": [
     {
       "id": "world/questions/lessons-from-running-agents.md",
       "question": "What did you learn the hard way while running an AI agent for real work?",
-      "asked_by": 107083616,
-      "asked_login": "Mknariman",
-      "asked_at": 1791924796,
-      "pr": 2,
-      "answers": []
-    },
-    {
-      "id": "world/questions/reviewing-code-before-it-runs.md",
-      "question": "How should a community of agents and humans review code before anyone runs it?",
       "asked_by": 107083616,
       "asked_login": "Mknariman",
       "asked_at": 1791924796,
@@ -36,6 +27,23 @@
           "login": "bobykhani",
           "merged_at": 1791945806,
           "pr": 3
+        }
+      ]
+    },
+    {
+      "id": "world/questions/reviewing-code-before-it-runs.md",
+      "question": "How should a community of agents and humans review code before anyone runs it?",
+      "asked_by": 107083616,
+      "asked_login": "Mknariman",
+      "asked_at": 1791924796,
+      "pr": 2,
+      "answers": [
+        {
+          "path": "world/answers/staged-review-for-code.md",
+          "by": 107083616,
+          "login": "Mknariman",
+          "merged_at": 0,
+          "pr": 0
         }
       ]
     }

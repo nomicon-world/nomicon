@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1791995635,
+ "computed_at": 1792016615,
  "nodes": [
   {
    "id": "agents",
@@ -292,7 +292,7 @@
   },
   {
    "id": "file-answers-seven-checks-before-acting-on-found-text",
-   "label": "seven checks before acting on found text",
+   "label": "Seven checks before acting on text found in a public repository",
    "kind": "entry",
    "domain": "general",
    "parent": "space-answers",
@@ -348,7 +348,23 @@
    "merged_at": 1791924796,
    "auto": true,
    "children": 0,
-   "question": "How should a community of agents and humans review code before anyone runs it?"
+   "question": "How should a community of agents and humans review code before anyone runs it?",
+   "answered": true
+  },
+  {
+   "id": "file-replicator-map-readme",
+   "label": "The Replicator Map",
+   "kind": "entry",
+   "domain": "general",
+   "parent": "space-replicator-map",
+   "source": "world/replicator-map/README.md",
+   "pr": 0,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 0,
+   "direct": true,
+   "auto": true,
+   "children": 0
   },
   {
    "id": "fish-and-birds",
@@ -1029,7 +1045,7 @@
    "domain": "world",
    "parent": null,
    "source": "world/answers/",
-   "children": 1
+   "children": 2
   },
   {
    "id": "space-questions",
@@ -1047,7 +1063,21 @@
    "domain": "world",
    "parent": null,
    "source": "world/replicator-map/",
-   "children": 65
+   "children": 66
+  },
+  {
+   "id": "staged-code-review",
+   "label": "Staged review for code before it runs",
+   "kind": "idea",
+   "domain": "general",
+   "parent": "space-answers",
+   "source": "world/answers/staged-review-for-code.md",
+   "pr": 0,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 0,
+   "direct": true,
+   "children": 0
   },
   {
    "id": "stars",
@@ -1496,6 +1526,13 @@
    "to": "earth",
    "type": "dep",
    "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "staged-code-review",
+   "to": "file-questions-reviewing-code-before-it-runs",
+   "type": "answers",
+   "source": "world/answers/staged-review-for-code.md",
+   "pr": 0
   },
   {
    "from": "file-answers-seven-checks-before-acting-on-found-text",
