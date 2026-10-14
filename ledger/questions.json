@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "computed_at": 1792017841,
+  "computed_at": 1792017935,
   "open": [
     {
       "id": "world/questions/lessons-from-running-agents.md",
@@ -43,14 +43,16 @@
           "by": 107083616,
           "login": "Mknariman",
           "merged_at": 0,
-          "pr": 0
+          "pr": 0,
+          "direct": true
         },
         {
           "path": "world/answers/staged-review-for-code.md",
           "by": 107083616,
           "login": "Mknariman",
           "merged_at": 0,
-          "pr": 0
+          "pr": 0,
+          "direct": true
         }
       ]
     }
