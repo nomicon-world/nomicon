@@ -43,6 +43,9 @@ canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action
 .pill.world { color: var(--accent); border-color: var(--accent); } .pill.laws { color: #9b5fc0; border-color: #9b5fc0; } .pill.free { color: #2E7D5B; border-color: #2E7D5B; }
 .ask { border: 1px solid var(--amber); border-radius: 8px; padding: 8px 10px; margin: 8px 0; font-size: 13px; }
 .ask ul { margin: 4px 0 0; }
+.sq { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.sq .opt { flex: none; }
+details summary { cursor: pointer; color: var(--accent); font-size: 13px; }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
 a.btn { text-decoration: none; display: inline-block; }
 #panel:not([hidden]) ~ #mini { display: none; }
@@ -102,7 +105,7 @@ async function load() {
   byId = new Map(MAP.nodes.map((n) => [n.id, n]));
   kids = new Map();
   for (const n of MAP.nodes) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (!kids.has(p)) kids.set(p, []); kids.get(p).push(n); }
-  try { J = await import("./jobs.js"); CAT = await (await fetch("../paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
+  try { J = await import("./jobs.js?v=4"); CAT = await (await fetch("../paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
   try { BASE = String((await (await fetch("../ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
 }
 
@@ -155,7 +158,47 @@ function layoutLevel(container) {
 }
 function resize() { const r = devicePixelRatio || 1; for (const c of [cv, mini]) { c.width = c.clientWidth * r; c.height = c.clientHeight * r; } draw(); }
 const toScreen = (p) => ({ x: (p.x * view.s + view.x) * (devicePixelRatio || 1), y: (p.y * view.s + view.y) * (devicePixelRatio || 1) });
-function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto; }
+let SEGS = [];
+function standingHtml(type, place) {
+  if (!CAT || !J || !CAT.standing || !CAT.standing[type]) return "";
+  const avail = new Set(J.optionsFor(CAT, place).map((x) => x.option.id));
+  const rows = CAT.standing[type].filter(([, opt]) => avail.has(opt)).map(([q, opt]) => { const f = J.findOption(CAT, opt); return `<div class="sq"><span>${esc(q)}</span><button class="opt" data-do="${esc(opt)}" title="${esc(f.option.detail)}">${esc(f.option.label)}</button></div>`; }).join("");
+  return rows ? `<h3 style="margin:12px 0 4px">Questions this ${type === "edge" ? "link" : "point"} asks</h3>${rows}` : "";
+}
+function askedHtml(ids) {
+  if (!ids || !ids.length) return "";
+  return `<div class="lbl">Questions asked about it</div><ul>${ids.map((id) => { const q = byId.get(id); return `<li><a href="#" data-go="${esc(id)}">${esc(q ? (q.question || q.label) : id)}</a> ${q && q.answered ? "(answered)" : "<b>(open)</b>"}</li>`; }).join("")}</ul>`;
+}
+function allJobsHtml(place) {
+  if (!CAT || !J) return `<p style="color:var(--muted)">Loading the ways to take part…</p>`;
+  const groups = new Map(); for (const x of J.optionsFor(CAT, place)) { if (!groups.has(x.door.id)) groups.set(x.door.id, { door: x.door, opts: [] }); groups.get(x.door.id).opts.push(x.option); }
+  const btn = (o) => `<button class="opt" data-do="${esc(o.id)}" title="${esc(o.detail)}">${esc(o.label)}</button>`;
+  return `<details style="margin-top:10px"><summary>All jobs here</summary>${[...groups.values()].map((g) => `<div class="lbl">${esc(g.door.label)}</div><div class="opts">${g.opts.map(btn).join("")}</div>`).join("")}<p style="margin-top:8px;color:var(--muted);font-size:12.5px">More ways that need no place: <a href="ways.html">all ways to take part</a>.</p></details>`;
+}
+function showEdge(e) {
+  const place = J ? J.edgeNode(e, byId) : { id: `${e.from}--${e.type}--${e.to}`, label: `${e.from} → ${e.to}`, kind: "edge" };
+  place._edge = e; selected = place; setHash(); draw();
+  const p = document.getElementById("panel"); p.hidden = false;
+  const claim = MAP.nodes.find((n) => n.source === e.source && !n.stub);
+  const src = e.source && !e.source.endsWith("/") ? `<a href="${REPO}/blob/main/${esc(e.source)}">${esc(e.source)}</a>` : esc(e.source || "");
+  p.innerHTML = `<h2>${esc(place.label)}</h2>
+  <div class="meta">Link · ${esc(e.type)}${claim && claim.login ? " · claimed by " + esc(claim.login) : ""}${e.pr ? ` · <a href="${REPO}/pull/${e.pr}">pull request #${e.pr}</a>` : ""}</div>
+  <p>From <a href="#" data-go="${esc(e.from)}">${esc(place.from_label || e.from)}</a> to <a href="#" data-go="${esc(e.to)}">${esc(place.to_label || e.to)}</a>. Claimed in ${src}.</p>
+  ${askedHtml(e.questions)}${standingHtml("edge", place)}${allJobsHtml(place)}`;
+  p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
+  p.querySelectorAll("[data-do]").forEach((b) => b.onclick = () => openJob(b.dataset.do, place));
+}
+function pickEdge(ev) {
+  const rect = cv.getBoundingClientRect(), r = devicePixelRatio || 1, x = (ev.clientX - rect.left) * r, y = (ev.clientY - rect.top) * r;
+  let best = null, bd = 8 * r;
+  for (const s of SEGS) {
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1, len = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - s.x1) * dx + (y - s.y1) * dy) / len));
+    const d = Math.hypot(x - (s.x1 + t * dx), y - (s.y1 + t * dy));
+    if (d < bd) { bd = d; best = s.e; }
+  }
+  return best;
+}
+function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto || (n.open_questions || 0) > 0; }
 function dimmed(n) {
   if (frontier && !isOpen(n)) return true;
   if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !n.children && ((!f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n))) || (f.option.open_only && n.answered) || (f.option.answered_only && J.placeType(n) === "question" && !n.answered))) return true; }
@@ -168,7 +211,7 @@ function draw() {
   ctx.clearRect(0, 0, W, H);
   const items = kids.get(level) || [], pos = layoutLevel(level);
   // Edges inside this level, and ports for edges that leave it.
-  const seen = new Set();
+  const seen = new Set(); SEGS = [];
   for (const e of MAP.edges) {
     const a = anchorIn(level, e.from), b = anchorIn(level, e.to);
     if (!a && !b) continue;
@@ -180,6 +223,8 @@ function draw() {
       const p = toScreen(pos.get(a)), q = toScreen(pos.get(b));
       ctx.globalAlpha = dimmed(byId.get(a)) && dimmed(byId.get(b)) ? 0.15 : 0.85;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+      SEGS.push({ e, x1: p.x, y1: p.y, x2: q.x, y2: q.y });
+      if (e.open_questions) { const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2; ctx.setLineDash([]); ctx.fillStyle = css("--amber"); ctx.beginPath(); ctx.arc(mx, my, 9 * r, 0, 7); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = `bold ${10 * r}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?" + e.open_questions, mx, my + 0.5); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
       const ang = Math.atan2(q.y - p.y, q.x - p.x), rr = radiusOf(byId.get(b)) * view.s * r, hx = q.x - Math.cos(ang) * rr, hy = q.y - Math.sin(ang) * rr;
       ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - Math.cos(ang - 0.4) * 9 * r, hy - Math.sin(ang - 0.4) * 9 * r); ctx.lineTo(hx - Math.cos(ang + 0.4) * 9 * r, hy - Math.sin(ang + 0.4) * 9 * r); ctx.closePath(); ctx.fillStyle = ctx.strokeStyle; ctx.fill();
       if (!EDGE_STYLE[e.type] && view.s > 0.8) { ctx.fillStyle = css("--muted"); ctx.font = `${11 * r}px system-ui`; ctx.fillText(e.type, (p.x + q.x) / 2 + 4 * r, (p.y + q.y) / 2 - 4 * r); }
@@ -213,6 +258,7 @@ function draw() {
     else { ctx.fillStyle = col + (n.kind === "space" ? "33" : "dd"); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = (n.children ? 3.5 : 1.5) * r; ctx.stroke(); }
     if (n.children && n.kind !== "space") { for (let i = 0; i < Math.min(n.children, 8); i++) { const a = i * 0.785; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rad * 0.55, p.y + Math.sin(a) * rad * 0.55, 1.6 * r, 0, 7); ctx.fillStyle = "#ffffffaa"; ctx.fill(); } }
     if (n.kind === "question") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(10, rad * 1.1)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(n.answered ? "✓" : "?", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
+    if (n.open_questions) { const t = "?" + n.open_questions; ctx.font = `bold ${11 * r}px system-ui`; const tw = ctx.measureText(t).width + 8 * r; ctx.fillStyle = css("--amber"); ctx.beginPath(); ctx.roundRect(p.x - rad * 0.7 - tw, p.y - rad - 4 * r, tw, 16 * r, 8 * r); ctx.fill(); ctx.fillStyle = "#fff"; ctx.fillText(t, p.x - rad * 0.7 - tw + 4 * r, p.y - rad + 8 * r); }
     if (n.children) { const t = String(n.children); ctx.font = `bold ${11 * r}px system-ui`; const tw = ctx.measureText(t).width + 8 * r; ctx.fillStyle = css("--ink"); ctx.beginPath(); ctx.roundRect(p.x + rad * 0.7, p.y - rad - 4 * r, tw, 16 * r, 8 * r); ctx.fill(); ctx.fillStyle = css("--bg"); ctx.fillText(t, p.x + rad * 0.7 + 4 * r, p.y - rad + 8 * r); }
     if (labelled.has(n.id)) { ctx.fillStyle = css("--ink"); ctx.font = `${(n.kind === "space" ? 14 : 12) * r}px system-ui`; ctx.textAlign = "center"; ctx.fillText(n.label.length > 42 ? n.label.slice(0, 40) + "…" : n.label, p.x, p.y + rad + 15 * r); ctx.textAlign = "start"; }
     if (n === selected) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 10 * r, 0, 7); ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2.5 * r; ctx.stroke(); }
@@ -244,7 +290,7 @@ function crumbs() {
 }
 function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); if (DO) h.set("do", DO); history.replaceState(null, "", h.toString() ? "#" + h.toString() : location.pathname); }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-function goTo(id) { const n = byId.get(id); if (!n) return; const parent = n.parent && byId.has(n.parent) ? n.parent : null; if (parent !== level) enter(parent); show(n); }
+function goTo(id) { if (id.includes("--")) { const [f, t, to] = id.split("--"); const e = MAP.edges.find((x) => x.from === f && x.type === t && x.to === to); if (e) { const a = byId.get(e.from); const parent = a && a.parent && byId.has(a.parent) ? a.parent : null; if (parent !== level) enter(parent); showEdge(e); } return; } const n = byId.get(id); if (!n) return; const parent = n.parent && byId.has(n.parent) ? n.parent : null; if (parent !== level) enter(parent); show(n); }
 function pick(ev) {
   const rect = cv.getBoundingClientRect(), mx = (ev.clientX - rect.left - view.x) / view.s, my = (ev.clientY - rect.top - view.y) / view.s;
   let best = null, bd = Infinity; const pos = layoutLevel(level);
@@ -277,7 +323,7 @@ function show(n) {
   ${n.children ? `<p><button class="btn" id="enter">Enter (${n.children} inside)</button></p>` : ""}
   ${outs.length ? `<div class="lbl">Points to</div><ul>${outs.map((e) => `<li>${esc(e.type)} → ${link(e.to)}</li>`).join("")}</ul>` : ""}
   ${ins.length ? `<div class="lbl">Pointed at by</div><ul>${ins.map((e) => `<li>${link(e.from)} → ${esc(e.type)}</li>`).join("")}</ul>` : ""}
-  <h3 style="margin:14px 0 2px">What you can do here</h3>${acts}`;
+  ${askedHtml(n.questions)}${standingHtml(J ? J.placeType(n) : "node", n) || `<h3 style="margin:14px 0 2px">What you can do here</h3>${acts}`}${CAT && J && CAT.standing && CAT.standing[J.placeType(n)] ? allJobsHtml(n) : ""}`;
   p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
   p.querySelectorAll("[data-do]").forEach((b) => b.onclick = () => openJob(b.dataset.do, n));
   const en = document.getElementById("enter"); if (en) en.onclick = () => enter(n.id);
@@ -310,7 +356,7 @@ function openJob(optId, n) {
     const c = (id, text) => { const b = document.getElementById(id); if (b) b.onclick = () => navigator.clipboard?.writeText(text).then(() => { b.textContent = "Copied"; }, () => {}); };
     c("copyh", card.header || ""); c("copyj", JSON.stringify(card, null, 2));
   }
-  document.getElementById("back").onclick = () => { DO = null; setHash(); draw(); if (n) show(n); else { p.hidden = true; } };
+  document.getElementById("back").onclick = () => { DO = null; setHash(); draw(); if (n && n.kind === "edge" && n._edge) showEdge(n._edge); else if (n) show(n); else { p.hidden = true; } };
 }
 /** Job mode from a link: #do=<option> with no node dims the places where it does not fit. */
 function pickPlaceFor(optId) {
@@ -323,7 +369,7 @@ function pickPlaceFor(optId) {
 let drag = null, moved = false;
 cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; moved = false; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) moved = true; view.x = drag.vx + dx; view.y = drag.vy + dy; draw(); });
-cv.addEventListener("pointerup", (e) => { const was = drag; drag = null; if (was && !moved) { const n = pick(e); if (n) show(n); else { selected = null; document.getElementById("panel").hidden = true; setHash(); draw(); } } });
+cv.addEventListener("pointerup", (e) => { const was = drag; drag = null; if (was && !moved) { const n = pick(e); const ed = n ? null : pickEdge(e); if (n) show(n); else if (ed) showEdge(ed); else { selected = null; document.getElementById("panel").hidden = true; setHash(); draw(); } } });
 cv.addEventListener("dblclick", (e) => { const n = pick(e); if (n && n.children) enter(n.id); });
 cv.addEventListener("wheel", (e) => { e.preventDefault(); const rect = cv.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top, k = Math.exp(-e.deltaY * 0.0015), s = Math.min(6, Math.max(0.15, view.s * k)); view.x = mx - (mx - view.x) * (s / view.s); view.y = my - (my - view.y) * (s / view.s); view.s = s; draw(); }, { passive: false });
 document.getElementById("up").onclick = () => { if (level !== null) { const n = byId.get(level); enter(n.parent && byId.has(n.parent) ? n.parent : null); } };
@@ -346,8 +392,8 @@ function legend() {
   const h = new URLSearchParams(location.hash.slice(1)); const into = h.get("in");
   enter(into && byId.has(into) ? into : null);
   if (h.get("do")) DO = h.get("do");
-  if (h.get("node") && byId.has(h.get("node"))) goTo(h.get("node")); else if (DO) pickPlaceFor(DO);
-  addEventListener("hashchange", () => { const k = new URLSearchParams(location.hash.slice(1)); const into = k.get("in"); const want = into && byId.has(into) ? into : null; if (want !== level) enter(want); if (k.get("node") && byId.has(k.get("node")) && selected?.id !== k.get("node")) goTo(k.get("node")); });
+  const hn = h.get("node"); if (hn && (byId.has(hn) || hn.includes("--"))) goTo(hn); else if (DO) pickPlaceFor(DO);
+  addEventListener("hashchange", () => { const k = new URLSearchParams(location.hash.slice(1)); const into = k.get("in"); const want = into && byId.has(into) ? into : null; if (want !== level) enter(want); if (k.get("node") && (byId.has(k.get("node")) || k.get("node").includes("--")) && selected?.id !== k.get("node")) goTo(k.get("node")); });
   setTimeout(() => { document.getElementById("hint").hidden = true; }, 6000);
 })();
 </script>

@@ -16,7 +16,10 @@ export interface MapNode { id: string; label: string; kind: string; domain: stri
 export interface MapEdge { from?: string; to: string; type: string }
 export interface MapDecl { node?: MapNode; edges: MapEdge[]; place_under: string[]; needs: string[] }
 
-export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl }
+export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl; about?: string }
+
+/** What a question is about: a node id, or an edge written from--type--to. */
+export const ABOUT = /^[a-z0-9][a-z0-9-]{0,63}(--[a-z][a-z0-9-]{0,31}--[a-z0-9][a-z0-9-]{0,63})?$/;
 
 /** Node ids, domains and relation words: lowercase letters, digits and hyphens. */
 export const MAP_ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
@@ -79,6 +82,7 @@ export function parseHeader(content: string): Header | null {
   if (typeof o["question"] === "string" && o["question"].trim()) h.question = o["question"].trim().slice(0, 500);
   const map = parseMap(o["map"]);
   if (map) h.map = map;
+  if (typeof o["about"] === "string" && ABOUT.test(o["about"].trim())) h.about = o["about"].trim();
   return h;
 }
 

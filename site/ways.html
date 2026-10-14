@@ -73,7 +73,7 @@ pre, code { font-family: ui-monospace, Consolas, monospace; font-size: .82rem; }
 <section id="job" hidden></section>
 </div>
 <script type="module">
-import * as J from "./jobs.js";
+import * as J from "./jobs.js?v=4";
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const COLORS = { blue: "c-blue", teal: "c-teal", olive: "c-olive", green: "c-green", rust: "c-rust", amber: "c-amber", plum: "c-plum", slate: "c-slate" };
 const cat = await (await fetch("../paths.json", { cache: "no-store" })).json();

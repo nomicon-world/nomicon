@@ -9,7 +9,7 @@
  */
 import type { MapDecl } from "./questions.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number }
 export interface SourceEdge { from: string; to: string; type: string }
 
@@ -18,8 +18,12 @@ export interface WorldNode {
   source: string | null; pr?: number; by?: number; login?: string; merged_at?: number;
   description?: string; position?: number[]; lod?: number;
   auto?: true; stub?: true; direct?: true; pointed_by?: string[]; question?: string; answered?: boolean; children: number;
+  /** Question nodes asked about this node, and how many are still open. */
+  questions?: string[]; open_questions?: number;
+  /** For a question: the node id or from--type--to edge it is about. */
+  about?: string;
 }
-export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number }
+export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number }
 export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }> }
 
 export const spaceOf = (path: string): string | null => {
@@ -46,6 +50,7 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   const inside = new Map<string, string>();
   const ordered = Object.values(files).sort((a, b) => a.merged_at - b.merged_at || a.pr - b.pr || a.path.localeCompare(b.path));
   const nodeOfPath = new Map<string, string>();
+  const pendingAbout: Array<[string, string]> = [];
   for (const f of ordered) {
     const sp = spaceOf(f.path); if (!sp) continue;
     ensureSpace(sp);
@@ -81,6 +86,20 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
     if (a && b && a !== b) edges.push({ from: a, to: b, type: "cites", source: f.path, pr: f.pr });
   }
+  // Questions about a node or an edge: the question points at it, and it counts the questions still open.
+  for (const f of ordered) {
+    if (!f.question || !f.about) continue;
+    const qid = nodeOfPath.get(f.path); if (!qid) continue;
+    const q = nodes.get(qid)!; q.about = f.about;
+    const parts = f.about.split("--");
+    if (parts.length === 3) {
+      const e = edges.find((x) => x.from === parts[0] && x.type === parts[1] && x.to === parts[2]);
+      if (e) { (e.questions ??= []).push(qid); } else conflicts.push({ path: f.path, problem: `about: ${f.about} names no edge on the map` });
+    } else {
+      edges.push({ from: qid, to: f.about, type: "about", source: f.path, pr: f.pr });
+      pendingAbout.push([f.about, qid]);
+    }
+  }
   // Containment, refusing cycles and unknown containers (those fall back to the file's space).
   for (const [child, parent] of inside) {
     if (!nodes.has(parent)) { conflicts.push({ path: nodes.get(child)!.source ?? child, problem: `inside: ${parent} names no node; placed in its space` }); continue; }
@@ -98,6 +117,10 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     put(stub);
   }
   for (const n of nodes.values()) if (n.parent && nodes.has(n.parent)) nodes.get(n.parent)!.children++;
+  for (const [target, qid] of pendingAbout) { const t = nodes.get(target); if (t) (t.questions ??= []).push(qid); }
+  const isOpen = (qid: string) => { const q = nodes.get(qid); return !!q && !q.answered; };
+  for (const n of nodes.values()) if (n.questions) n.open_questions = n.questions.filter(isOpen).length;
+  for (const e of edges) if (e.questions) e.open_questions = e.questions.filter(isOpen).length;
   const seen = new Set<string>();
   const uniq = edges.filter((e) => { const k = `${e.from}|${e.to}|${e.type}`; if (seen.has(k)) return false; seen.add(k); return true; });
   return { version: 1, computed_at: now, nodes: [...nodes.values()].sort((a, b) => a.id.localeCompare(b.id)), edges: uniq, conflicts };

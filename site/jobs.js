@@ -1,7 +1,14 @@
 // Job cards: an option from paths.json plus a place on the World map, filled in.
 // The agent has the same logic in agent/src/jobs.ts; a test keeps the two identical.
+/** A link on the map as a place: id from--type--to, with both ends' labels. */
+export function edgeNode(edge, byId) {
+  const a = byId.get(edge.from), b = byId.get(edge.to);
+  return { id: `${edge.from}--${edge.type}--${edge.to}`, label: `${a ? a.label : edge.from} → ${b ? b.label : edge.to} (${edge.type})`, kind: "edge", parent: null, source: edge.source,
+    from: edge.from, to: edge.to, rel: edge.type, from_label: a ? a.label : edge.from, to_label: b ? b.label : edge.to, open_questions: edge.open_questions ?? 0, questions: edge.questions ?? [] };
+}
 export function placeType(node) {
   if (!node) return "none";
+  if (node.kind === "edge") return "edge";
   if (node.stub) return "stub";
   if (node.kind === "space") return "space";
   if (node.kind === "question") return "question";
@@ -46,6 +53,8 @@ export function jobCard(catalog, optionId, node, byId, baseMicro, mapUrl) {
     source: place && place.source ? place.source : "<file>", kind: option.kind ?? "idea", rel: option.rel ?? "relates", verb: option.verb ?? "improve",
     template: option.template ?? "", target: option.target ?? "", command: option.command ?? "",
     title: option.title ?? "<your title>", new_id: "<your-id>", slug: "<your-file-name>",
+    from: place && place.from ? place.from : "<from>", to: place && place.to ? place.to : "<to>", rel_type: place && place.rel ? place.rel : "relates",
+    from_label: place && place.from_label ? place.from_label : "<from>", to_label: place && place.to_label ? place.to_label : "<to>",
   };
   vals.file = fill(recipe.file ?? "", vals);
   vals.pr_title = fill(recipe.pr_title ?? "", vals);

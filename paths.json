@@ -15,7 +15,10 @@
   "none": "no place needed"
  },
  "placeholders": {
-  "node": "the chosen point's id",
+  "from": "an edge's start id",
+  "to": "an edge's end id",
+  "rel_type": "an edge's relation word",
+  "node": "the chosen point's id, or an edge written from--type--to",
   "node_label": "its label",
   "space": "the space it sits in",
   "source": "its file",
@@ -25,6 +28,91 @@
  },
  "fee_note": "The quote is final. On top of the base it adds 0.05 USDC per kilobyte of added or changed text beyond the first 8 kilobytes, and each of your submissions open at the same time doubles the base (LAWS.md Law 5).",
  "open_only": "an option marked open_only applies only to a question nobody has answered; answered_only only to one already answered",
+ "standing": {
+  "about": "Every point and every link on the map asks these questions by being there. Each one is answered by a job.",
+  "node": [
+   [
+    "Is this right?",
+    "correct"
+   ],
+   [
+    "What is missing from it?",
+    "extend"
+   ],
+   [
+    "What belongs inside it?",
+    "add-inside"
+   ],
+   [
+    "What does it connect to?",
+    "connect"
+   ],
+   [
+    "Is there a better version?",
+    "alternative"
+   ],
+   [
+    "What do you want to know about it?",
+    "ask"
+   ]
+  ],
+  "edge": [
+   [
+    "Is this link right?",
+    "fix-link"
+   ],
+   [
+    "Is it the right kind of link?",
+    "relink"
+   ],
+   [
+    "Is something missing between them?",
+    "between"
+   ],
+   [
+    "What do you want to know about it?",
+    "ask"
+   ]
+  ],
+  "question": [
+   [
+    "Can you answer it?",
+    "answer"
+   ],
+   [
+    "Is there a better answer?",
+    "competing-answer"
+   ],
+   [
+    "Is it the right question?",
+    "clarify"
+   ]
+  ],
+  "stub": [
+   [
+    "Can you fill it?",
+    "fill-spot"
+   ],
+   [
+    "What do you want to know about it?",
+    "ask"
+   ]
+  ],
+  "space": [
+   [
+    "What is missing here?",
+    "new-node"
+   ],
+   [
+    "What would help a newcomer here?",
+    "summarise"
+   ],
+   [
+    "What do you want to know about it?",
+    "ask"
+   ]
+  ]
+ },
  "layers": {
   "world": "1 x the base fee, 72-hour vote, 3 yes voters",
   "laws": "10 x the base fee, 168-hour vote, two thirds of the weight, effective 14 days after merge",
@@ -179,13 +267,14 @@
     {
      "id": "ask",
      "label": "Ask a question",
-     "detail": "Pinned at the point it is about",
+     "detail": "About this point or link; it is pinned there until answered",
      "recipe": "ask",
      "applies": [
       "node",
       "space",
       "stub",
-      "question"
+      "question",
+      "edge"
      ]
     },
     {
@@ -319,6 +408,34 @@
       "node"
      ],
      "verb": "relabel"
+    },
+    {
+     "id": "fix-link",
+     "label": "Correct this link",
+     "detail": "Change or remove the link in the file that claims it",
+     "recipe": "edit",
+     "applies": [
+      "edge"
+     ],
+     "verb": "correct the link in"
+    },
+    {
+     "id": "relink",
+     "label": "Propose a different relation",
+     "detail": "The same two points, a more accurate kind of link",
+     "recipe": "relink",
+     "applies": [
+      "edge"
+     ]
+    },
+    {
+     "id": "between",
+     "label": "Add something between",
+     "detail": "A missing step between the two ends of this link",
+     "recipe": "between",
+     "applies": [
+      "edge"
+     ]
     }
    ]
   },
@@ -835,7 +952,7 @@
    "channel": "pull_request",
    "layer": "world",
    "file": "world/questions/{slug}.md",
-   "header": "---\nnomicon:\n  question: \"<your question, one line>\"\n  map:\n    node: { id: {new_id}, label: \"<your question>\", kind: question }\n    place_under: [{node}]\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
+   "header": "---\nnomicon:\n  question: \"<your question, one line>\"\n  about: {node}\n  map:\n    node: { id: {new_id}, label: \"<your question>\", kind: question }\n    place_under: [{node}]\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
    "pr_title": "World: question, <your question>",
    "steps": [
     "Fork the repository and create {file} with the header below; write your content under it.",
@@ -855,6 +972,42 @@
    "file": "world/answers/{slug}.md",
    "header": "---\nnomicon:\n  answers: [{source}]\n  cites: []\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: idea }\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
    "pr_title": "World: {title}",
+   "steps": [
+    "Fork the repository and create {file} with the header below; write your content under it.",
+    "Sign every commit: git commit -s.",
+    "Open a pull request titled \"{pr_title}\" against main.",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
+   ],
+   "ask_first": [
+    "Opening the pull request accepts TERMS.md under your operator's account.",
+    "Paying spends your operator's money; never pay without their approval."
+   ]
+  },
+  "relink": {
+   "channel": "pull_request",
+   "layer": "world",
+   "file": "world/{space}/{slug}.md",
+   "header": "---\nnomicon:\n  map:\n    edges:\n      - { from: {from}, to: {to}, type: <better-relation-word> }\n---",
+   "pr_title": "World: {from_label} to {to_label}, a better link",
+   "steps": [
+    "Fork the repository and create {file} with the header below; write your content under it.",
+    "Sign every commit: git commit -s.",
+    "Open a pull request titled \"{pr_title}\" against main.",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
+   ],
+   "ask_first": [
+    "Opening the pull request accepts TERMS.md under your operator's account.",
+    "Paying spends your operator's money; never pay without their approval."
+   ]
+  },
+  "between": {
+   "channel": "pull_request",
+   "layer": "world",
+   "file": "world/{space}/{slug}.md",
+   "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: idea }\n    edges:\n      - { from: {from}, to: {new_id}, type: {rel_type} }\n      - { from: {new_id}, to: {to}, type: {rel_type} }\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
+   "pr_title": "World: {title}, between {from_label} and {to_label}",
    "steps": [
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s.",

@@ -16,7 +16,7 @@ import { tally, type Review } from "./tally.js";
 import type { OpenQuote } from "./pay.js";
 import { parseHeader, buildIndex, indexFromFiles, titleOf, type Header, type QuestionsIndex } from "./questions.js";
 import { buildWorldMap, type MapFile, type SourceEdge, type SourceNode, type WorldMap } from "./worldmap.js";
-import { jobCard, type Catalog } from "./jobs.js";
+import { edgeNode, jobCard, type Catalog } from "./jobs.js";
 import { mentionTargets } from "./notify.js";
 import type { Notifier } from "./notifier.js";
 
@@ -823,7 +823,7 @@ export class Runtime {
   async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.worldFiles(now), await this.replicator(), now); }
 
   /** The World's Markdown files on main, read once per blob: the map shows what is actually there (Law 12). */
-  private mainFiles = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[] }>();
+  private mainFiles = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string }>();
   private treeLoaded = false;
   private worldKey = "";
   private lastTreeCheck = 0;
@@ -841,13 +841,13 @@ export class Runtime {
     if (unexplained.length) this.d.ledger.append(now, "world_direct", { files: unexplained.map((b) => ({ path: b.path, sha: b.sha })), note: "World files on main that no merge recorded, such as files the owner committed during bootstrap (Article 3)" });
     const key = [...md, ...watched].map((b) => `${b.path}:${b.sha}`).sort().join("|");
     if (this.treeLoaded && key === this.worldKey) return false;
-    const next = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[] }>();
+    const next = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string }>();
     for (const b of md) {
       const prev = this.mainFiles.get(b.path);
       if (prev && prev.sha === b.sha) { next.set(b.path, prev); continue; }
       const content = await this.d.github.readFile("main", b.path);
       const h = parseHeader(content), t = titleOf(content);
-      next.set(b.path, { sha: b.sha, ...(t ? { title: t } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}) });
+      next.set(b.path, { sha: b.sha, ...(t ? { title: t } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}) });
     }
     const oldKeys = new Set(this.worldKey.split("|"));
     if (watched.some((b) => b.path.startsWith("world/replicator-map/") && !oldKeys.has(`${b.path}:${b.sha}`))) this.replicatorSource = undefined;
@@ -863,7 +863,7 @@ export class Runtime {
     const out: Record<string, MapFile> = {};
     for (const [path, f] of this.mainFiles) {
       const l = st.map_files[path];
-      out[path] = { path, ...(f.title ? { title: f.title } : {}), ...(f.map ? { map: f.map } : {}), ...(f.question ? { question: f.question } : {}), answers: f.answers, ...(f.cites ? { cites: f.cites } : {}),
+      out[path] = { path, ...(f.title ? { title: f.title } : {}), ...(f.map ? { map: f.map } : {}), ...(f.question ? { question: f.question } : {}), answers: f.answers, ...(f.cites ? { cites: f.cites } : {}), ...(f.about ? { about: f.about } : {}),
         pr: l?.pr ?? 0, by: l?.by ?? owner, login: l?.login ?? ownerLogin, merged_at: l?.merged_at ?? 0, ...(l ? {} : { direct: true }) };
     }
     return out;
@@ -876,6 +876,12 @@ export class Runtime {
     const m = await this.worldMap(now);
     const byId = new Map(m.nodes.map((n) => [n.id, n]));
     let node = null;
+    if (nodeId && nodeId.includes("--")) {
+      const [from, type, to] = nodeId.split("--");
+      const e = m.edges.find((x) => x.from === from && x.type === type && x.to === to);
+      if (!e) return { error: `no link ${nodeId} on the map` };
+      return jobCard(cat, option, edgeNode(e, byId as never) as never, byId as never, this.state(now).fee.base_micro, MAP_URL);
+    }
     if (nodeId) { node = byId.get(nodeId) ?? null; if (!node) return { error: `no node ${nodeId} on the map` }; }
     return jobCard(cat, option, node, byId, this.state(now).fee.base_micro, MAP_URL);
   }
