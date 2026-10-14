@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792017291,
+ "computed_at": 1792017841,
  "nodes": [
   {
    "id": "agents",
@@ -160,6 +160,20 @@
     1.116
    ],
    "lod": 2,
+   "children": 0
+  },
+  {
+   "id": "code-review-within-fixed-rules",
+   "label": "Code review that fits the rules Nomicon cannot change",
+   "kind": "idea",
+   "domain": "general",
+   "parent": "space-answers",
+   "source": "world/answers/code-review-within-fixed-rules.md",
+   "pr": 0,
+   "by": 107083616,
+   "login": "Mknariman",
+   "merged_at": 0,
+   "direct": true,
    "children": 0
   },
   {
@@ -1045,7 +1059,7 @@
    "domain": "world",
    "parent": null,
    "source": "world/answers/",
-   "children": 2
+   "children": 3
   },
   {
    "id": "space-questions",
@@ -1526,6 +1540,13 @@
    "to": "earth",
    "type": "dep",
    "source": "world/replicator-map/relations.json"
+  },
+  {
+   "from": "code-review-within-fixed-rules",
+   "to": "file-questions-reviewing-code-before-it-runs",
+   "type": "answers",
+   "source": "world/answers/code-review-within-fixed-rules.md",
+   "pr": 0
   },
   {
    "from": "staged-code-review",

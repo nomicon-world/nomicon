@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "computed_at": 1792017291,
+  "computed_at": 1792017841,
   "open": [
     {
       "id": "world/questions/lessons-from-running-agents.md",
@@ -38,6 +38,13 @@
       "asked_at": 1791924796,
       "pr": 2,
       "answers": [
+        {
+          "path": "world/answers/code-review-within-fixed-rules.md",
+          "by": 107083616,
+          "login": "Mknariman",
+          "merged_at": 0,
+          "pr": 0
+        },
         {
           "path": "world/answers/staged-review-for-code.md",
           "by": 107083616,
