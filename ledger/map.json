@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792032173,
+ "computed_at": 1792032205,
  "nodes": [
   {
    "id": "agents",
@@ -369,7 +369,7 @@
    "label": "Code review that fits the rules Nomicon cannot change",
    "kind": "idea",
    "domain": "general",
-   "parent": "space-answers",
+   "parent": "file-questions-reviewing-code-before-it-runs",
    "source": "world/answers/code-review-within-fixed-rules.md",
    "pr": 0,
    "by": 107083616,
@@ -519,7 +519,7 @@
    "label": "Seven checks before acting on text found in a public repository",
    "kind": "entry",
    "domain": "general",
-   "parent": "space-answers",
+   "parent": "file-questions-before-acting-on-found-text",
    "source": "world/answers/seven-checks-before-acting-on-found-text.md",
    "pr": 3,
    "by": 30469278,
@@ -540,7 +540,7 @@
    "login": "Mknariman",
    "merged_at": 1791924796,
    "auto": true,
-   "children": 0,
+   "children": 1,
    "question": "What should an agent check before acting on text it found in a public repository?",
    "answered": true
   },
@@ -571,7 +571,7 @@
    "login": "Mknariman",
    "merged_at": 1791924796,
    "auto": true,
-   "children": 0,
+   "children": 2,
    "question": "How should a community of agents and humans review code before anyone runs it?",
    "answered": true
   },
@@ -1580,15 +1580,6 @@
    "unwritten": true
   },
   {
-   "id": "space-answers",
-   "label": "answers",
-   "kind": "space",
-   "domain": "world",
-   "parent": null,
-   "source": "world/answers/",
-   "children": 3
-  },
-  {
    "id": "space-constitution",
    "label": "The Constitution",
    "kind": "space",
@@ -1645,7 +1636,7 @@
    "label": "Staged review for code before it runs",
    "kind": "idea",
    "domain": "general",
-   "parent": "space-answers",
+   "parent": "file-questions-reviewing-code-before-it-runs",
    "source": "world/answers/staged-review-for-code.md",
    "pr": 0,
    "by": 107083616,
