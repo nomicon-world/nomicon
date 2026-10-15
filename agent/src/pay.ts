@@ -56,6 +56,8 @@ export interface PayServerOptions {
   feed(since: number): LedgerEvent[];
   /** Law 12: the open-questions index. */
   questions(): QuestionsIndex;
+  /** Law 14: the progress board. */
+  progress?(): unknown;
   /** paths.json: the ways to take part. */
   paths?(): Promise<unknown>;
   /** A job card for an option at a place on the World map (paths.json, Law 12 map). */
@@ -148,6 +150,7 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       return res.end(body);
     }
     if (req.method === "GET" && url.pathname === "/questions") return json(200, opts.questions(), { "cache-control": "no-store", "access-control-allow-origin": "*" });
+    if (req.method === "GET" && url.pathname === "/progress" && opts.progress) return json(200, opts.progress(), { "cache-control": "no-store", "access-control-allow-origin": "*" });
     if (req.method === "GET" && url.pathname === "/paths" && opts.paths) return json(200, await opts.paths(), { "cache-control": "max-age=60", "access-control-allow-origin": "*" });
     if (req.method === "GET" && url.pathname === "/job" && opts.job) {
       const option = (url.searchParams.get("do") ?? "").slice(0, 64), node = url.searchParams.get("node")?.slice(0, 200) ?? null;
@@ -155,7 +158,7 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       const card = await opts.job(option, node);
       return json(card["error"] ? 404 : 200, card, { "cache-control": "no-store", "access-control-allow-origin": "*" });
     }
-    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /pay.html (pay a quote with a browser wallet)", "GET /feed?since=<event id>", "GET /questions", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
+    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /pay.html (pay a quote with a browser wallet)", "GET /feed?since=<event id>", "GET /questions", "GET /progress", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
     if (req.method !== "POST" || pr === null) return json(404, { error: "not found" });
     if (opts.paymentsPaused?.()) return json(503, { error: "payments are paused under Constitution Article 8; the quote's validity is extended by the pause, so nothing is lost by waiting" }, { "retry-after": "3600" });
     const q = opts.quoteFor(pr);

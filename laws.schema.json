@@ -129,6 +129,26 @@
         "max_unpaid_screen_kb_per_day": { "type": "integer", "minimum": 256 }
       }
     },
+    "progress": {
+      "type": "object",
+      "required": ["label_factors", "default_label", "structure_factor", "label_window_days_after_merge", "labeller_floor_base_fees", "scored_layers"],
+      "properties": {
+        "label_factors": {
+          "type": "object",
+          "required": ["new", "builds", "collects"],
+          "properties": {
+            "new": { "type": "number", "minimum": 0, "maximum": 10 },
+            "builds": { "type": "number", "minimum": 0, "maximum": 10 },
+            "collects": { "type": "number", "minimum": 0, "maximum": 10 }
+          }
+        },
+        "default_label": { "enum": ["new", "builds", "collects"] },
+        "structure_factor": { "type": "number", "minimum": 1, "maximum": 10 },
+        "label_window_days_after_merge": { "type": "integer", "minimum": 1, "maximum": 365 },
+        "labeller_floor_base_fees": { "type": "number", "minimum": 0, "maximum": 100 },
+        "scored_layers": { "type": "array", "items": { "enum": ["world", "laws"] } }
+      }
+    },
     "notices": {
       "type": "object",
       "required": ["mention_cap_per_merge", "doorbell_retries", "doorbell_retire_after_failures", "digest_every_days", "watch_poll_every_hours"],

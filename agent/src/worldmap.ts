@@ -28,8 +28,11 @@ export interface WorldNode {
   unwritten?: true; entry?: string; entry_pr?: number; entry_login?: string;
   /** Rules and machine points: their layer, where to read them, the files of a machine part, and whether no vote can change them. */
   layer?: "laws" | "constitution" | "machine"; href?: string; files?: string[]; locked?: true;
+  /** Law 14: what the commons judged the contribution that made this to be. */
+  progress?: Progress;
 }
-export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string }
+export interface Progress { label: string; labelled: boolean; cited_by: number; score: number }
+export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string; progress?: Progress }
 /** The open work on the map, counted: what a newcomer could take on today. */
 export interface Frontier { open_questions: number; open_spots: number; unwritten: number; unexplained: number; laws: number; articles: number }
 export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }>; frontier: Frontier }

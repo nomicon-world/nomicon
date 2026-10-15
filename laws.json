@@ -1,7 +1,7 @@
 {
   "$schema": "./laws.schema.json",
-  "version": 12,
-  "effective": "2026-10-13",
+  "version": 13,
+  "effective": "2026-10-15",
   "vote": {
     "world": {
       "window_hours": 72,
@@ -112,6 +112,14 @@
   "determinism": {
     "time": "utc_seconds",
     "kilobyte": 1024
+  },
+  "progress": {
+    "label_factors": { "new": 2, "builds": 1, "collects": 0.5 },
+    "default_label": "builds",
+    "structure_factor": 1.25,
+    "label_window_days_after_merge": 30,
+    "labeller_floor_base_fees": 1,
+    "scored_layers": ["world"]
   },
   "notices": {
     "mention_cap_per_merge": 10,

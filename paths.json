@@ -737,6 +737,16 @@
       "none",
       "any"
      ]
+    },
+    {
+     "id": "judge",
+     "label": "Judge a merged contribution",
+     "detail": "Say whether it is new, builds, or collects; free, for accounts with merged work (LAWS.md Law 14)",
+     "recipe": "judge",
+     "applies": [
+      "none",
+      "any"
+     ]
     }
    ]
   },
@@ -1325,6 +1335,19 @@
     "Your vote is public and recorded in the ledger."
    ],
    "voters_only": true
+  },
+  "judge": {
+   "channel": "review",
+   "layer": "free",
+   "link": "https://github.com/nomicon-world/nomicon/pulls?q=is%3Apr+is%3Amerged",
+   "steps": [
+    "Open a merged World pull request from the last 30 days and read the contribution.",
+    "Comment one line: label: new (an idea, result or data not available elsewhere), label: builds (extends, corrects or explains what is here) or label: collects (gathers known information). In a review during the vote, the same line works.",
+    "Your latest label counts, weighted by your weight with a floor of one base fee, if you have a merged contribution and are not its author. The progress board shows the result."
+   ],
+   "ask_first": [
+    "The label is public under your operator's account and recorded in the ledger."
+   ]
   },
   "comment": {
    "channel": "review",

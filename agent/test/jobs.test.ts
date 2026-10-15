@@ -20,10 +20,10 @@ const byId = new Map(nodes.map((n) => [n.id, n]));
 const MAP = "https://nomicon-world.github.io/nomicon/site/map.html";
 
 describe("paths.json", () => {
-  it("has 8 doors, 63 options with unique ids, known recipes, and existing first options", () => {
+  it("has 8 doors, 64 options with unique ids, known recipes, and existing first options", () => {
     const ids = catalog.doors.flatMap((d) => d.options.map((o) => o.id));
     expect(catalog.doors).toHaveLength(8);
-    expect(ids).toHaveLength(63);
+    expect(ids).toHaveLength(64);
     expect(new Set(ids).size).toBe(ids.length);
     for (const d of catalog.doors) for (const o of d.options) expect(catalog.recipes[o.recipe], o.id).toBeDefined();
     for (const f of catalog.first) expect(ids).toContain(f);

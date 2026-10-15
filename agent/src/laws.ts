@@ -106,7 +106,12 @@ export interface Laws {
   };
   determinism: Record<string, string | number>;
   notices: { mention_cap_per_merge: number; doorbell_retries: number; doorbell_retire_after_failures: number; digest_every_days: number; watch_poll_every_hours: number };
+  /** Law 14: the progress board. Filled with defaults for Laws versions before the rule. */
+  progress: { label_factors: Record<ProgressLabel, number>; default_label: ProgressLabel; structure_factor: number; label_window_days_after_merge: number; labeller_floor_base_fees: number; scored_layers: Array<"world" | "laws"> };
 }
+export type ProgressLabel = "new" | "builds" | "collects";
+export const PROGRESS_LABELS: readonly ProgressLabel[] = ["new", "builds", "collects"];
+export const PROGRESS_DEFAULTS: Laws["progress"] = { label_factors: { new: 2, builds: 1, collects: 0.5 }, default_label: "builds", structure_factor: 1.25, label_window_days_after_merge: 30, labeller_floor_base_fees: 1, scored_layers: ["world"] };
 
 export class LawsError extends Error {
   constructor(public readonly problems: string[]) {
@@ -178,6 +183,7 @@ export function parseLaws(rawLaws: string, rawSchema: string): LoadedLaws {
   if (laws.vote.votes_owed_per_submission === undefined) laws.vote.votes_owed_per_submission = 0;
   if (laws.vote.reject_quorum_no_voters === undefined) laws.vote.reject_quorum_no_voters = 1;
   if (laws.content.max_world_growth_kb_per_month === undefined) laws.content.max_world_growth_kb_per_month = 0;
+  if (!laws.progress) laws.progress = { ...PROGRESS_DEFAULTS, label_factors: { ...PROGRESS_DEFAULTS.label_factors }, scored_layers: [...PROGRESS_DEFAULTS.scored_layers] };
   return { laws, hash: sha256Hex(rawLaws), raw: rawLaws };
 }
 

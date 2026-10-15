@@ -22,6 +22,7 @@ import { headerReport } from "./headercheck.js";
 import { extended, pausedAt, pausesOf, type Pause, type PauseScope } from "./pauses.js";
 import { heldBack } from "./live.js";
 import { rulesFrom, type RulesSource } from "./rulesmap.js";
+import { parseLabel, progressBoard, type ProgressBoard } from "./progress.js";
 import type { Notifier } from "./notifier.js";
 
 export interface RuntimeDeps {
@@ -135,6 +136,41 @@ export class Runtime {
   /** Ledger events after `since`, for the feed endpoint. */
   feed(since: number, limit = 200): LedgerEvent[] { return this.events.filter((e) => e.id > since).slice(0, limit); }
 
+  /** Law 14: the progress board, from the ledger alone. */
+  progress(now = this.d.clock.now()): ProgressBoard {
+    const st = this.state(now), laws = this.laws!.laws;
+    const weights = new Map<number, bigint>(Object.entries(st.weights).map(([k, w]) => [Number(k), w.mature_micro + w.immature_micro]));
+    const merged = new Set(st.merges.filter((m) => !m.revoked).map((m) => m.account));
+    return progressBoard(st.map_files, this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now);
+  }
+  /** Law 14: a label in a review or a comment, from an account with a merged contribution, recorded once per source. */
+  private recordLabels(pr: number, texts: Array<{ id: number; account: number; login: string; body: string; source: "review" | "comment" }>, now: number): void {
+    const st = this.state(now);
+    const may = new Set(st.merges.filter((m) => !m.revoked).map((m) => m.account));
+    const author = st.pr_account[String(pr)];
+    for (const t of texts) {
+      const label = parseLabel(t.body);
+      if (!label || t.account === author || !may.has(t.account) || st.owner_accounts.includes(t.account)) continue;
+      if (this.events.some((e) => e.type === "label" && Number(e["pr"]) === pr && e["source"] === t.source && Number(e["source_id"]) === t.id)) continue;
+      this.d.ledger.append(now, "label", { pr, account: t.account, login: t.login, label, source: t.source, source_id: t.id });
+    }
+  }
+  private lastLabelSweep = 0;
+  /** Law 14: labels may be given for a while after the merge, in reviews or comments; look every ten minutes at the contributions still open to them. */
+  private async sweepLabels(now: number): Promise<void> {
+    if (now - this.lastLabelSweep < 600) return;
+    this.lastLabelSweep = now;
+    const laws = this.laws!.laws, since = now - laws.progress.label_window_days_after_merge * 86400;
+    for (const e of this.events) {
+      if (e.type !== "merge" || e.at < since || !laws.progress.scored_layers.includes(String(e["layer"]) as "world" | "laws")) continue;
+      const pr = Number(e["pr"]);
+      const [reviews, comments] = await Promise.all([this.d.github.listReviews(pr), this.d.github.listIssueComments(pr)]);
+      this.recordLabels(pr, [
+        ...reviews.map((r) => ({ id: r.reviewId, account: r.account, login: r.login, body: r.body ?? "", source: "review" as const })),
+        ...comments.map((c) => ({ id: c.id, account: c.account, login: c.login, body: c.body, source: "comment" as const })),
+      ], now);
+    }
+  }
   /** Law 12: the open-questions index. */
   questionsIndex(now = this.d.clock.now()): QuestionsIndex {
     const files = this.worldFiles(now);
@@ -234,6 +270,7 @@ export class Runtime {
     await this.guard("merge reconciliation", () => this.reconcileClosed(openNumbers, laws, now));
     await this.guard("laws snapshots", () => this.reconcileLawsSnapshots(now, laws));
     await this.guard("bootstrap end", () => this.sweepBootstrapEnd(laws, now));
+    await this.guard("labels", () => this.sweepLabels(now));
     if (this.d.notifier) {
       const n = this.d.notifier;
       await this.guard("doorbell registrations", () => n.pollRegistrations(now));
@@ -567,6 +604,7 @@ export class Runtime {
     const qualified = new Set((open["qualified"] as number[]) ?? []);
     const authors = new Set((open["authors"] as number[]) ?? []);
     this.recordReviews(pr.number, reviews, qualified, Number(open["opened"]), closesAt, now);
+    this.recordLabels(pr.number, reviews.map((r) => ({ id: r.reviewId, account: r.account, login: r.login, body: r.body ?? "", source: "review" as const })), now);
     if (now < closesAt) return;
     const lawsAtOpen = this.lawsByHash(String(open["laws_hash"]), laws);
     const atClose = fold(this.events, closesAt, lawsAtOpen);
@@ -749,7 +787,8 @@ export class Runtime {
     if (paths.includes("paths.json")) this.catalogSource = undefined;
     const weightNote = weight > 0n ? `Weight ${micro(weight)} USDC accrues to the author and matures in ${laws.weight.maturity_days} days.`
       : this.state(now).owner_accounts.includes(author.id) ? "The owner earns no weight from its own contributions (Constitution Article 6)." : "No weight accrues from it.";
-    await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. ${weightNote}`);
+    const ask = quote["layer"] === "world" ? ` Judge it (Law 14): reply with one line, \`label: new\` (an idea, result or data not available elsewhere), \`label: builds\` (extends, corrects or explains what is here) or \`label: collects\` (gathers known information), within ${laws.progress.label_window_days_after_merge} days. Labels from accounts with a merged contribution count, weighted; the author's and the owner's do not.` : "";
+    await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. ${weightNote}` + ask);
     // Law 12: tell the people this contribution answered or built on.
     const targets = mentionTargets(author.id, headers, this.state(now), laws.notices.mention_cap_per_merge);
     if (targets.length) {
@@ -994,13 +1033,20 @@ export class Runtime {
     return lines;
   }
 
+  /** The map with each contribution's progress (Law 14) on the points and links it made. */
+  private annotatedMap(m: WorldMap, now: number): WorldMap {
+    const byPr = new Map(this.progress(now).contributions.map((c) => [c.pr, c] as const));
+    for (const n of m.nodes) { const c = n.pr ? byPr.get(n.pr) : n.entry_pr ? byPr.get(n.entry_pr) : undefined; if (c) n.progress = { label: c.label, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score }; }
+    for (const e of m.edges) { const c = e.pr ? byPr.get(e.pr) : undefined; if (c) e.progress = { label: c.label, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score }; }
+    return m;
+  }
   private async publish(now: number): Promise<void> {
     const head = this.d.ledger.headHash();
     if (head === this.lastPublishedHead) {
       if (!this.mapDirty) return;
       await this.d.github.publishLedger([
         { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
-        { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()), null, 1) + "\n" },
+        { path: "ledger/map.json", content: JSON.stringify(this.annotatedMap(await this.worldMap(now), now), null, 1) + "\n" },
       ], "map: World files on main changed");
       this.mapDirty = false;
       return;
@@ -1014,7 +1060,8 @@ export class Runtime {
       { path: "ledger/head.json", content: this.d.ledger.headJson() },
       { path: "ledger/state.json", content: serializeState(state) },
       { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
-      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()), null, 1) + "\n" },
+      { path: "ledger/progress.json", content: JSON.stringify(this.progress(now), null, 1) + "\n" },
+      { path: "ledger/map.json", content: JSON.stringify(this.annotatedMap(await this.worldMap(now), now), null, 1) + "\n" },
     ], `ledger: event ${this.d.ledger.head}`);
     this.d.ledger.markPublished(names);
     this.lastPublishedHead = head;

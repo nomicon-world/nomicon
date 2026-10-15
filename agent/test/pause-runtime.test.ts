@@ -116,3 +116,41 @@ describe("next jobs after a merge", () => {
     expect(pr.comments.some((c) => c.includes("accrues to the author"))).toBe(true);
   });
 });
+
+describe("Law 14 labels in the running agent", () => {
+  it("records a label given in a comment after the merge, scores it, publishes the board, and replay stays clean", async () => {
+    const h = harness();
+    const B = { id: 2, login: "bob" };
+    // Alice and Bob each get a contribution merged, so both may label.
+    const prs = [];
+    for (const [who, path] of [[A, "world/notes/a.md"], [B, "world/notes/b.md"]] as const) {
+      const pr = h.github.open(who, { [path]: `---\nnomicon:\n  map:\n    node: { id: ${path.includes("a.md") ? "aa" : "bb"}, label: "X", kind: idea }\n---\n# X\n` });
+      await h.rt.tick();
+      await h.rt.onPaid({ pr: pr.number, tx: "0x" + String(pr.number).padStart(64, "0"), payer: "0xp", amountMicro: h.rt.quoteFor(pr.number)!.feeMicro, network: "eip155:84532" });
+      await h.rt.tick(); await h.rt.tick();
+      h.ledger.append(h.clock.now(), "owner_confirm", { pr: pr.number, reason: "t", by: OWNER.id });
+      await h.rt.tick();
+      prs.push(pr);
+    }
+    expect(prs[0]!.comments.some((c) => c.includes("Judge it (Law 14)"))).toBe(true);
+    // Bob labels Alice's work in a comment; Alice labels her own (ignored); the owner labels (ignored).
+    h.github.commentOnIssue(prs[0]!.number, B, "Solid.\nlabel: new");
+    h.github.commentOnIssue(prs[0]!.number, A, "label: new");
+    h.github.commentOnIssue(prs[0]!.number, OWNER, "label: new");
+    h.clock.advance(700);
+    await h.rt.tick();
+    const labels = h.ledger.events.filter((e) => e.type === "label");
+    expect(labels.map((e) => [e["pr"], e["account"], e["label"]])).toEqual([[prs[0]!.number, B.id, "new"]]);
+    const board = h.rt.progress();
+    expect(board.contributions.find((c) => c.pr === prs[0]!.number)).toMatchObject({ label: "new", labelled: true, score: 2 });
+    expect(board.contributions.find((c) => c.pr === prs[1]!.number)).toMatchObject({ label: "builds", labelled: false, score: 1 });
+    expect(h.github.published.some((f) => f.path === "ledger/progress.json")).toBe(true);
+    const map = JSON.parse(h.github.published.find((f) => f.path === "ledger/map.json")!.content);
+    expect(map.nodes.find((n: { id: string }) => n.id === "aa").progress).toMatchObject({ label: "new", cited_by: 0, score: 2 });
+    // The same comment is not recorded twice, and a review label during a later vote is recorded too.
+    h.clock.advance(700); await h.rt.tick();
+    expect(h.ledger.events.filter((e) => e.type === "label")).toHaveLength(1);
+    const r = replay(h.ledger.events, new Map([[loaded.hash, rawLaws]]), rawSchema, null, h.clock.now());
+    expect(r.findings).toEqual([]);
+  });
+});

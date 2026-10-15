@@ -12,9 +12,13 @@
   .err { color: #b00; }
 </style>
 <h1>Nomicon</h1>
-<p id="meta"><small>Loading <code>ledger/state.json</code> and <code>ledger/questions.json</code>. Serve the repository root over HTTP; opening this file directly does not work.</small></p>
+<p id="meta"><small>Loading <code>ledger/state.json</code>, <code>ledger/questions.json</code> and <code>ledger/progress.json</code>. Serve the repository root over HTTP; opening this file directly does not work.</small></p>
+<h2>Progress</h2>
+<p><small>What the commons judged to be progress (<code>LAWS.md</code> Law 14): each merged World contribution's label (<b>new</b>, <b>builds</b> or <b>collects</b>, given in reviews and comments by accounts with merged work, weighted), what it did to the frontier, and who built on it. Score = label × structure × (1 + citing accounts). It mints no weight and moves no money. Judge one: comment <code>label: new</code>, <code>label: builds</code> or <code>label: collects</code> on its pull request within 30 days of the merge.</small></p>
+<table id="progress"><thead><tr><th>#</th><th>contribution</th><th>by</th><th>label</th><th>structure</th><th class="n">built on by</th><th class="n">score</th></tr></thead><tbody></tbody></table>
+<table id="authors"><thead><tr><th>#</th><th>author</th><th class="n">contributions</th><th class="n">judged new</th><th class="n">score</th></tr></thead><tbody></tbody></table>
 <h2>Weight</h2>
-<p><small>Mature weight by account, in USDC, as of the ledger head. Weight is capped at 20 percent of the total in any tally and decays with a 180-day half-life. Nothing here is a ranking of merit; it is who paid to publish and was voted in.</small></p>
+<p><small>Mature weight by account, in USDC, as of the ledger head. Weight is capped at 20 percent of the total in any tally and decays with a 180-day half-life. Weight is who may vote, not a ranking of merit (the progress board above is the commons' judgment of that); it is who paid to publish and was voted in.</small></p>
 <table id="weights"><thead><tr><th>#</th><th>account</th><th class="n">mature</th><th class="n">maturing</th><th class="n">share</th></tr></thead><tbody></tbody></table>
 <h2>Open questions</h2>
 <p><small>Asked by a merged file's header and not yet answered. Answer one by merging a file whose header lists its path under <code>answers</code>.</small></p>
@@ -30,10 +34,15 @@
   const usdc = (micro) => (Number(BigInt(micro)) / 1e6).toFixed(2);
   const when = (s) => new Date(Number(s) * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC";
   try {
-    const [state, questions] = await Promise.all([
-      fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/state.json").then((r) => r.json()),
-      fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/questions.json").then((r) => (r.ok ? r.json() : { open: [], answered: [] })),
+    const DATA = new URLSearchParams(location.search).has("local") ? "../" : "https://raw.githubusercontent.com/nomicon-world/nomicon/main/";
+    const [state, questions, progress] = await Promise.all([
+      fetch(DATA + "ledger/state.json").then((r) => r.json()),
+      fetch(DATA + "ledger/questions.json").then((r) => (r.ok ? r.json() : { open: [], answered: [] })),
+      fetch(DATA + "ledger/progress.json").then((r) => (r.ok ? r.json() : { contributions: [], authors: [] })),
     ]);
+    const REPO = "https://github.com/nomicon-world/nomicon";
+    document.querySelector("#progress tbody").innerHTML = (progress.contributions ?? []).map((c, i) => `<tr><td>${i + 1}</td><td><a href="${REPO}/pull/${esc(c.pr)}">#${esc(c.pr)}</a> ${c.paths.map((p) => `<code>${esc(p.replace(/^world[/]/, ""))}</code>`).join(" ")}</td><td>${esc(c.login)}</td><td>${esc(c.label)}${c.labelled ? "" : " <small>(unlabelled)</small>"}</td><td><small>${esc(c.structure.join(", ") || "loose entry")}</small></td><td class="n">${c.cited_by.length}</td><td class="n">${esc(c.score)}</td></tr>`).join("") || `<tr><td colspan="7"><small>Nothing merged in the World yet.</small></td></tr>`;
+    document.querySelector("#authors tbody").innerHTML = (progress.authors ?? []).map((a, i) => `<tr><td>${i + 1}</td><td>${esc(a.login)} <small>${esc(a.account)}</small></td><td class="n">${a.contributions}</td><td class="n">${a.new}</td><td class="n">${esc(a.score)}</td></tr>`).join("");
     const now = Math.floor(Date.now() / 1000);
     meta.innerHTML = `<small>Ledger head ${esc(state.head_event)}, computed ${state.computed_at ? when(state.computed_at) : "never"}. Base fee ${usdc(state.fee.base_micro)} USDC. ${state.bootstrap.active ? "Bootstrap is active: every merge needs the owner's confirmation." : ""}</small>`;
     const rows = Object.entries(state.weights).map(([id, w]) => ({ id, login: w.login, mature: BigInt(w.mature_micro), immature: BigInt(w.immature_micro ?? 0) })).sort((a, b) => (a.mature < b.mature ? 1 : a.mature > b.mature ? -1 : 0));

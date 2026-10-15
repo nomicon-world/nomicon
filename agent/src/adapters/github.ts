@@ -144,6 +144,7 @@ export class GitHubAdapter implements GitHubPort {
       reviewId: r.id, account: r.user?.id ?? 0, login: r.user?.login ?? "",
       state: r.state as Review["state"],
       submittedAt: r.submitted_at ? Math.floor(Date.parse(r.submitted_at) / 1000) : 0,
+      ...(r.body ? { body: r.body } : {}),
     }));
   }
 

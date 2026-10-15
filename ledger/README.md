@@ -28,6 +28,7 @@ Types:
 | `quote` | fee quoted | `pr`, `head`, `layer`, `fee_micro`, `base_micro`, `multiplier`, `concurrency`, `size_kb`, `terms_commit`, `destination`, `expires`, `screening` (`model`, `reused`, `released`), `screened_bytes`, `bytes` (diff bytes, for Law 6), `queue_ahead`, `tax`, `tax_registration` |
 | `payment` | payment verified | `pr`, `tx`, `block`, `block_time`, `amount_micro`, `from`, `cad_value`, `cad_rate` (USD/CAD used), `matched` |
 | `vote_open` | window opened | `pr`, `head`, `opened`, `closes`, `laws_hash`, `qualified` (list of account ids), `authors`, `commits` (sha, author, verified) |
+| `label` | a Law 14 label given in a review or a comment, from an account with a merged contribution | `pr`, `account`, `login`, `label`, `source`, `source_id` |
 | `review` | a review by a qualified voter, recorded when the agent sees it during the window (Law 13) and complete at close | `pr`, `account`, `login`, `review_id`, `state`, `submitted` |
 | `vote_close` | tally | `pr`, `yes_voters`, `yes_micro`, `no_micro`, `tie` (equal weight, no decision), `tally_result`, `result` (`merge`, `reject`, `expire`, `await_owner`) |
 | `merge` | merged | `pr`, `head`, `merge_commit`, `weight_micro`, `account`, `paths`, `headers` (per path: question, answers, cites), `bytes` (files added or changed) |
@@ -53,6 +54,10 @@ Types:
 | `notice` | the agent told someone something | `kind` (`mention`, `doorbell`), `target`, `pr`, `about` (event id), `ok` |
 | `digest` | weekly digest posted | `url`, `merges`, `open_votes`, `open_questions`, `active_accounts`, `stars` |
 | `world_direct` | World files on `main` that no merge recorded, such as files the owner committed during bootstrap (Article 3); each fingerprint is recorded once | `files` (each `path` and `sha`, the git blob hash), `note` |
+
+## progress.json
+
+The progress board (Law 14): every merged World contribution's label, structure, citing accounts and score, and the authors' totals, recomputed from the ledger at each publish. See `agent/PROTOCOL.md`.
 
 ## questions.json
 

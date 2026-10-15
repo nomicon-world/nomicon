@@ -47,9 +47,9 @@ export class FakeGitHub implements GitHubPort {
     this.pulls.set(n, pull);
     return pull;
   }
-  review(pr: number, account: number, state: Review["state"], at = this.clock.now()): void {
+  review(pr: number, account: number, state: Review["state"], at = this.clock.now(), body?: string): void {
     const p = this.pulls.get(pr)!;
-    p.reviews.push({ reviewId: pr * 1000 + p.reviews.length + 1, account, login: `u${account}`, state, submittedAt: at });
+    p.reviews.push({ reviewId: pr * 1000 + p.reviews.length + 1, account, login: `u${account}`, state, submittedAt: at, ...(body ? { body } : {}) });
   }
   /** A collaborator dismisses an account's latest review on the platform; the ledger's record of it must still count (Law 2). */
   dismissReview(pr: number, account: number): void {

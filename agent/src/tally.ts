@@ -12,6 +12,8 @@ export interface Review {
   state: "APPROVED" | "CHANGES_REQUESTED" | "COMMENTED" | "DISMISSED" | "PENDING";
   /** Platform timestamp, UTC seconds. */
   submittedAt: number;
+  /** The review's text, where a Law 14 label may be given. */
+  body?: string;
 }
 
 export interface TallyInput {

@@ -80,7 +80,7 @@ describe("runtime end to end", () => {
     expect(h.rt.state().weighted_accounts).toBe(1);
     const paths = h.github.published.map((f) => f.path);
     expect(paths.filter((p) => p.startsWith("ledger/events/") && p.endsWith(".jsonl")).length).toBeGreaterThan(0);
-    expect(paths.slice(-4)).toEqual(["ledger/head.json", "ledger/state.json", "ledger/questions.json", "ledger/map.json"]);
+    expect(paths.slice(-5)).toEqual(["ledger/head.json", "ledger/state.json", "ledger/questions.json", "ledger/progress.json", "ledger/map.json"]);
   });
 
   it("rejects at intake without a fee, and holds with no quote", async () => {
