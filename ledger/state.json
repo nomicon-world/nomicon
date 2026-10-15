@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "computed_at": 1792033671,
-  "head_event": 39,
+  "computed_at": 1792034471,
+  "head_event": 40,
   "bootstrap": {
     "active": true,
     "began": 1791865881,
@@ -16,7 +16,7 @@
     "30469278": {
       "login": "bobykhani",
       "mature_micro": "0",
-      "immature_micro": "996092",
+      "immature_micro": "996056",
       "last_vote_at": null
     },
     "107083616": {
@@ -59,7 +59,8 @@
   "barred_until": {},
   "pr_account": {
     "2": 107083616,
-    "3": 30469278
+    "3": 30469278,
+    "4": 107083616
   },
   "path_author": {
     "world/README.md": 107083616,
