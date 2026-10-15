@@ -747,7 +747,9 @@ export class Runtime {
     const mergeEvent = this.d.ledger.append(now, "merge", { pr, head, merge_commit: mergeCommit, weight_micro: weight, account: author.id, login: author.login, layer: quote["layer"], paths, headers, titles, bytes });
     if (paths.some((x) => x.startsWith("world/replicator-map/"))) this.replicatorSource = undefined;
     if (paths.includes("paths.json")) this.catalogSource = undefined;
-    await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. Weight ${micro(weight)} USDC accrues to the author and matures in ${laws.weight.maturity_days} days.`);
+    const weightNote = weight > 0n ? `Weight ${micro(weight)} USDC accrues to the author and matures in ${laws.weight.maturity_days} days.`
+      : this.state(now).owner_accounts.includes(author.id) ? "The owner earns no weight from its own contributions (Constitution Article 6)." : "No weight accrues from it.";
+    await this.d.github.comment(pr, (note ? note + " " : "") + `Merged as ${mergeCommit}. ${weightNote}`);
     // Law 12: tell the people this contribution answered or built on.
     const targets = mentionTargets(author.id, headers, this.state(now), laws.notices.mention_cap_per_merge);
     if (targets.length) {
@@ -968,8 +970,10 @@ export class Runtime {
   }
   /** Up to three jobs near what a merge added: open spots and open questions beside it, else ways to build on it. */
   async nextJobs(paths: string[], now: number): Promise<string[]> {
+    // The merge just changed main: read it now rather than at the next five-minute check, or the new file is not on the map yet.
+    try { if (await this.refreshTree(now, true)) this.mapDirty = true; } catch (e) { this.log(`tree refresh before next jobs failed: ${(e as Error).message}`); }
     const m = await this.worldMap(now);
-    const placed = m.nodes.filter((n) => n.source && paths.includes(n.source));
+    const placed = m.nodes.filter((n) => (n.source && paths.includes(n.source)) || (n.entry && paths.includes(n.entry)));
     const lines: string[] = [], seen = new Set<string>();
     const add = (id: string, label: string, option: string, text: string) => {
       const key = `${id}|${option}`; if (seen.has(key) || lines.length >= 3) return; seen.add(key);
@@ -978,6 +982,13 @@ export class Runtime {
     for (const p of placed) for (const n of m.nodes) if (n.parent === p.parent || n.parent === p.id) {
       if (n.stub) add(n.id, n.label, "fill-spot", "Fill the open spot");
       else if (n.kind === "question" && !n.answered) add(n.id, n.label, "answer", "Answer the open question");
+    }
+    // The open work around it: points beside it nobody has written about, and links there nobody has explained.
+    for (const p of placed) for (const n of m.nodes) if (n.unwritten && (n.parent === p.parent || n.parent === p.id || n.id === p.parent)) add(n.id, n.label, "write-entry", "Write the first entry for");
+    const near = new Set(placed.flatMap((p) => [p.id, p.parent ?? ""]));
+    for (const e of m.edges) if (e.unexplained && (near.has(e.from) || near.has(e.to))) {
+      const a = m.nodes.find((x) => x.id === e.from), b = m.nodes.find((x) => x.id === e.to);
+      add(`${e.from}--${e.type}--${e.to}`, `${a ? a.label : e.from} → ${b ? b.label : e.to}`, "explain-link", "Explain the link");
     }
     for (const p of placed) { add(p.id, p.label, "add-inside", "Add something inside"); add(p.id, p.label, "connect", "Connect to something related:"); }
     return lines;

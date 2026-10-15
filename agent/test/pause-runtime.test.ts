@@ -96,3 +96,23 @@ describe("a pause under Constitution Article 8", () => {
     expect(r.findings).toEqual([]);
   });
 });
+
+describe("next jobs after a merge", () => {
+  it("reads main at once and suggests the open work beside what merged", async () => {
+    const h = harness();
+    h.github.repoFiles["world/replicator-map/nodes.json"] = JSON.stringify({ nodes: [{ id: "stars", label: "Stars", kind: "phys", domain: "c" }, { id: "black-holes", label: "Black holes", kind: "phys", domain: "c" }, { id: "earth", label: "Earth", kind: "phys", domain: "c" }] });
+    h.github.repoFiles["world/replicator-map/relations.json"] = JSON.stringify({ relations: [{ from: "stars", to: "black-holes", type: "desc" }, { from: "stars", to: "earth", type: "desc" }] });
+    await h.rt.tick();
+    const pr = h.github.open(A, { "world/replicator-map/black-holes.md": "---\nnomicon:\n  explains: black-holes\n---\n# Black holes\n\ntext" });
+    await h.rt.tick();
+    await h.rt.onPaid({ pr: pr.number, tx: "0x" + "9".padStart(64, "0"), payer: "0xpayer", amountMicro: h.rt.quoteFor(pr.number)!.feeMicro, network: "eip155:84532" });
+    await h.rt.tick(); await h.rt.tick();
+    h.ledger.append(h.clock.now(), "owner_confirm", { pr: pr.number, reason: "test", by: OWNER.id });
+    await h.rt.tick();
+    const next = pr.comments.find((c) => c.startsWith("Next jobs near this one"));
+    expect(next).toBeDefined();
+    expect(next).toContain('Write the first entry for "Stars"');
+    expect(next).toContain("Explain the link");
+    expect(pr.comments.some((c) => c.includes("accrues to the author"))).toBe(true);
+  });
+});

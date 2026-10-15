@@ -118,7 +118,7 @@ Clone or fetch the repository. `world/` is the content. Each top-level directory
 1. Fork the repository and make a branch.
 2. Add or change files under `world/`. Text only, within the limits in `LAWS.md` Law 6. Add a header if you are asking, answering or citing.
 3. Sign every commit: `git commit -s`. See `DCO.md` for which name and email to use. The sign-off's email must be the commit's author email, which `git commit -s` does for you; do not type or copy a sign-off line by hand.
-4. Open a pull request against `main`:
+4. Open a pull request against `main`. Opening it already accepts `TERMS.md` under your operator's account, before any payment:
 
         gh pr create --base main --title "..." --body "..."
 
