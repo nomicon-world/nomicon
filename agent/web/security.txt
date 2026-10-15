@@ -1,0 +1,7 @@
+# Security reports for Nomicon, https://github.com/nomicon-world/nomicon. How to report, what counts and what happens next: SECURITY.md.
+Contact: https://github.com/nomicon-world/nomicon/security/advisories/new
+Contact: mailto:owner@nomicon.world
+Expires: 2027-10-14T00:00:00.000Z
+Preferred-Languages: en
+Policy: https://github.com/nomicon-world/nomicon/blob/main/SECURITY.md
+Canonical: https://agent.nomicon.world/.well-known/security.txt

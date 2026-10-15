@@ -33,6 +33,15 @@ export function describeFacilitator(choice: FacilitatorChoice): string {
   return choice.kind === "cdp" ? "Coinbase CDP facilitator" : choice.url;
 }
 
+/** Files the agent serves from agent/web: the pay page, its module, and the security contact (RFC 9116). */
+const WEB_FILES: Record<string, { name: string; type: string; csp?: true }> = {
+  "/pay.html": { name: "pay.page", type: "text/html; charset=utf-8", csp: true },
+  "/x402pay.js": { name: "x402pay.js", type: "text/javascript; charset=utf-8" },
+  "/.well-known/security.txt": { name: "security.txt", type: "text/plain; charset=utf-8" },
+};
+/** The pay page loads no outside script and talks only to this server, raw.githubusercontent.com and api.github.com. */
+const PAY_PAGE_CSP = "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+
 export interface PayServerOptions {
   network: "eip155:8453" | "eip155:84532";
   facilitator: FacilitatorChoice;
@@ -131,14 +140,11 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       return res.end(JSON.stringify({ since, events }, (_k, v) => (typeof v === "bigint" ? v.toString() : v)));
     }
     // The pay page lives on this server, next to the endpoint it pays, not on the hosting platform (its pages may not host payments).
-    if (req.method === "GET" && opts.webDir && (url.pathname === "/pay.html" || url.pathname === "/x402pay.js")) {
-      const page = url.pathname === "/pay.html";
+    const file = req.method === "GET" && opts.webDir ? WEB_FILES[url.pathname] : undefined;
+    if (file) {
       let body: string;
-      try { body = await readFile(join(opts.webDir, page ? "pay.page" : "x402pay.js"), "utf8"); } catch { return json(404, { error: "not found" }); }
-      res.writeHead(200, {
-        "content-type": page ? "text/html; charset=utf-8" : "text/javascript; charset=utf-8", "cache-control": "no-cache", "x-content-type-options": "nosniff",
-        ...(page ? { "content-security-policy": "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'", "referrer-policy": "no-referrer" } : {}),
-      });
+      try { body = await readFile(join(opts.webDir!, file.name), "utf8"); } catch { return json(404, { error: "not found" }); }
+      res.writeHead(200, { "content-type": file.type, "cache-control": "no-cache", "x-content-type-options": "nosniff", ...(file.csp ? { "content-security-policy": PAY_PAGE_CSP, "referrer-policy": "no-referrer" } : {}) });
       return res.end(body);
     }
     if (req.method === "GET" && url.pathname === "/questions") return json(200, opts.questions(), { "cache-control": "no-store", "access-control-allow-origin": "*" });

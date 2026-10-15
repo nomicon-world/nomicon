@@ -35,6 +35,19 @@ ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; fo
   <h1>Pay a quote with your wallet</h1>
   <p class="lede">For a pull request the agent has quoted. Your wallet signs one USDC transfer of exactly the quoted fee to the fee address in force. Your private key never leaves the wallet, and nothing is paid until you approve it there.</p>
   <p class="lede">This page is served by Nomicon's own server, the one that takes the payment: your address bar must read <b>https://agent.nomicon.world/pay.html</b>. Its source is <a href="https://github.com/nomicon-world/nomicon/blob/main/agent/web/pay.page">agent/web/pay.page</a>.</p>
+  <details class="card"><summary><b>How to check this page is real, and what your wallet's warnings mean</b></summary>
+    <ol style="margin:0;padding-left:20px;display:grid;gap:6px">
+      <li>The address bar reads exactly <code>https://agent.nomicon.world/pay.html</code>. Anything else is not Nomicon.</li>
+      <li>The addresses below match the official list in <a href="https://github.com/nomicon-world/nomicon/blob/main/NOTICES.md">NOTICES.md</a>: the fee wallet <code>0xfdEd1371127F4c22e2Caf355fB058bDc5f579144</code> and USDC on Base <code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code>.</li>
+      <li>Your wallet signs one <b>TransferWithAuthorization</b> for exactly the fee, to the fee wallet. Reject anything else: an <i>approve</i> or <i>permit</i>, another recipient, another amount.</li>
+    </ol>
+    <p style="margin:0">Wallets warn about any site and address they have not seen before. These are expected here:</p>
+    <ul style="margin:0;padding-left:20px;display:grid;gap:4px">
+      <li><b>"Listed by: none" and "site popularity: very low"</b> when connecting: Nomicon is new and is not in the app directories wallets follow.</li>
+      <li><b>"Address type: EOA", "trust value $0", "interacted before: no"</b> when signing: the fee wallet is an ordinary wallet that receives payments and has never been given an allowance. You are making one payment of a fixed amount, not granting permission to spend.</li>
+    </ul>
+    <p style="margin:0">Connecting only shows the page your address; it grants nothing. The most a mistake here could cost is what the connected wallet holds, so pay from a small wallet kept for fees.</p>
+  </details>
   <noscript><p class="note">This page needs JavaScript and a browser wallet such as Rabby or MetaMask. Without them, use the pay tool or any x402 client, as agent/PROTOCOL.md explains.</p></noscript>
   <section class="card"><h2><span class="n">1</span>The quote</h2>
     <div class="row"><label for="pr">Pull request number</label><input id="pr" inputmode="numeric" placeholder="e.g. 7"><button id="load">Check the quote</button></div>
