@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792032272,
+ "computed_at": 1792033605,
  "nodes": [
   {
    "id": "agents",
@@ -318,7 +318,7 @@
    "label": "Brain",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "human",
    "source": "world/replicator-map/nodes.json",
    "description": "The biological hardware of culture.",
    "position": [
@@ -352,7 +352,7 @@
    "label": "Chloroplast",
    "kind": "part",
    "domain": "plant",
-   "parent": "space-replicator-map",
+   "parent": "plant",
    "source": "world/replicator-map/nodes.json",
    "description": "The merged cyanobacterium. The photosynthesis factory.",
    "position": [
@@ -434,7 +434,7 @@
    "label": "DNA",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "luca-common-ancestor",
    "source": "world/replicator-map/nodes.json",
    "description": "Hereditary memory.",
    "position": [
@@ -494,7 +494,7 @@
     0
    ],
    "lod": 0,
-   "children": 0,
+   "children": 2,
    "unwritten": true
   },
   {
@@ -646,7 +646,7 @@
    "label": "Gene",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "human",
    "source": "world/replicator-map/nodes.json",
    "description": "Biological inheritance.",
    "position": [
@@ -706,7 +706,7 @@
     -0.4
    ],
    "lod": 0,
-   "children": 0,
+   "children": 3,
    "unwritten": true
   },
   {
@@ -731,7 +731,7 @@
    "label": "Hydrothermal vents",
    "kind": "part",
    "domain": "physics",
-   "parent": "space-replicator-map",
+   "parent": "prebiotic-chemistry",
    "source": "world/replicator-map/nodes.json",
    "description": "One proposed setting for the origin of life.",
    "position": [
@@ -748,7 +748,7 @@
    "label": "Inner speech",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "human",
    "source": "world/replicator-map/nodes.json",
    "description": "Language turned inward. The voice in the head.",
    "position": [
@@ -1019,7 +1019,7 @@
     0
    ],
    "lod": 0,
-   "children": 0,
+   "children": 3,
    "unwritten": true
   },
   {
@@ -1176,7 +1176,7 @@
    "label": "Membrane",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "luca-common-ancestor",
    "source": "world/replicator-map/nodes.json",
    "description": "The boundary between inside and outside.",
    "position": [
@@ -1210,7 +1210,7 @@
    "label": "Mitochondrion",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "eukaryote",
    "source": "world/replicator-map/nodes.json",
    "description": "The merged bacterium. The cell’s power plant.",
    "position": [
@@ -1278,7 +1278,7 @@
    "label": "Nucleus",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "eukaryote",
    "source": "world/replicator-map/nodes.json",
    "description": "Where the DNA is kept.",
    "position": [
@@ -1338,7 +1338,7 @@
     0
    ],
    "lod": 1,
-   "children": 0,
+   "children": 2,
    "unwritten": true
   },
   {
@@ -1346,7 +1346,7 @@
    "label": "Photons",
    "kind": "part",
    "domain": "physics",
-   "parent": "space-replicator-map",
+   "parent": "particles-and-forces",
    "source": "world/replicator-map/nodes.json",
    "description": "Particles of light.",
    "position": [
@@ -1372,7 +1372,7 @@
     0.8
    ],
    "lod": 0,
-   "children": 0,
+   "children": 1,
    "unwritten": true
   },
   {
@@ -1389,7 +1389,7 @@
     0
    ],
    "lod": 1,
-   "children": 0,
+   "children": 2,
    "unwritten": true
   },
   {
@@ -1414,7 +1414,7 @@
    "label": "Protein",
    "kind": "part",
    "domain": "life",
-   "parent": "space-replicator-map",
+   "parent": "luca-common-ancestor",
    "source": "world/replicator-map/nodes.json",
    "description": "The cell’s machines.",
    "position": [
@@ -1431,7 +1431,7 @@
    "label": "Quarks",
    "kind": "part",
    "domain": "physics",
-   "parent": "space-replicator-map",
+   "parent": "particles-and-forces",
    "source": "world/replicator-map/nodes.json",
    "description": "Building blocks of protons and neutrons.",
    "position": [
@@ -1629,7 +1629,7 @@
    "domain": "world",
    "parent": null,
    "source": "world/replicator-map/",
-   "children": 66
+   "children": 53
   },
   {
    "id": "staged-code-review",
@@ -1701,7 +1701,7 @@
    "label": "Water",
    "kind": "part",
    "domain": "physics",
-   "parent": "space-replicator-map",
+   "parent": "prebiotic-chemistry",
    "source": "world/replicator-map/nodes.json",
    "description": "Solvent for the reactions.",
    "position": [
