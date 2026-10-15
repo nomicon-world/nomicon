@@ -6,8 +6,8 @@ export interface IntakeInput {
   files: ChangedFile[];
   /** Paths present at the base commit. */
   existingPaths: Iterable<string>;
-  /** Every commit in the pull request: whether it has a Signed-off-by trailer. */
-  commits: Array<{ sha: string; signedOff: boolean }>;
+  /** Every commit in the pull request: whether it has a Signed-off-by trailer, and whether its email is the author's (absent when unknown). */
+  commits: Array<{ sha: string; signedOff: boolean; signoffMatchesAuthor?: boolean }>;
 }
 
 export interface IntakeResult {
@@ -38,7 +38,10 @@ export function intake(input: IntakeInput, laws: Laws): IntakeResult {
   if (layer === "owner") reasons.push("change touches an owner-maintained file");
   if (layer === "ledger") reasons.push("change touches the ledger");
 
-  for (const c of input.commits) if (!c.signedOff) reasons.push(`commit ${c.sha.slice(0, 7)} lacks a Signed-off-by line`);
+  for (const c of input.commits) {
+    if (!c.signedOff) reasons.push(`commit ${c.sha.slice(0, 7)} lacks a Signed-off-by line`);
+    else if (c.signoffMatchesAuthor === false) reasons.push(`commit ${c.sha.slice(0, 7)}: the Signed-off-by email is not the commit's author email (git commit -s writes a matching one; see DCO.md)`);
+  }
 
   for (const p of pathProblems(files, input.existingPaths, laws)) reasons.push(`${p.path}: ${p.reason}`);
 

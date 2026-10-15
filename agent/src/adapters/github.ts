@@ -10,6 +10,11 @@ import type { Review } from "../tally.js";
 
 const SIGNOFF = /^Signed-off-by: .+ <.+@.+>$/m;
 
+/** The emails of every Signed-off-by line in a commit message, lowercased. */
+export function signoffEmails(message: string): string[] {
+  return [...message.matchAll(/^Signed-off-by: .+ <(.+@.+)>\s*$/gm)].map((m) => m[1]!.trim().toLowerCase());
+}
+
 /** Bytes of added lines per file, from a unified diff. */
 export function bytesChangedByFile(diff: string): Map<string, number> {
   const out = new Map<string, number>();
@@ -120,6 +125,8 @@ export class GitHubAdapter implements GitHubPort {
     const commits = await this.octokit.paginate(this.octokit.pulls.listCommits, { owner: this.owner, repo: this.repo, pull_number: n, per_page: 100 });
     return commits.map((c) => {
       const out: PullCommit = { sha: c.sha, signedOff: SIGNOFF.test(c.commit.message), verified: c.commit.verification?.verified === true };
+      const authorEmail = c.commit.author?.email?.trim().toLowerCase();
+      if (out.signedOff && authorEmail) out.signoffMatchesAuthor = signoffEmails(c.commit.message).includes(authorEmail);
       if (c.author?.id) out.authorId = c.author.id;
       if (c.committer?.id) out.committerId = c.committer.id;
       return out;

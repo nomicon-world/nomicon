@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { intake } from "../src/intake.js";
+import { signoffEmails } from "../src/adapters/github.js";
 import type { ChangedFile } from "../src/paths.js";
 import { laws } from "./helpers.js";
 
@@ -32,6 +33,17 @@ describe("intake", () => {
   it("rejects a missing sign-off", () => {
     const r = intake({ files: [f("world/a.md")], existingPaths: existing, commits: [{ sha: "deadbeef", signedOff: false }] }, laws);
     expect(r.reasons.join()).toContain("Signed-off-by");
+  });
+  it("rejects a sign-off whose email is not the author's, and passes when unknown", () => {
+    const bad = intake({ files: [f("world/a.md")], existingPaths: existing, commits: [{ sha: "deadbeef", signedOff: true, signoffMatchesAuthor: false }] }, laws);
+    expect(bad.reasons.join()).toContain("not the commit's author email");
+    expect(intake({ files: [f("world/a.md")], existingPaths: existing, commits: [{ sha: "deadbeef", signedOff: true, signoffMatchesAuthor: true }] }, laws).ok).toBe(true);
+    expect(intake({ files: [f("world/a.md")], existingPaths: existing, commits: [{ sha: "deadbeef", signedOff: true }] }, laws).ok).toBe(true);
+  });
+  it("reads every sign-off email from a commit message", () => {
+    const msg = "Add a file\n\nSigned-off-by: A Person <A@Example.org>\nSigned-off-by: Bot <1+bot@users.noreply.github.com>\n";
+    expect(signoffEmails(msg)).toEqual(["a@example.org", "1+bot@users.noreply.github.com"]);
+    expect(signoffEmails("Signed-off-by: no email")).toEqual([]);
   });
   it("rejects case collisions with existing paths and within the change", () => {
     expect(intake({ files: [f("readme.md")], existingPaths: existing, commits }, laws).reasons.join()).toContain("ignoring case");

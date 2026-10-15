@@ -19,7 +19,8 @@ export interface PullInfo {
 }
 
 /** `verified`: the platform verified the commit's signature as belonging to `authorId` (Law 1); an unverified author name is anyone's to write. */
-export interface PullCommit { sha: string; signedOff: boolean; authorId?: number; committerId?: number; verified?: boolean }
+/** signoffMatchesAuthor: whether a Signed-off-by email is the commit's author email; absent when unknown. */
+export interface PullCommit { sha: string; signedOff: boolean; signoffMatchesAuthor?: boolean; authorId?: number; committerId?: number; verified?: boolean }
 
 export interface IssueComment { id: number; account: number; login: string; body: string; createdAt: number }
 
