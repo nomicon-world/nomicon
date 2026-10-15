@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "computed_at": 1792089854,
-  "head_event": 54,
+  "computed_at": 1792103815,
+  "head_event": 55,
   "bootstrap": {
     "active": true,
     "began": 1791865881,
@@ -10,13 +10,13 @@
   "fee": {
     "base_micro": "1000000",
     "destination": "0xfdEd1371127F4c22e2Caf355fB058bDc5f579144",
-    "last_adjusted_at": 1792082162
+    "last_adjusted_at": 1792103815
   },
   "weights": {
     "30469278": {
       "login": "bobykhani",
       "mature_micro": "0",
-      "immature_micro": "993600",
+      "immature_micro": "992982",
       "last_vote_at": null
     },
     "107083616": {
