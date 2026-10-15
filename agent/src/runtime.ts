@@ -1035,9 +1035,13 @@ export class Runtime {
 
   /** The map with each contribution's progress (Law 14) on the points and links it made. */
   private annotatedMap(m: WorldMap, now: number): WorldMap {
-    const byPr = new Map(this.progress(now).contributions.map((c) => [c.pr, c] as const));
-    for (const n of m.nodes) { const c = n.pr ? byPr.get(n.pr) : n.entry_pr ? byPr.get(n.entry_pr) : undefined; if (c) n.progress = { label: c.label, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score }; }
-    for (const e of m.edges) { const c = e.pr ? byPr.get(e.pr) : undefined; if (c) e.progress = { label: c.label, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score }; }
+    const board = this.progress(now).contributions;
+    const byPr = new Map(board.map((c) => [c.pr, c] as const));
+    const byPath = new Map(board.flatMap((c) => c.paths.map((p) => [p, c] as const)));
+    const brief = (c: (typeof board)[number]) => ({ label: c.label, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score });
+    for (const n of m.nodes) { const c = n.pr ? byPr.get(n.pr) : n.entry ? byPath.get(n.entry) : undefined; if (c) n.progress = brief(c); }
+    // A starter-map link has no pull request of its own; the file that explains it does.
+    for (const e of m.edges) { const c = e.pr ? byPr.get(e.pr) : e.entry ? byPath.get(e.entry) : undefined; if (c) e.progress = brief(c); }
     return m;
   }
   private async publish(now: number): Promise<void> {

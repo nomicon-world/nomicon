@@ -38,3 +38,25 @@ describe("the site waits fourteen days for voted changes to the served files (Ar
     expect(github.branches["live"]).toBe("c5");
   });
 });
+
+describe("progress on the map (Law 14)", () => {
+  it("puts a contribution's progress on the starter-map point and link its file explains", async () => {
+    const clock = new FakeClock(t0), github = new FakeGitHub(clock), ledger = new Ledger(mkdtempSync(join(tmpdir(), "nomicon-prog-")));
+    const rt = new Runtime({ github, chain: new FakeChain(clock), screen: new FakeScreen(), oracle: new FixedOracle(), clock, ledger, publicBaseUrl: "https://pay.example", loadLaws: async () => ({ rawLaws, rawSchema }), termsCommit: async () => "tt".repeat(20) });
+    ledger.append(t0, "genesis", { head: "aa".repeat(20), laws_hash: loaded.hash, owner_accounts: [100], owner_keys: [], agent_account: 101, fee_destination: "0xdest", network: "eip155:84532" });
+    github.repoFiles["world/replicator-map/nodes.json"] = JSON.stringify({ nodes: [{ id: "stars", label: "Stars", kind: "phys", domain: "c" }, { id: "earth", label: "Earth", kind: "phys", domain: "c" }] });
+    github.repoFiles["world/replicator-map/relations.json"] = JSON.stringify({ relations: [{ from: "stars", to: "earth", type: "desc" }] });
+    await rt.tick();
+    for (const [path, body] of [["world/replicator-map/stars.md", "explains: stars"], ["world/replicator-map/stars--desc--earth.md", "explains: stars--desc--earth"]]) {
+      const pr = github.open({ id: 1, login: "alice" }, { [path]: `---\nnomicon:\n  ${body}\n---\n# X\n` });
+      await rt.tick();
+      await rt.onPaid({ pr: pr.number, tx: "0x" + String(pr.number).padStart(64, "0"), payer: "0xp", amountMicro: rt.quoteFor(pr.number)!.feeMicro, network: "eip155:84532" });
+      await rt.tick(); await rt.tick();
+      ledger.append(clock.now(), "owner_confirm", { pr: pr.number, reason: "t", by: 100 });
+      await rt.tick();
+    }
+    const map = JSON.parse(github.published.find((f) => f.path === "ledger/map.json")!.content);
+    expect(map.nodes.find((n: { id: string }) => n.id === "stars").progress).toMatchObject({ label: "builds", score: 1.25 });
+    expect(map.edges.find((e: { from: string }) => e.from === "stars").progress).toMatchObject({ label: "builds", score: 1.25 });
+  });
+});
