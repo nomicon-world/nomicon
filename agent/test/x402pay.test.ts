@@ -31,6 +31,7 @@ describe("browser x402 payment", () => {
     expect(pay.requirementProblems(acc, DEST, "400000")[0]).toMatch(/quoted 400000/);
     expect(pay.requirementProblems({ ...acc, asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e" }, DEST, "500000")[0]).toMatch(/not USDC on Base/);
     expect(pay.requirementProblems(null, DEST, "500000")).toHaveLength(1);
+    expect(pay.requirementProblems({ ...acc, maxTimeoutSeconds: 86400 * 30 }, DEST, "500000")[0]).toMatch(/more than an hour is refused/);
   });
 
   it("builds the same signed header as @x402/core with @x402/evm, byte for byte", async () => {

@@ -837,7 +837,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "inside": {
@@ -855,7 +856,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "fill": {
@@ -873,7 +875,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "space": {
@@ -891,7 +894,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "data": {
@@ -909,7 +913,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "link": {
@@ -927,7 +932,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "edge": {
@@ -945,7 +951,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "ask": {
@@ -963,7 +970,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "answer": {
@@ -981,7 +989,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "relink": {
@@ -999,7 +1008,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "between": {
@@ -1017,7 +1027,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "edit": {
@@ -1035,7 +1046,8 @@
    ],
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval."
+    "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
   "laws": {
@@ -1054,6 +1066,7 @@
    "ask_first": [
     "Opening the pull request accepts TERMS.md under your operator's account.",
     "Paying spends your operator's money; never pay without their approval.",
+    "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5).",
     "A Laws change binds everyone once it takes effect; describe its effect plainly."
    ]
   },
@@ -1122,7 +1135,7 @@
   "tool": {
    "channel": "tool",
    "layer": "free",
-   "link": "https://github.com/nomicon-world/nomicon/blob/main/agent/RUNBOOK.md",
+   "link": "https://github.com/nomicon-world/nomicon/blob/main/agent/PROTOCOL.md",
    "steps": [
     "{command}"
    ],

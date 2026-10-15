@@ -44,13 +44,14 @@ ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; fo
     <ul class="checks" id="wchecks"></ul>
   </section>
   <section class="card"><h2><span class="n">3</span>Pay</h2>
-    <p class="note">Paying accepts TERMS.md at the commit the quote names, and the fee is not refunded if the contribution is rejected. Do not push to the pull request after paying. Agents: your operator decides this step.</p>
+    <p class="note">Paying accepts TERMS.md at the commit the quote names, and the fee is not refunded if the contribution is rejected. The paying address and the transaction are public, and the ledger links them to your GitHub account for good (TERMS.md section 5). Do not push to the pull request after paying. Agents: your operator decides this step.</p>
+    <p class="lede">Your wallet will ask for a <b>signature</b>, not a transaction: a "TransferWithAuthorization" on the USDC contract on Base. It moves exactly the fee, once, to the destination above, and stops being valid about ten minutes later. The amount shows in USDC's smallest unit, so 1 USDC reads 1000000. This page lists every field before the wallet opens; reject the request if anything differs.</p>
     <div class="row"><button id="pay" disabled>Pay</button></div>
     <div id="log" aria-live="polite"></div>
   </section>
 </div>
 <script type="module">
-import * as X from "./x402pay.js?v=1";
+import * as X from "./x402pay.js?v=2";
 
 const REPO = "nomicon-world/nomicon";
 const $ = (id) => document.getElementById(id);
@@ -101,6 +102,8 @@ async function loadQuote() {
     ok = check(list, /^\d+(\.\d{1,6})?$/.test(q.fee_usdc || ""), `the fee is ${q.fee_usdc} USDC`) && ok;
     const mins = Math.round((Date.parse(q.expires) - Date.now()) / 60000);
     ok = check(list, mins > 0, mins > 0 ? `valid for about ${mins} more minutes` : "the quote has expired; the agent will issue a new one") && ok;
+    const headNow = pull.head && pull.head.sha;
+    ok = check(list, headNow === q.head, headNow === q.head ? `the pull request is still the version quoted (${String(q.head).slice(0, 7)})` : `the pull request changed after the quote (quoted ${String(q.head).slice(0, 7)}, now ${String(headNow).slice(0, 7)}): paying would pay for a version that is gone. The agent quotes the current one on its next pass`) && ok;
 
     const dl = $("quote"); dl.hidden = false;
     dl.innerHTML = [["Fee", `${q.fee_usdc} USDC` + (q.tax && q.tax !== "none" ? ` (includes ${q.tax})` : "")], ["Layer", `${q.layer}, base ${q.base_usdc} × ${q.multiplier}`],
@@ -138,6 +141,8 @@ async function payNow() {
   $("pay").disabled = true; $("log").textContent = "";
   try {
     if (Date.parse(quote.expires) <= Date.now()) throw new Error("the quote expired; check again for the new one");
+    const now = await (await fetch(`https://api.github.com/repos/${REPO}/pulls/${quote.pr}`, { headers: { accept: "application/vnd.github+json" } })).json();
+    if (now.state !== "open" || !now.head || now.head.sha !== quote.head) throw new Error("the pull request changed or closed since you checked the quote; check it again");
     log(`Asking ${quote.pay} for its payment terms...`);
     const first = await fetch(quote.pay, { method: "POST" });
     if (first.status !== 402) throw new Error(`expected 402 Payment Required, got ${first.status}: ${await first.text()}`);
@@ -149,8 +154,21 @@ async function payNow() {
     if (problems.length) throw new Error("not signing: " + problems.join("; "));
     log(`Terms match the quote: ${quote.fee_usdc} USDC to ${acc.payTo}.`);
     const auth = X.authorization(acc, account, Math.floor(Date.now() / 1000), X.newNonce());
-    log("Approve the signature in your wallet. It authorizes this one transfer, nothing else.");
-    const signature = await window.ethereum.request({ method: "eth_signTypedData_v4", params: [account, JSON.stringify(X.typedData(acc, auth))] });
+    const td = X.typedData(acc, auth);
+    log([
+      "Your wallet now asks for a signature. It must show exactly:",
+      `  type               ${td.primaryType}`,
+      `  chainId            ${td.domain.chainId} (Base)`,
+      `  verifyingContract  ${td.domain.verifyingContract} (USDC on Base)`,
+      `  from               ${auth.from} (you)`,
+      `  to                 ${auth.to} (the destination above)`,
+      `  value              ${auth.value} (= ${usdc(BigInt(auth.value))} USDC)`,
+      `  validAfter         ${auth.validAfter}`,
+      `  validBefore        ${auth.validBefore} (${new Date(Number(auth.validBefore) * 1000).toLocaleTimeString()})`,
+      `  nonce              ${auth.nonce.slice(0, 10)}... (random)`,
+      "Reject it in the wallet if anything differs.",
+    ].join("\n"));
+    const signature = await window.ethereum.request({ method: "eth_signTypedData_v4", params: [account, JSON.stringify(td)] });
     log("Signed. Sending the payment...");
     const res = await fetch(quote.pay, { method: "POST", headers: { "payment-signature": X.paymentHeader(required, acc, auth, signature) } });
     const text = await res.text(); let body = {}; try { body = JSON.parse(text); } catch {}

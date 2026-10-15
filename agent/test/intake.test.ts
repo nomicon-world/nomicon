@@ -66,3 +66,16 @@ describe("intake", () => {
     expect(intake({ files: [f("NOTICES.md", { status: "modified" })], existingPaths: existing, commits }, laws).ok).toBe(false);
   });
 });
+
+describe("intake rejection comment", () => {
+  it("points a sign-off failure to DCO.md with the fix, and other failures to the Laws", async () => {
+    const { intakeRejectComment } = await import("../src/runtime.js");
+    const s = intakeRejectComment(["commit abc1234 lacks a Signed-off-by line"]);
+    expect(s).toContain("DCO.md");
+    expect(s).toContain("--reset-author -s");
+    expect(s).not.toContain("Law 6");
+    const o = intakeRejectComment(["world/x.exe: file type not allowed in the World"]);
+    expect(o).toContain("LAWS.md Law 6 and Law 8");
+    expect(o).not.toContain("rebase");
+  });
+});

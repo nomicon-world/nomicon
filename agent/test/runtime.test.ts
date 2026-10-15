@@ -37,6 +37,25 @@ describe("runtime end to end", () => {
   let h: ReturnType<typeof harness>;
   beforeEach(() => { h = harness(); });
 
+  it("withdraws a quote at once when the pull request changes, and quotes the new head on the next pass", async () => {
+    const pr = h.github.open(A, { "world/notes/a.md": "# A\n\nhello" });
+    await h.rt.tick();
+    const first = h.rt.quoteFor(pr.number)!;
+    expect(first.head).toBe(pr.headSha);
+    expect(pr.comments[0]).toContain("What the agent read from your file headers");
+    expect(pr.comments[0]).toContain('- `world/notes/a.md`: appears on the map as "A"');
+    h.github.push(pr.number);
+    expect(h.rt.quoteFor(pr.number)!.currentHead).toBe(first.head); // the endpoint knows only what the last pass saw
+    await h.rt.tick();
+    expect(h.ledger.events.some((e) => e.type === "quote_lapsed" && e["reason"] === "head changed")).toBe(true);
+    expect(h.rt.quoteFor(pr.number)).toBeNull();
+    expect(pr.comments.at(-1)).toContain("changed after the quote");
+    await h.rt.tick();
+    const second = h.rt.quoteFor(pr.number)!;
+    expect(second.head).toBe(pr.headSha);
+    expect(second.head).not.toBe(first.head);
+  });
+
   it("quotes, takes payment, opens a vote, and during bootstrap waits for the owner then merges and mints weight", async () => {
     const pr = h.github.open(A, { "world/notes/a.md": "# A\n\nhello" });
     await h.rt.tick();

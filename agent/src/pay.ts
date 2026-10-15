@@ -15,7 +15,8 @@ import type { LedgerEvent } from "./ledger.js";
 import type { QuestionsIndex } from "./questions.js";
 import { RateLimiter, clientIp } from "./limits.js";
 
-export interface OpenQuote { pr: number; feeMicro: bigint; destination: string; expires: number }
+/** head: the commit the quote covers; currentHead: the pull request's head as the agent last saw it, when known. */
+export interface OpenQuote { pr: number; feeMicro: bigint; destination: string; expires: number; head?: string; currentHead?: string }
 
 /** Who verifies and settles payments: a plain facilitator URL (x402.org settles testnets only), or Coinbase's, which settles Base mainnet and needs a CDP API key. */
 export type FacilitatorChoice = { kind: "url"; url: string } | { kind: "cdp"; apiKeyId: string; apiKeySecret: string };
@@ -136,6 +137,7 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
     const q = opts.quoteFor(pr);
     if (!q) return json(404, { error: "no open quote for this pull request" });
     if (q.expires < opts.now()) return json(410, { error: "quote expired; the agent will issue a new one" });
+    if (q.head && q.currentHead && q.head !== q.currentHead) return json(409, { error: "the pull request changed after this quote; the agent withdraws it and quotes the current version on its next pass" });
     const ctx: HTTPRequestContext = { adapter: adapterFor(req, url), path: url.pathname, method: "POST" };
     try {
       const result = await http.processHTTPRequest(ctx);

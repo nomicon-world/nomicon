@@ -96,6 +96,8 @@ export interface Question {
   answers: Array<{ path: string; by: number; login: string; merged_at: number; pr: number; direct?: true }>;
   /** Committed directly by the owner during bootstrap rather than merged: no pull request, no vote. */
   direct?: true;
+  /** The question's id on the World map, for /job?node= (ids differ from file paths). */
+  node?: string;
 }
 
 export interface QuestionsIndex { version: 1; computed_at: number; open: Question[]; answered: Question[] }

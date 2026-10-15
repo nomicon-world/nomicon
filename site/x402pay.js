@@ -23,6 +23,7 @@ export function requirementProblems(acc, destination, feeMicro) {
   if (BigInt(acc.amount) !== BigInt(feeMicro)) out.push(`it asks for ${acc.amount} micro-USDC, not the quoted ${feeMicro}`);
   if (String(acc.asset).toLowerCase() !== BASE_USDC.toLowerCase()) out.push(`it names asset ${acc.asset}, not USDC on Base`);
   if (!acc.extra || !acc.extra.name || !acc.extra.version) out.push("it lacks the token's signing domain");
+  if (!(Number(acc.maxTimeoutSeconds) > 0 && Number(acc.maxTimeoutSeconds) <= 3600)) out.push(`it asks for a signature valid ${acc.maxTimeoutSeconds} seconds; more than an hour is refused`);
   return out;
 }
 

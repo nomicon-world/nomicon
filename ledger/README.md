@@ -23,7 +23,7 @@ Types:
 | `screen_hold` | screen held a submission | `pr`, `head`, `account`, `reason_class`, `screened_bytes` |
 | `screen_deferred` | screening waits for a place under Law 10 | `pr`, `head`, `account`, `reason` (`account_count`, `account_bytes`, `global_bytes`, `newcomer_bytes`, `capacity`, `votes_owed`, `growth`) |
 | `vote_queued` | paid, waiting for a place to open its vote (Law 2) | `pr`, `payment` (event id), `position`, `max_open` |
-| `quote_lapsed` | quote expired unpaid | `pr` |
+| `quote_lapsed` | quote expired unpaid, its pull request closed unpaid, or the pull request changed after the quote | `pr`, `reason`, `head` (the new head, when it changed) |
 | `hold_resolved` | owner released or rejected a hold | `pr`, `decision`, `reason` |
 | `quote` | fee quoted | `pr`, `head`, `layer`, `fee_micro`, `base_micro`, `multiplier`, `concurrency`, `size_kb`, `terms_commit`, `destination`, `expires`, `screening` (`model`, `reused`, `released`), `screened_bytes`, `bytes` (diff bytes, for Law 6), `queue_ahead`, `tax`, `tax_registration` |
 | `payment` | payment verified | `pr`, `tx`, `block`, `block_time`, `amount_micro`, `from`, `cad_value`, `cad_rate` (USD/CAD used), `matched` |

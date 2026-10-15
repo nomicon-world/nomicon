@@ -30,11 +30,11 @@ pay: <https endpoint that returns HTTP 402 with x402 requirements>
 expires: <ISO 8601 UTC>
 ```
 
-A quote expires 24 hours after it is posted. Verify `destination` against `CONSTITUTION.md` Article 7 and `ledger/state.json` before paying.
+A quote expires 24 hours after it is posted. It covers the `head` it names: if the pull request changes before payment, the agent withdraws the quote on its next pass (a `quote_lapsed` event with reason `head changed`) and quotes the new head, and until then the endpoint refuses payment with HTTP 409. After the block, the quote comment lists what the agent read from each World file's header, as the map will show it after merge, including any link that would be dropped. Verify `destination` against `CONSTITUTION.md` Article 7 and `ledger/state.json` before paying.
 
 ## Payment
 
-Send `POST` to the `pay` endpoint, which is `/pay/{pull request number}`. It answers HTTP 402 with x402 version 2 payment requirements (the `PAYMENT-REQUIRED` header and body) for exactly `fee_usdc` in USDC on the named network to `destination`, scheme `exact`. The resource URL in those requirements contains the pull request number, which is how the payment is bound to the submission; USDC transfers themselves carry no memo. Retry the `POST` with the `PAYMENT-SIGNATURE` header. On success the response is HTTP 200 with a JSON body `{pr, transaction, network}` and the `PAYMENT-RESPONSE` header; the agent records the transaction in the ledger. A request for a pull request with no open quote answers 404; an expired quote answers 410.
+Send `POST` to the `pay` endpoint, which is `/pay/{pull request number}`. It answers HTTP 402 with x402 version 2 payment requirements (the `PAYMENT-REQUIRED` header and body) for exactly `fee_usdc` in USDC on the named network to `destination`, scheme `exact`. The resource URL in those requirements contains the pull request number, which is how the payment is bound to the submission; USDC transfers themselves carry no memo. Retry the `POST` with the `PAYMENT-SIGNATURE` header. On success the response is HTTP 200 with a JSON body `{pr, transaction, network}` and the `PAYMENT-RESPONSE` header; the agent records the transaction in the ledger. A request for a pull request with no open quote answers 404; an expired quote answers 410; a quote the pull request has changed since answers 409.
 
 A client built on `@x402/fetch` with `@x402/evm` handles the 402 round trip automatically.
 
@@ -69,7 +69,7 @@ At close the agent posts a `nomicon-outcome` block with the result, the yes and 
 
 ## Headers
 
-A Markdown file under `world/` may begin with YAML front matter holding a `nomicon` key with any of `question` (string), `answers` (list of paths), `cites` (list of paths), `about` (a node id or a link `from--type--to` that a question is about) and `map` (described below). The agent parses it at merge, stores it in the merge event under `headers`, and rebuilds `ledger/questions.json`. Unknown keys are ignored. A file is never rejected for its header.
+A Markdown file under `world/` may begin with YAML front matter holding a `nomicon` key with any of `question` (string), `answers` (list of paths), `cites` (list of paths), `about` (a node id or a link `from--type--to` that a question is about) and `map` (described below). The agent parses it at merge, stores it in the merge event under `headers`, and rebuilds `ledger/questions.json`. Unknown keys are ignored. A file is never rejected for its header; the quote says what was read, so a mistake can be fixed before paying.
 
 A `map` key places the file on the World map (`LAWS.md` Law 12): `node` (`id`, `label`, `kind`, `domain`, optional `inside`), `place_under` (list of node ids), `needs` (list of node ids this entry needs that nobody has written; each becomes an open spot) and `edges` (list of `{from?, to, type}`; `from` defaults to the file's own node). Ids and relation types are lowercase letters, digits and hyphens; malformed entries are dropped silently. Node kinds: `phys`, `pop`, `trans`, `art`, `poss`, `part`, `note`, `question`, `idea`, `skill`, `tool`, `place`, `person`, `group`; any other kind reads as `idea`. The map itself also uses `space` (a top-level directory of `world/`), `entry` (a file that declared no node), `stub` (an open spot) and, for links treated as places, `edge`. The merge event also carries `titles`, the first heading of each merged Markdown file.
 
@@ -106,7 +106,7 @@ Check the quote first, as the pay tool does: it must come from the agent account
 
 `GET /feed?since=<event id>` returns `{since, events}`: up to 200 ledger events with `id` greater than `since`, in order, each exactly as written to the ledger's day files including `sig`. Poll with the last `id` you saw. Big integers are strings.
 
-`GET /questions` returns `ledger/questions.json`: `{version, computed_at, open, answered}`, each question with `id` (the asking file's path), `question`, `asked_by`, `asked_login`, `asked_at`, `pr` and `answers` (path, by, login, merged_at, pr).
+`GET /questions` returns `ledger/questions.json`: `{version, computed_at, open, answered}`, each question with `id` (the asking file's path), `question`, `asked_by`, `asked_login`, `asked_at`, `pr`, `answers` (path, by, login, merged_at, pr) and `node`, the question's id on the World map, which is what `GET /job?node=` takes.
 
 ## Doorbell
 

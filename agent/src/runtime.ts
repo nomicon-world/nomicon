@@ -18,6 +18,7 @@ import { parseHeader, buildIndex, indexFromFiles, titleOf, type Header, type Que
 import { buildWorldMap, type MapFile, type SourceEdge, type SourceNode, type WorldMap } from "./worldmap.js";
 import { edgeNode, jobCard, type Catalog } from "./jobs.js";
 import { mentionTargets } from "./notify.js";
+import { headerReport } from "./headercheck.js";
 import type { Notifier } from "./notifier.js";
 
 export interface RuntimeDeps {
@@ -130,14 +131,23 @@ export class Runtime {
   feed(since: number, limit = 200): LedgerEvent[] { return this.events.filter((e) => e.id > since).slice(0, limit); }
 
   /** Law 12: the open-questions index. */
-  questionsIndex(now = this.d.clock.now()): QuestionsIndex { return this.treeLoaded ? indexFromFiles(this.worldFiles(now), now) : buildIndex(this.state(now).questions, now); }
+  questionsIndex(now = this.d.clock.now()): QuestionsIndex {
+    const files = this.worldFiles(now);
+    const idx = this.treeLoaded ? indexFromFiles(files, now) : buildIndex(this.state(now).questions, now);
+    const nodeOf = new Map(buildWorldMap(files, this.replicatorSource ?? null, now).nodes.filter((n) => n.source && !n.stub).map((n) => [n.source!, n.id] as [string, string]));
+    for (const q of [...idx.open, ...idx.answered]) { const id = nodeOf.get(q.id); if (id) q.node = id; }
+    return idx;
+  }
 
   /** Current open quote for the payment endpoint. */
   quoteFor(pr: number): OpenQuote | null {
     const p = this.phase(pr);
     if (p.kind !== "quoted") return null;
     const q = p.quote;
-    return { pr, feeMicro: BigInt(String(q["fee_micro"])), destination: String(q["destination"]), expires: Number(q["expires"]) };
+    const out: OpenQuote = { pr, feeMicro: BigInt(String(q["fee_micro"])), destination: String(q["destination"]), expires: Number(q["expires"]), head: String(q["head"]) };
+    const seen = this.heads.get(pr);
+    if (seen) out.currentHead = seen;
+    return out;
   }
 
   /** Called by the payment endpoint after settlement. */
@@ -180,6 +190,7 @@ export class Runtime {
     await this.maybeAdjustFee(laws, now);
     await this.maybeEndBootstrap(now);
     const pulls = await this.d.github.listOpenPulls();
+    this.heads = new Map(pulls.map((p) => [p.number, p.headSha] as [number, string]));
     // Closes are processed in the order their windows closed, then by number, so an earlier submission wins a conflict.
     // Order of service: votes by their close time, then paid submissions in order of payment, then submissions
     // never quoted before those whose quote lapsed, then by number. So places go oldest first (Law 2, Law 5).
@@ -223,6 +234,8 @@ export class Runtime {
   }
   /** Set when main's World files change without a ledger event, such as an owner commit during bootstrap. */
   private mapDirty = false;
+  /** Each open pull request's head as of the last pass, so the payment endpoint can refuse a quote the pull request has outgrown. */
+  private heads = new Map<number, string>();
 
   private async handlePull(pr: PullInfo, laws: Laws, now: number): Promise<void> {
     const p = this.phase(pr.number);
@@ -237,6 +250,13 @@ export class Runtime {
         }
         return;
       case "quoted":
+        // Law 8: the vote is on the quoted head. A push after the quote voids it at once, so nobody pays for a head
+        // that would be withdrawn when the vote opens; the new head is screened and quoted on the next pass.
+        if (pr.headSha !== String(p.quote["head"])) {
+          this.d.ledger.append(now, "quote_lapsed", { pr: pr.number, reason: "head changed", head: pr.headSha });
+          await this.d.github.comment(pr.number, "This pull request changed after the quote, so the quote is withdrawn: paying it would pay for a version that is no longer here. A new quote for the current version follows on the agent's next pass. Nothing was charged.");
+          return;
+        }
         if (Number(p.quote["expires"]) < now) {
           this.d.ledger.append(now, "quote_lapsed", { pr: pr.number });
           await this.d.github.comment(pr.number, "The quote lapsed unpaid. A new quote will be issued on the agent's next pass while this pull request stays open.");
@@ -299,7 +319,7 @@ export class Runtime {
     const result = intake({ files, existingPaths: existing, commits }, laws);
     if (!result.ok) {
       this.d.ledger.append(now, "intake_reject", { pr: pr.number, account: pr.author.id, reasons: result.reasons });
-      await this.d.github.comment(pr.number, "Not accepted at intake:\n\n" + result.reasons.map((r) => "- " + r).join("\n") + "\n\nSee LAWS.md Law 6 and Law 8. No fee was charged.");
+      await this.d.github.comment(pr.number, intakeRejectComment(result.reasons));
       await this.d.github.close(pr.number);
       return;
     }
@@ -365,7 +385,15 @@ export class Runtime {
       await this.d.github.comment(pr.number, `A held fee from pull request #${held.pr} covers this submission. The vote opens on the agent's next pass.`);
       return;
     }
-    await this.d.github.comment(pr.number, quoteComment(ev, laws, this.d.publicBaseUrl));
+    // Law 12: say what the headers will do on the map, so a mistake is fixed before paying, not found after merge.
+    let read: string[] = [];
+    try {
+      const md = files.filter((f) => f.status !== "removed" && f.path.startsWith("world/") && f.path.toLowerCase().endsWith(".md"));
+      const changed = await Promise.all(md.map(async (f) => ({ path: f.path, content: await this.d.github.readFile(pr.headSha, f.path) })));
+      const removed = files.flatMap((f) => (f.status === "removed" ? [f.path] : f.previousPath ? [f.previousPath] : []));
+      read = headerReport(changed, removed, this.worldFiles(now), await this.replicator(), pr.number, now);
+    } catch (e) { this.log(`pr ${pr.number}: header report skipped: ${(e as Error).message}`); }
+    await this.d.github.comment(pr.number, quoteComment(ev, laws, this.d.publicBaseUrl, read));
   }
 
   /** Model screenings in the last day whose submission is unpaid: per account, in total, and the newcomers' share; `known` holds accounts that have ever paid. */
@@ -526,7 +554,10 @@ export class Runtime {
       votes: result.votes.map((v) => ({ account: v.account, yes: v.yes, weight_micro: v.weightMicro })),
     });
     const summary = `Tally: ${result.result}. Yes voters ${result.yesVoters} of quorum ${result.quorum}. Yes weight ${micro(result.yesMicro)}, no weight ${micro(result.noMicro)}${result.tie ? ". Equal weight is no decision (Law 2)" : ""}.`;
-    if (recorded === "await_owner") { await this.d.github.comment(pr.number, summary + " Bootstrap is active: this merges only when the owner confirms, and the owner may reject."); return; }
+    if (recorded === "await_owner") {
+      await this.d.github.comment(pr.number, `The vote closed. Bootstrap is active, so the count does not decide: this merges only when the owner confirms, and the owner may reject (Constitution Article 3). For the record, the count was: ${summary}`);
+      return;
+    }
     if (recorded === "merge") { await this.doMerge(pr.number, String(open["head"]), quote, laws, now, pr.author, summary); return; }
     if (recorded === "reject") { await this.d.github.comment(pr.number, summary + " The fee is forfeit (Law 5)."); await this.d.github.close(pr.number); return; }
     await this.expire(pr.number, quote, laws, now, summary + (result.tie ? "" : " Quorum was not reached."));
@@ -882,7 +913,13 @@ export class Runtime {
       if (!e) return { error: `no link ${nodeId} on the map` };
       return jobCard(cat, option, edgeNode(e, byId as never) as never, byId as never, this.state(now).fee.base_micro, MAP_URL);
     }
-    if (nodeId) { node = byId.get(nodeId) ?? null; if (!node) return { error: `no node ${nodeId} on the map` }; }
+    if (nodeId) {
+      node = byId.get(nodeId) ?? null;
+      if (!node) {
+        const bySource = m.nodes.find((n) => n.source === nodeId && !n.stub);
+        return { error: bySource ? `no node ${nodeId} on the map: that is a file path; its node id is ${bySource.id}` : `no node ${nodeId} on the map; node ids are in ledger/map.json, and each question in ledger/questions.json names its node` };
+      }
+    }
     return jobCard(cat, option, node, byId, this.state(now).fee.base_micro, MAP_URL);
   }
   /** Up to three jobs near what a merge added: open spots and open questions beside it, else ways to build on it. */
@@ -944,7 +981,18 @@ const OWNER_CAUSED_HOLD_DAYS = 365;
 /** A voter may change its review this many times during a window and have each change recorded; the final state is always recorded at close. */
 const MAX_RECORDED_REVIEWS_PER_VOTER = 10;
 
-export function quoteComment(q: LedgerEvent, laws: Laws, base: string): string {
+/** The comment closing a pull request that fails intake: the reasons, where the rules are, and how to fix a missing or mismatched sign-off. */
+export function intakeRejectComment(reasons: string[]): string {
+  const signoff = reasons.some((r) => r.includes("Signed-off-by"));
+  const other = reasons.some((r) => !r.includes("Signed-off-by"));
+  const refs = [signoff ? "DCO.md for the sign-off" : "", other ? "LAWS.md Law 6 and Law 8 for what a submission may change" : ""].filter(Boolean).join("; ");
+  const fix = signoff
+    ? "\n\nTo fix the sign-off: set git's user.name and user.email to your account (DCO.md says which), then on your branch run `git rebase HEAD~<number of your commits> --exec \"git commit --amend --no-edit --reset-author -s\"` (for a single commit, `git commit --amend --no-edit --reset-author -s`), push it, and open a new pull request. A closed pull request is not screened again."
+    : "";
+  return "Not accepted at intake:\n\n" + reasons.map((r) => "- " + r).join("\n") + `\n\nSee ${refs}. No fee was charged.` + fix;
+}
+
+export function quoteComment(q: LedgerEvent, laws: Laws, base: string, read: string[] = []): string {
   const lines = [
     `pr: ${q["pr"]}`, `head: ${q["head"]}`, `layer: ${q["layer"]}`,
     `fee_usdc: ${micro(BigInt(String(q["fee_micro"])))}`, `base_usdc: ${micro(BigInt(String(q["base_micro"])))}`,
@@ -953,7 +1001,7 @@ export function quoteComment(q: LedgerEvent, laws: Laws, base: string): string {
     `pay: ${base.replace(/\/$/, "")}/pay/${q["pr"]}`, `expires: ${iso(Number(q["expires"]))}`,
     `queue_ahead: ${q["queue_ahead"] ?? 0}`, `tax: ${q["tax"] ?? "none"}`, `tax_registration: ${q["tax_registration"] ?? "none"}`,
   ];
-  return `Paying this quote accepts TERMS.md at commit ${q["terms_commit"]}, with the owner named in NOTICES.md; the fee is not refunded on rejection and is held on expiry as LAWS.md Law 5 says.\n\n` + "```nomicon-quote\n" + lines.join("\n") + "\n```\nPay within the validity window with USDC on Base via x402 (see agent/PROTOCOL.md); with a browser wallet, at " + PAY_PAGE + "#pr=" + q["pr"] + ". Paying is acceptance of TERMS.md at the commit shown. Verify the destination against CONSTITUTION.md Article 7 before paying.";
+  return `Paying this quote accepts TERMS.md at commit ${q["terms_commit"]}, with the owner named in NOTICES.md; the fee is not refunded on rejection and is held on expiry as LAWS.md Law 5 says.\n\n` + "```nomicon-quote\n" + lines.join("\n") + "\n```\nPay within the validity window with USDC on Base via x402 (see agent/PROTOCOL.md); with a browser wallet, at " + PAY_PAGE + "#pr=" + q["pr"] + ". Paying is acceptance of TERMS.md at the commit shown. Verify the destination against CONSTITUTION.md Article 7 before paying." + (read.length ? "\n\nWhat the agent read from your file headers, as the map will show them after merge. Check it before paying; to change anything, push a fix, and this quote is withdrawn and a new one follows:\n\n" + read.map((r) => "- " + r).join("\n") : "");
 }
 
 export function micro(m: bigint): string {

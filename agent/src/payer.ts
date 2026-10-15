@@ -42,9 +42,11 @@ export function parseQuote(body: string): Quote | null {
 }
 
 /** Every reason not to pay this quote; empty when it may be paid. */
-export function quoteProblems(q: Quote, pr: number, destinationInForce: string, now: number): string[] {
+export function quoteProblems(q: Quote, pr: number, destinationInForce: string, now: number, pull?: { state: string; head: string }): string[] {
   const out: string[] = [];
   if (Number(q["pr"]) !== pr) out.push(`the quote names pull request ${q["pr"]}, not ${pr}`);
+  if (pull && pull.state !== "open") out.push(`pull request #${pr} is ${pull.state}: nothing to pay`);
+  if (pull && pull.state === "open" && pull.head !== q["head"]) out.push(`pull request #${pr} changed after the quote (quoted ${String(q["head"]).slice(0, 7)}, now ${pull.head.slice(0, 7)}); paying would pay for a version that is gone, and the agent quotes the current one on its next pass`);
   const network = q["network"] ?? "";
   if (!USDC[network]) out.push(`unknown network ${network}`);
   let dest = "";
@@ -107,7 +109,9 @@ async function main(): Promise<void> {
   const q = quotes[quotes.length - 1];
   if (!q) fail(`no quote from the agent account (${agentId}) on pull request #${pr} yet; the agent posts one a few minutes after screening`);
 
-  const problems = quoteProblems(q, pr, destInForce, Date.now());
+  const pullInfo = (await gh(`/repos/${repo}/pulls/${pr}`)) as { state?: string; merged?: boolean; head?: { sha?: string } };
+  const pull = { state: pullInfo.merged ? "merged" : (pullInfo.state ?? "unknown"), head: pullInfo.head?.sha ?? "" };
+  const problems = quoteProblems(q, pr, destInForce, Date.now(), pull);
   if (problems.length) fail(problems.join("; "));
 
   const network = q["network"]!;

@@ -43,4 +43,11 @@ describe("nomicon-pay quote checks", () => {
     expect(quoteProblems(parseQuote(comment({ ...good, network: "eip155:1" }))!, 7, DEST, NOW).join()).toMatch(/unknown network/);
     expect(quoteProblems(parseQuote(comment({ ...good, fee_usdc: "1e9" }))!, 7, DEST, NOW).join()).toMatch(/not an amount/);
   });
+
+  it("refuses a pull request that changed after the quote, or is no longer open", () => {
+    const q = parseQuote(comment({ ...good, head: "aaaaaaa1111" }))!;
+    expect(quoteProblems(q, 7, DEST, NOW, { state: "open", head: "aaaaaaa1111" })).toEqual([]);
+    expect(quoteProblems(q, 7, DEST, NOW, { state: "open", head: "bbbbbbb2222" }).join()).toMatch(/changed after the quote \(quoted aaaaaaa, now bbbbbbb\)/);
+    expect(quoteProblems(q, 7, DEST, NOW, { state: "merged", head: "aaaaaaa1111" }).join()).toMatch(/is merged: nothing to pay/);
+  });
 });
