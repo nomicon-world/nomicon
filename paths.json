@@ -1074,7 +1074,7 @@
    "channel": "pull_request",
    "layer": "world",
    "file": "world/questions/{slug}.md",
-   "header": "---\nnomicon:\n  question: \"<your question, one line>\"\n  about: {node}\n  map:\n    node: { id: {new_id}, label: \"<your question>\", kind: question }\n    place_under: [{node}]\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
+   "header": "---\nnomicon:\n  question: \"<your question, one line>\"\n  about: {node}\n  map:\n    node: { id: {new_id}, label: \"<your question>\", kind: question }\n    needs: []  # ids of things this entry needs that nobody has written yet; each becomes an open spot for the next contributor\n---",
    "pr_title": "World: question, <your question>",
    "steps": [
     "Fork the repository and create {file} with the header below; write your content under it.",

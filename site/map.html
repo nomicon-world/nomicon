@@ -257,6 +257,7 @@ function draw() {
   for (const e of MAP.edges) {
     const a = anchorIn(level, e.from), b = anchorIn(level, e.to);
     if (!a && !b) continue;
+    if (a && a === b) continue; // both ends inside the same point: drawn when you enter it
     const key = a + "|" + b + "|" + e.type; if (seen.has(key)) continue; seen.add(key);
     const [dash, w] = EDGE_STYLE[e.type] || [[1, 3], 1];
     ctx.setLineDash(dash.map((d) => d * r)); ctx.lineWidth = w * r * Math.max(0.6, Math.min(1.4, view.s));

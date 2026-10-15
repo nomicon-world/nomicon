@@ -29,7 +29,7 @@ describe("the map reads main (Law 12)", () => {
     await h.rt.tick();
     const map = published(h.github, "ledger/map.json");
     const reply = map.nodes.find((n: { id: string }) => n.id === "reply");
-    expect(reply).toMatchObject({ direct: true, by: 100, parent: "space-a" });
+    expect(reply).toMatchObject({ direct: true, by: 100, parent: "file-q-ask" }); // an answer sits inside its question
     const qs = published(h.github, "ledger/questions.json");
     expect(qs.answered.map((q: { id: string }) => q.id)).toEqual(["world/q/ask.md"]);
   });

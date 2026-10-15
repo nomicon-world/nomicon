@@ -148,11 +148,24 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
       pendingAbout.push([f.about, qid]);
     }
   }
+  // Questions and answers sit where they belong: a question inside the point it is about (a link's first end, a rule),
+  // an answer inside the first question it answers. The files stay in world/questions and world/answers, whose paths
+  // are their ids; only the drawing moves. A declared `inside` wins, and the cycle check below applies to both.
+  for (const f of ordered) {
+    const id = nodeOfPath.get(f.path); if (!id || inside.has(id)) continue;
+    if (f.question && f.about) {
+      const target = f.about.includes("--") ? f.about.split("--")[0]! : f.about;
+      if (target !== id && nodes.has(target) && !nodes.get(target)!.stub) inside.set(id, target);
+    } else if (f.answers.length && nodes.get(id)!.source === f.path) {
+      const q = f.answers.map((p) => nodeOfPath.get(p)).find((x) => x && x !== id);
+      if (q) inside.set(id, q);
+    }
+  }
   // Containment, refusing cycles and unknown containers (those fall back to the file's space).
   for (const [child, parent] of inside) {
     if (!nodes.has(parent)) { conflicts.push({ path: nodes.get(child)!.source ?? child, problem: `inside: ${parent} names no node; placed in its space` }); continue; }
     let p: string | null = parent, cycle = false;
-    for (let i = 0; p && i < 64; i++) { if (p === child) { cycle = true; break; } p = inside.get(p) ?? null; }
+    for (let i = 0; p && i < 64; i++) { if (p === child) { cycle = true; break; } p = inside.get(p) ?? nodes.get(p)?.parent ?? null; }
     if (cycle) { conflicts.push({ path: nodes.get(child)!.source ?? child, problem: `inside: ${parent} would make a loop; placed in its space` }); inside.delete(child); continue; }
     nodes.get(child)!.parent = parent;
   }
@@ -174,7 +187,8 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   // The open work: starter-map points and links nobody has written about yet, alongside open questions and spots.
   for (const n of nodes.values()) if (n.source === "world/replicator-map/nodes.json" && !n.entry) n.unwritten = true;
   for (const e of uniq) if (e.source === "world/replicator-map/relations.json" && !e.entry) e.unexplained = true;
-  const all = [...nodes.values()];
+  // A folder space left empty, now that its questions or answers sit elsewhere, is not drawn.
+  const all = [...nodes.values()].filter((n) => !(n.kind === "space" && !n.layer && n.children === 0 && (n.source ?? "").startsWith("world/")));
   const frontier: Frontier = {
     open_questions: all.filter((n) => n.kind === "question" && !n.answered).length,
     open_spots: all.filter((n) => n.stub).length,
