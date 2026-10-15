@@ -19,6 +19,8 @@ import { buildWorldMap, type MapFile, type SourceEdge, type SourceNode, type Wor
 import { edgeNode, jobCard, type Catalog } from "./jobs.js";
 import { mentionTargets } from "./notify.js";
 import { headerReport } from "./headercheck.js";
+import { extended, pausedAt, pausesOf, type Pause, type PauseScope } from "./pauses.js";
+import { heldBack } from "./live.js";
 import type { Notifier } from "./notifier.js";
 
 export interface RuntimeDeps {
@@ -37,6 +39,8 @@ export interface RuntimeDeps {
   notifier?: Notifier;
   /** Shown on every quote once the owner is registered for GST/HST (Law 5). */
   tax?: { included: string; registration: string };
+  /** Article 8: the branch the site is served from, moved forward only as voted changes to the served files come of age. Unset: not managed. */
+  liveBranch?: string;
 }
 
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -144,7 +148,7 @@ export class Runtime {
     const p = this.phase(pr);
     if (p.kind !== "quoted") return null;
     const q = p.quote;
-    const out: OpenQuote = { pr, feeMicro: BigInt(String(q["fee_micro"])), destination: String(q["destination"]), expires: Number(q["expires"]), head: String(q["head"]) };
+    const out: OpenQuote = { pr, feeMicro: BigInt(String(q["fee_micro"])), destination: String(q["destination"]), expires: this.due(Number(q["expires"]), q.at, this.d.clock.now()), head: String(q["head"]) };
     const seen = this.heads.get(pr);
     if (seen) out.currentHead = seen;
     return out;
@@ -171,7 +175,7 @@ export class Runtime {
     const arrival = info?.blockTime ?? now;
     // Law 5: a payment the agent accepted while the quote was open is on time whatever its block timestamp;
     // one recorded later is on time if its block preceded the quote's expiry.
-    const matched = n.amountMicro >= quoted && (n.acceptedWhileOpen === true || arrival <= Number(p.quote["expires"]));
+    const matched = n.amountMicro >= quoted && (n.acceptedWhileOpen === true || arrival <= this.due(Number(p.quote["expires"]), p.quote.at, arrival));
     const cad = await this.d.oracle.usdcToCad();
     const amountCad = ((Number(n.amountMicro) / 1_000_000) * Number(cad)).toFixed(2);
     this.d.ledger.append(now, "payment", {
@@ -187,8 +191,15 @@ export class Runtime {
     const laws = await this.refreshLaws();
     const now = this.d.clock.now();
     if (!this.events.some((e) => e.type === "genesis")) { this.log("no genesis event; run `nomicon genesis` first"); return; }
-    await this.maybeAdjustFee(laws, now);
     await this.maybeEndBootstrap(now);
+    // Constitution Article 8: a pause of the whole agent stops quotes, votes, merges and fee adjustment; deadlines wait with it.
+    if (this.paused("all", now)) {
+      this.log("paused under Constitution Article 8: nothing runs until the owner resumes");
+      await this.guard("world tree", async () => { if (await this.refreshTree(now)) this.mapDirty = true; });
+      await this.publish(now);
+      return;
+    }
+    await this.maybeAdjustFee(laws, now);
     const pulls = await this.d.github.listOpenPulls();
     this.heads = new Map(pulls.map((p) => [p.number, p.headSha] as [number, string]));
     // Closes are processed in the order their windows closed, then by number, so an earlier submission wins a conflict.
@@ -231,11 +242,29 @@ export class Runtime {
     }
     await this.guard("world tree", async () => { if (await this.refreshTree(now)) this.mapDirty = true; });
     await this.publish(now);
+    await this.guard("site", () => this.advanceLive(now));
+  }
+
+  /** Article 8: serve main, except what a voted change younger than fourteen days would bring; then serve the commit before it. */
+  async advanceLive(now: number): Promise<void> {
+    const branch = this.d.liveBranch, gh = this.d.github;
+    if (!branch || !gh.branchHead || !gh.firstParent || !gh.setBranch) return;
+    const held = heldBack(this.events, now);
+    const target = held ? await gh.firstParent(String(held["merge_commit"])) : await gh.branchHead("main");
+    if (!target || (await gh.branchHead(branch)) === target) return;
+    await gh.setBranch(branch, target);
+    this.log(`site: ${branch} now serves ${target.slice(0, 7)}${held ? `, holding back pr ${held["pr"]} until fourteen days after its merge` : ""}`);
   }
   /** Set when main's World files change without a ledger event, such as an owner commit during bootstrap. */
   private mapDirty = false;
   /** Each open pull request's head as of the last pass, so the payment endpoint can refuse a quote the pull request has outgrown. */
   private heads = new Map<number, string>();
+  /** Constitution Article 8 and Law 5: paused intervals and recorded outages, from the ledger. */
+  pauses(): Pause[] { return pausesOf(this.events); }
+  /** A deadline that runs against a contributor, pushed back by any pause or outage since it was set. */
+  private due(deadline: number, setAt: number, now: number): number { return extended(deadline, setAt, this.pauses(), now); }
+  /** Whether a function of the agent is paused now. */
+  paused(scope: PauseScope, now = this.d.clock.now()): boolean { return pausedAt(this.pauses(), scope, now); }
 
   private async handlePull(pr: PullInfo, laws: Laws, now: number): Promise<void> {
     const p = this.phase(pr.number);
@@ -243,7 +272,7 @@ export class Runtime {
     switch (p.kind) {
       case "new": return this.intakeAndScreen(pr, laws, now, state);
       case "held":
-        if (now - p.since >= laws.screening.hold_timeout_days * 86400) {
+        if (now >= this.due(p.since + laws.screening.hold_timeout_days * 86400, p.since, now)) {
           this.d.ledger.append(now, "hold_resolved", { pr: pr.number, decision: "timeout", reason: "no owner action within the hold timeout" });
           await this.d.github.comment(pr.number, "The screening hold was not resolved within the time the Laws allow. This submission is closed without charge; it may be resubmitted.");
           await this.d.github.close(pr.number);
@@ -257,7 +286,7 @@ export class Runtime {
           await this.d.github.comment(pr.number, "This pull request changed after the quote, so the quote is withdrawn: paying it would pay for a version that is no longer here. A new quote for the current version follows on the agent's next pass. Nothing was charged.");
           return;
         }
-        if (Number(p.quote["expires"]) < now) {
+        if (this.due(Number(p.quote["expires"]), p.quote.at, now) < now) {
           this.d.ledger.append(now, "quote_lapsed", { pr: pr.number });
           await this.d.github.comment(pr.number, "The quote lapsed unpaid. A new quote will be issued on the agent's next pass while this pull request stays open.");
         }
@@ -269,7 +298,7 @@ export class Runtime {
       }
       case "voting": return this.maybeClose(pr, p.open, p.quote, laws, now, state);
       case "await_owner":
-        if (now - p.close.at >= laws.bootstrap.owner_action_deadline_days * 86400) await this.expire(pr.number, p.quote, laws, now, "the owner did not act within the bootstrap deadline", OWNER_CAUSED_HOLD_DAYS);
+        if (now >= this.due(p.close.at + laws.bootstrap.owner_action_deadline_days * 86400, p.close.at, now)) await this.expire(pr.number, p.quote, laws, now, "the owner did not act within the bootstrap deadline", OWNER_CAUSED_HOLD_DAYS);
         return;
       case "confirmed": return this.doMerge(pr.number, String(p.open["head"]), p.quote, laws, now, pr.author);
       case "merging": return this.doMerge(pr.number, String(p.open["head"]), p.quote, laws, now, pr.author);
@@ -278,6 +307,7 @@ export class Runtime {
   }
 
   private async intakeAndScreen(pr: PullInfo, laws: Laws, now: number, state: State): Promise<void> {
+    if (this.paused("quotes", now)) return;
     const barred = state.barred_until[pr.author.id];
     if (barred && barred > now) {
       this.d.ledger.append(now, "intake_reject", { pr: pr.number, account: pr.author.id, reasons: [`author is barred from submitting until ${iso(barred)}`] });
@@ -433,7 +463,7 @@ export class Runtime {
       if (seen.has(pr)) continue;
       seen.add(pr);
       const p = this.phase(pr);
-      if (p.kind === "quoted" && Number(p.quote["expires"]) < now) continue;
+      if (p.kind === "quoted" && this.due(Number(p.quote["expires"]), p.quote.at, now) < now) continue;
       if (p.kind === "quoted" || p.kind === "paid" || p.kind === "voting" || p.kind === "await_owner" || p.kind === "confirmed" || p.kind === "merging") total += Number(p.quote["bytes"] ?? 0);
     }
     return total;
@@ -476,6 +506,7 @@ export class Runtime {
 
   /** A paid submission waits for a place; record its position once and tell the author once. */
   private async queueVote(pr: PullInfo, payment: LedgerEvent, now: number, maxOpen: number): Promise<void> {
+    if (this.paused("votes", now)) return;
     if (this.events.some((e) => e.type === "vote_queued" && Number(e["pr"]) === pr.number && Number(e["payment"]) === payment.id)) return;
     const position = this.paidWaiting(now).indexOf(pr.number) + 1;
     this.d.ledger.append(now, "vote_queued", { pr: pr.number, payment: payment.id, position, max_open: maxOpen });
@@ -507,6 +538,7 @@ export class Runtime {
   }
 
   private async openVote(pr: PullInfo, quote: LedgerEvent, laws: Laws, now: number, state: State): Promise<void> {
+    if (this.paused("votes", now)) return;
     if (pr.headSha !== String(quote["head"])) { await this.withdraw(pr.number, laws, now, "head changed before the vote opened", quote); return; }
     const commits = await this.d.github.listCommits(pr.number);
     const authors = new Set<number>([pr.author.id]);
@@ -526,8 +558,9 @@ export class Runtime {
   }
 
   private async maybeClose(pr: PullInfo, open: LedgerEvent, quote: LedgerEvent, laws: Laws, now: number, state: State): Promise<void> {
+    if (this.paused("votes", now)) return;
     if (pr.headSha !== String(open["head"]) || pr.draft) { await this.withdraw(pr.number, laws, now, pr.draft ? "converted to draft" : "pushed after the vote opened", quote); return; }
-    const closesAt = Number(open["closes"]);
+    const closesAt = this.due(Number(open["closes"]), Number(open["opened"]), now);
     // Reviews are recorded as they appear, so the ledger shows votes as cast and Law 13 can count them.
     const reviews = await this.d.github.listReviews(pr.number);
     const qualified = new Set((open["qualified"] as number[]) ?? []);
@@ -662,6 +695,7 @@ export class Runtime {
   }
 
   private async doMerge(pr: number, head: string, quote: LedgerEvent, laws: Laws, now: number, author: { id: number; login: string }, note = ""): Promise<void> {
+    if (this.paused("merges", now)) { this.log(`pr ${pr}: merges are paused; it merges when the owner resumes`); return; }
     // Law 8 at close: main may have moved since the quote, so the path rules run again against it,
     // unless GitHub already performed this merge (a crash before the record, see reconcileClosed).
     let alreadyMerged = false;

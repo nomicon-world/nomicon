@@ -36,6 +36,8 @@ export interface PayServerOptions {
   facilitator: FacilitatorChoice;
   /** Current open quote for a pull request, or null. */
   quoteFor(pr: number): OpenQuote | null;
+  /** Constitution Article 8: true while the owner has paused payments or the whole agent. */
+  paymentsPaused?: () => boolean;
   onPaid(notice: PaymentNotice): Promise<void>;
   now(): number;
   publicBaseUrl: string;
@@ -134,6 +136,7 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
     }
     if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /feed?since=<event id>", "GET /questions", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
     if (req.method !== "POST" || pr === null) return json(404, { error: "not found" });
+    if (opts.paymentsPaused?.()) return json(503, { error: "payments are paused under Constitution Article 8; the quote's validity is extended by the pause, so nothing is lost by waiting" }, { "retry-after": "3600" });
     const q = opts.quoteFor(pr);
     if (!q) return json(404, { error: "no open quote for this pull request" });
     if (q.expires < opts.now()) return json(410, { error: "quote expired; the agent will issue a new one" });

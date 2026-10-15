@@ -99,14 +99,14 @@ function radiusOf(n) {
 }
 
 async function load() {
-  const res = await fetch("../ledger/map.json", { cache: "no-store" });
+  const res = await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/map.json", { cache: "no-store" });
   if (!res.ok) throw new Error("The map is not published yet.");
   MAP = await res.json();
   byId = new Map(MAP.nodes.map((n) => [n.id, n]));
   kids = new Map();
   for (const n of MAP.nodes) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (!kids.has(p)) kids.set(p, []); kids.get(p).push(n); }
-  try { J = await import("./jobs.js?v=4"); CAT = await (await fetch("../paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
-  try { BASE = String((await (await fetch("../ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
+  try { J = await import("./jobs.js?v=4"); CAT = await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
+  try { BASE = String((await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
 }
 
 /** The child of `container` that contains `id`, or null when `id` lies outside it. */

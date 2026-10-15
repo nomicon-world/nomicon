@@ -43,6 +43,12 @@ export interface GitHubPort {
   close(n: number): Promise<void>;
   /** Publish ledger files to the repository. */
   publishLedger(files: Array<{ path: string; content: string }>, message: string): Promise<void>;
+  /** The commit a branch points at, or null when the branch does not exist. */
+  branchHead?(branch: string): Promise<string | null>;
+  /** A commit's first parent: for a merge, the main branch just before it. */
+  firstParent?(sha: string): Promise<string>;
+  /** Point a branch at a commit, creating it if needed. */
+  setBranch?(branch: string, sha: string): Promise<void>;
   /** Comments on an issue, oldest first. */
   listIssueComments(issue: number): Promise<IssueComment[]>;
   /** Accounts watching the repository. */

@@ -7,8 +7,10 @@ import type { Laws } from "./laws.js";
 import { weightsAt, type Merge } from "./weight.js";
 import type { Question } from "./questions.js";
 import type { MapFile } from "./worldmap.js";
+import { extended, pausesOf, type Pause } from "./pauses.js";
 
-export interface HeldFee { account: number; layer: "world" | "laws"; micro: bigint; until: number; pr: number }
+/** since: when the fee was held; until: when it is forfeited, before any pause pushes that back (Article 8). */
+export interface HeldFee { account: number; layer: "world" | "laws"; micro: bigint; until: number; pr: number; since?: number }
 /** A held fee applied to a later submission: consumed by that submission's merge or rejection, held again on its expiry (Law 5). */
 export interface HeldFeeInUse extends HeldFee { used_by: number }
 export interface OpenVote { pr: number; head: string; layer: "world" | "laws"; opened: number; closes: number; laws_hash: string; qualified: number[]; authors: number[]; weightedAccountsAtOpen: number }
@@ -151,7 +153,7 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
     case "expiry": {
       const pr = num(e["pr"]), inUse = s.held_in_use[pr];
       if (inUse) delete s.held_in_use[pr]; // Law 5: a held fee is applied once; the funded submission's expiry forfeits it
-      else s.held_fees.push({ account: num(e["account"]), layer: e["layer"] as "world" | "laws", micro: big(e["fee_micro"]), until: num(e["held_until"]), pr });
+      else s.held_fees.push({ account: num(e["account"]), layer: e["layer"] as "world" | "laws", micro: big(e["fee_micro"]), until: num(e["held_until"]), pr, since: e.at });
       s.open_votes = s.open_votes.filter((v) => v.pr !== pr);
       break;
     }
@@ -181,6 +183,8 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
       break;
     case "declare":
       if (e["what"] === "bootstrap_end") s.bootstrap.active = false;
+      // Article 7: a refund the law requires revokes the weight its fee minted.
+      if (e["what"] === "refund") for (const m of s.merges) if (m.pr === num(e["pr"])) m.revoked = true;
       break;
     case "hold_resolved":
       if (e["decision"] === "reject" && e["barred_until"] !== undefined && Number.isFinite(accountOf())) s.barred_until[accountOf()] = num(e["barred_until"]);
@@ -193,7 +197,7 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
 }
 
 /** Recompute weights at `now` from the folded merges. */
-export function materialize(s: State, now: number, laws: Laws): State {
+export function materialize(s: State, now: number, laws: Laws, pauses: Pause[] = []): State {
   const merges: Merge[] = s.merges.filter((m) => !m.revoked).map((m) => ({ account: m.account, mergedAt: m.mergedAt, weightMicro: m.weightMicro }));
   const lastVote = new Map<number, number>(Object.entries(s.last_vote_at).map(([k, v]) => [Number(k), v]));
   const w = weightsAt(merges, lastVote, now, laws);
@@ -204,7 +208,7 @@ export function materialize(s: State, now: number, laws: Laws): State {
     if (aw.matureMicro > 0n) count++;
   }
   s.weighted_accounts = count;
-  s.held_fees = s.held_fees.filter((h) => h.until > now);
+  s.held_fees = s.held_fees.filter((h) => extended(h.until, h.since ?? h.until, pauses, now) > now);
   for (const p of s.pending_owner_accounts) if (p.effective_at <= now && !s.owner_accounts.includes(p.account)) s.owner_accounts.push(p.account);
   s.pending_owner_accounts = s.pending_owner_accounts.filter((p) => p.effective_at > now);
   s.computed_at = now;
@@ -214,7 +218,7 @@ export function materialize(s: State, now: number, laws: Laws): State {
 export function fold(events: LedgerEvent[], now: number, laws: Laws): State {
   let s = emptyState();
   for (const e of events) s = applyEvent(s, e, laws);
-  return materialize(s, now, laws);
+  return materialize(s, now, laws, pausesOf(events));
 }
 
 export function serializeState(s: State): string {

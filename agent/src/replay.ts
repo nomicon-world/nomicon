@@ -10,6 +10,7 @@ import { parseLaws, type Laws } from "./laws.js";
 import { tally, type Review } from "./tally.js";
 import { fold, type State } from "./state.js";
 import { weightsAt } from "./weight.js";
+import { extended, pausesOf } from "./pauses.js";
 
 export interface ReplayFinding { event: number; problem: string }
 
@@ -45,6 +46,7 @@ export function replay(events: LedgerEvent[], lawsByHash: Map<string, string>, r
 
   // Walk vote_open → vote_close pairs and recompute tallies.
   const opens = new Map<number, LedgerEvent>();
+  const pauses = pausesOf(events);
   const reviews = new Map<number, Review[]>();
   const merges: Array<{ account: number; mergedAt: number; weightMicro: bigint; pr: number; revoked?: boolean }> = [];
   const lastVote = new Map<number, number>();
@@ -60,13 +62,14 @@ export function replay(events: LedgerEvent[], lawsByHash: Map<string, string>, r
     }
     if (e.type === "merge") merges.push({ account: Number(e["account"]), mergedAt: e.at, weightMicro: BigInt(String(e["weight_micro"])), pr: Number(e["pr"]) });
     if (e.type === "takedown") for (const pr of (e["prs"] as number[]) ?? []) for (const m of merges) if (m.pr === pr) m.revoked = true;
+    if (e.type === "declare" && e["what"] === "refund") for (const m of merges) if (m.pr === Number(e["pr"])) m.revoked = true;
     if (e.type === "vote_close") {
       const pr = Number(e["pr"]);
       const open = opens.get(pr);
       if (!open) { findings.push({ event: e.id, problem: `vote_close for pr ${pr} without vote_open` }); continue; }
       const laws = lawsFor(String(open["laws_hash"]));
       currentLaws = laws;
-      const closesAt = Number(open["closes"]);
+      const closesAt = extended(Number(open["closes"]), Number(open["opened"]), pauses, e.at);
       const live = merges.filter((m) => !m.revoked && m.mergedAt < Number(open["opened"]));
       const w = weightsAt(live, lastVote, closesAt, laws);
       const matureAtClose = new Map<number, bigint>();

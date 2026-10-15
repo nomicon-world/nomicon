@@ -31,8 +31,8 @@
   const when = (s) => new Date(Number(s) * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC";
   try {
     const [state, questions] = await Promise.all([
-      fetch("../ledger/state.json").then((r) => r.json()),
-      fetch("../ledger/questions.json").then((r) => (r.ok ? r.json() : { open: [], answered: [] })),
+      fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/state.json").then((r) => r.json()),
+      fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/questions.json").then((r) => (r.ok ? r.json() : { open: [], answered: [] })),
     ]);
     const now = Math.floor(Date.now() / 1000);
     meta.innerHTML = `<small>Ledger head ${esc(state.head_event)}, computed ${state.computed_at ? when(state.computed_at) : "never"}. Base fee ${usdc(state.fee.base_micro)} USDC. ${state.bootstrap.active ? "Bootstrap is active: every merge needs the owner's confirmation." : ""}</small>`;

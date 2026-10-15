@@ -14,6 +14,13 @@
  *   rotate-destination <address> <reason>
  *   set-agent-account <reason>   record that the agent now acts as the GitHub identity its current credentials resolve to
  *   maintenance <from_iso> <to_iso> <reason>
+ *   pause <all|quotes|payments|votes|merges> <ground>   Article 8: stop the agent or one function; contributor deadlines wait
+ *   resume <reason>                  end the running pause
+ *   outage <from_iso> <to_iso> <what>   Law 5: record a past outage; quotes are extended by it
+ *   veto <pr> <ground; provision; behaviour withheld>   Article 8: decline to deploy part of a voted change
+ *   veto-review <veto event id> remains|lifted <why>   Article 8: the ninety-day review of a veto
+ *   power <security|adapt|refuse|measure|retire|transfer|sealed> <record>   Articles 6, 6A, 8, 11: record a power used
+ *   refund <pr> <refund tx> <ground>  Article 7: a refund the law requires; revokes the weight its fee minted
  *   end-bootstrap <reason>
  *   deploy <commit> <reason>
  *   patch <commit> <reason>
@@ -52,6 +59,8 @@ import { loadLaws, sha256Hex } from "./laws.js";
 import { phaseOf } from "./phases.js";
 import { TERMS_AMENDMENT_NOTICE_DAYS, termsCommitAt } from "./terms.js";
 import type { PriceOracle } from "./ports.js";
+import { pausesOf } from "./pauses.js";
+import { maintenanceProblems, pauseProblems, powerWarnings, RECORDED_POWERS } from "./powers.js";
 
 const env = (k: string, def?: string): string => {
   const v = process.env[k] ?? def;
@@ -187,7 +196,55 @@ async function main(argv: string[]): Promise<void> {
       ownerCommand("agent_account_change", { agent_account: identity.id, login: identity.login, reason });
       return;
     }
-    case "maintenance": ownerCommand("declare", { what: "maintenance_window", from: Math.floor(Date.parse(args[0]!) / 1000), to: Math.floor(Date.parse(args[1]!) / 1000), reason: args.slice(2).join(" ") }); return;
+    case "maintenance": {
+      const from = Math.floor(Date.parse(args[0] ?? "") / 1000), to = Math.floor(Date.parse(args[1] ?? "") / 1000);
+      const problems = maintenanceProblems(from, to, now());
+      if (problems.length) throw new Error(problems.join("; "));
+      ownerCommand("declare", { what: "maintenance_window", from, to, reason: args.slice(2).join(" ") });
+      return;
+    }
+    case "pause": {
+      const scope = args[0] ?? "", reason = args.slice(1).join(" ").trim();
+      const problems = pauseProblems(scope, reason);
+      if (problems.length) throw new Error('usage: nomicon pause <all|quotes|payments|votes|merges> "<ground>": ' + problems.join("; "));
+      ownerCommand("declare", { what: "pause", scope, reason });
+      return;
+    }
+    case "resume": {
+      if (!pausesOf(ledger().events).some((p) => p.kind === "pause" && p.to === null)) throw new Error("nothing is paused");
+      ownerCommand("declare", { what: "resume", reason: args.join(" ").trim() });
+      return;
+    }
+    case "outage": {
+      const from = Math.floor(Date.parse(args[0] ?? "") / 1000), to = Math.floor(Date.parse(args[1] ?? "") / 1000);
+      if (!(to > from) || to > now()) throw new Error('usage: nomicon outage <from_iso> <to_iso> "<what was down>" (a past interval; Law 5 extends quotes by it)');
+      ownerCommand("declare", { what: "outage", from, to, reason: args.slice(2).join(" ").trim() });
+      return;
+    }
+    case "veto": {
+      const pr = Number(args[0]), record = args.slice(1).join(" ").trim();
+      if (!Number.isInteger(pr) || pr <= 0 || record.length < 20) throw new Error('usage: nomicon veto <pr> "<ground; the provision or term quoted; the behaviour withheld>" (Article 8)');
+      ownerCommand("declare", { what: "veto", pr, record });
+      return;
+    }
+    case "veto-review": {
+      const veto = Number(args[0]), outcome = args[1] ?? "", record = args.slice(2).join(" ").trim();
+      if (!ledger().events.some((e) => e.id === veto && e.type === "declare" && e["what"] === "veto") || (outcome !== "remains" && outcome !== "lifted") || !record) throw new Error('usage: nomicon veto-review <veto event id> remains|lifted "<why>"');
+      ownerCommand("declare", { what: "veto_review", veto_event: veto, outcome, record });
+      return;
+    }
+    case "power": {
+      const power = args[0] ?? "", record = args.slice(1).join(" ").trim();
+      if (!(RECORDED_POWERS as readonly string[]).includes(power) || record.length < 20) throw new Error(`usage: nomicon power <${RECORDED_POWERS.join("|")}> "<the record the Constitution asks for>"`);
+      ownerCommand("declare", { what: "power", power, record });
+      return;
+    }
+    case "refund": {
+      const pr = Number(args[0]), tx = args[1] ?? "", ground = args.slice(2).join(" ").trim();
+      if (!Number.isInteger(pr) || pr <= 0 || !/^0x[0-9a-fA-F]{64}$/.test(tx) || !ground) throw new Error('usage: nomicon refund <pr> <refund transaction> "<the law, order, judgment or settlement that requires it>" (Article 7)');
+      ownerCommand("declare", { what: "refund", pr, tx, ground });
+      return;
+    }
     case "end-bootstrap": ownerCommand("declare", { what: "bootstrap_end", reason: args.join(" ") }); return;
     case "deploy": ownerCommand("deploy", { commit: args[0], reason: args.slice(1).join(" ") }); return;
     case "patch": ownerCommand("patch", { commit: args[0], reason: args.slice(1).join(" ") }); return;
@@ -238,7 +295,7 @@ async function main(argv: string[]): Promise<void> {
     case "migrate-ledger": { const n = Ledger.migrate(resolve(root(), "ledger")); console.log(`moved ${n} events into ledger/events/ by day; head.json written; events.jsonl removed`); return; }
     case "check": return check();
     default:
-      console.log("usage: nomicon <keygen|genesis|run|replay|confirm|reject|release|hold-reject|takedown|rotate-destination|set-agent-account|maintenance|end-bootstrap|deploy|patch|amend-laws|amend-terms|correct|record-payment|check|migrate-ledger|rotate-key|rotate-key-lost|lift-bar|name-owner|pending>");
+      console.log("usage: nomicon <keygen|pause|resume|outage|veto|veto-review|power|refund|genesis|run|replay|confirm|reject|release|hold-reject|takedown|rotate-destination|set-agent-account|maintenance|end-bootstrap|deploy|patch|amend-laws|amend-terms|correct|record-payment|check|migrate-ledger|rotate-key|rotate-key-lost|lift-bar|name-owner|pending>");
       process.exitCode = 1;
   }
 }
@@ -289,6 +346,7 @@ async function buildRuntime(): Promise<{ rt: Runtime; led: Ledger; chain: BaseCh
     ...(process.env["NOMICON_TAX_INCLUDED"] ? { tax: { included: process.env["NOMICON_TAX_INCLUDED"], registration: process.env["NOMICON_TAX_REGISTRATION"] ?? "none" } } : {}),
     loadLaws: async () => ({ rawLaws: await github.readFile("main", "laws.json"), rawSchema: await github.readFile("main", "laws.schema.json") }),
     termsCommit: async () => termsCommitAt(led.events, now(), env("NOMICON_TERMS_COMMIT", "main")),
+    ...(process.env["NOMICON_LIVE_BRANCH"] ? { liveBranch: process.env["NOMICON_LIVE_BRANCH"] } : {}),
     log,
   });
   return { rt, led, chain, network, log, publicBaseUrl, trustProxy };
@@ -300,7 +358,7 @@ async function run(): Promise<void> {
   log(`network ${network}, facilitator ${describeFacilitator(facilitator)}`);
   const { server } = await createPayServer({
     network, facilitator,
-    quoteFor: (pr) => rt.quoteFor(pr), onPaid: (n) => rt.onPaid(n), now, publicBaseUrl,
+    quoteFor: (pr) => rt.quoteFor(pr), onPaid: (n) => rt.onPaid(n), paymentsPaused: () => rt.paused("payments"), now, publicBaseUrl,
     feed: (since) => rt.feed(since), questions: () => rt.questionsIndex(), paths: () => rt.catalog(), job: (option, node) => rt.job(option, node),
     limits: { trustProxy },
   });
@@ -348,6 +406,7 @@ async function pending(): Promise<void> {
   }
   for (const r of rows) console.log(r);
   if (!rows.length) console.log("nothing waits on the owner");
+  for (const w of powerWarnings(led.events, t)) console.log(w);
   if (oldestWait >= 60 * 86400) console.log(`WARNING: a paid contribution has waited ${days(oldestWait)} days; at 90 the Article 14 lapse begins`);
 }
 

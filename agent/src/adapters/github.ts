@@ -216,6 +216,23 @@ export class GitHubAdapter implements GitHubPort {
     }
   }
 
+  async branchHead(branch: string): Promise<string | null> {
+    try { const { data } = await this.octokit.git.getRef({ owner: this.owner, repo: this.repo, ref: `heads/${branch}` }); return data.object.sha; }
+    catch (e) { if ((e as { status?: number }).status === 404) return null; throw e; }
+  }
+
+  async firstParent(sha: string): Promise<string> {
+    const { data } = await this.octokit.git.getCommit({ owner: this.owner, repo: this.repo, commit_sha: sha });
+    if (!data.parents[0]) throw new Error(`commit ${sha} has no parent`);
+    return data.parents[0].sha;
+  }
+
+  async setBranch(branch: string, sha: string): Promise<void> {
+    const o = { owner: this.owner, repo: this.repo };
+    if ((await this.branchHead(branch)) === null) await this.octokit.git.createRef({ ...o, ref: `refs/heads/${branch}`, sha });
+    else await this.octokit.git.updateRef({ ...o, ref: `heads/${branch}`, sha, force: true });
+  }
+
   async listIssueComments(issue: number): Promise<IssueComment[]> {
     const base = { owner: this.owner, repo: this.repo, issue_number: issue, per_page: 100 };
     const first = await this.conditional(`comments:${issue}`, (headers) => this.octokit.issues.listComments({ ...base, page: 1, headers }));

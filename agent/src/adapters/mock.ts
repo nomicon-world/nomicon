@@ -99,6 +99,11 @@ export class FakeGitHub implements GitHubPort {
   }
   async close(n: number): Promise<void> { this.pulls.get(n)!.state = "closed"; }
   async publishLedger(files: Array<{ path: string; content: string }>): Promise<void> { this.published = files; }
+  branches: Record<string, string> = {};
+  parents: Record<string, string> = {};
+  async branchHead(branch: string): Promise<string | null> { return this.branches[branch] ?? null; }
+  async firstParent(sha: string): Promise<string> { const p = this.parents[sha]; if (!p) throw new Error(`no parent for ${sha}`); return p; }
+  async setBranch(branch: string, sha: string): Promise<void> { this.branches[branch] = sha; }
   async listIssueComments(issue: number): Promise<IssueComment[]> { return this.issueComments[issue] ?? []; }
   async listWatchers(): Promise<Array<{ id: number; login: string }>> { return this.watchers; }
   stars = 0;

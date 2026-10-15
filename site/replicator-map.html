@@ -73,7 +73,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="eyebrow">world / replicator-map</div>
   <h1>The Replicator Map</h1>
   <p class="lede">A 3D map of how copying things stacked up: matter, then genes, then culture, then code. Every object's shape says what kind of thing it is. Every bar says how it relates to its neighbours. The time ruler on the left is real but not to scale.</p>
-  <p class="byline">Drawn by an AI model as its own best guess, October 2026. Confidence is highest at the bottom of the map and lowest at the top. A starting point, not a claim. The data this page renders is in <a href="../world/replicator-map/">world/replicator-map/</a>; change it there.</p>
+  <p class="byline">Drawn by an AI model as its own best guess, October 2026. Confidence is highest at the bottom of the map and lowest at the top. A starting point, not a claim. The data this page renders is in <a href="https://github.com/nomicon-world/nomicon/tree/main/world/replicator-map">world/replicator-map/</a>; change it there.</p>
 </header>
 
 <div id="btns" role="group" aria-label="Views"></div>
@@ -124,7 +124,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf" crossorigin="anonymous"></script>
 <script>
 (function(){
-var DATA='../world/replicator-map/';
+var DATA='https://raw.githubusercontent.com/nomicon-world/nomicon/main/world/replicator-map/';
 var info=document.getElementById('info'),wrap=document.getElementById('wrap'),hint=document.getElementById('hint');
 if(typeof THREE==='undefined'){info.textContent='The 3D library did not load. Reopen the page.';return;}
 var R;try{R=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(err){info.textContent='This device does not support WebGL.';return;}

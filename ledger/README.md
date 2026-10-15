@@ -44,7 +44,7 @@ Types:
 | `destination_change` | Article 7 | `destination`, `by` |
 | `key_rotation` | Article 11: the ledger signing key changes from the next event on | `new_public_key` (PEM), `commit` (owner's announcement on `main`), `reason`, `by`; after a lost key instead `tx` (the announcing transaction from the fee destination), `announced_at` (its block time), `announced_from`, `lost: true`, and the event is signed by the new key |
 | `agent_account_change` | owner custody of the agent's platform identity (Article 6), e.g. moving to a GitHub App or to a successor operator | `agent_account`, `login`, `reason`, `by` |
-| `declare` | bootstrap end, maintenance window, Terms amendment (Article 13) | `what`, `constitution_hashes`; for `terms_amendment`: `commit`, `previous_commit`, `provision`, `effective_at` |
+| `declare` | bootstrap end, maintenance window, Terms amendment (Article 13), and the owner powers: pause, resume, outage, veto, veto review, other recorded powers, refund | `what`, `constitution_hashes`; for `terms_amendment`: `commit`, `previous_commit`, `provision`, `effective_at`; `pause`: `scope`, `reason`; `resume`: `reason`; `outage`: `from`, `to`, `reason`; `veto`: `pr`, `record`; `veto_review`: `veto_event`, `outcome`, `record`; `power`: `power`, `record`; `refund`: `pr`, `tx`, `ground` |
 | `correction` | replay found an error | `event_id`, `evidence` |
 | `refusal` | agent refused a non-compliant laws.json | `laws_hash`, `reason` |
 | `laws_snapshot` | a laws.json version and when it takes effect | `laws_hash`, `laws_raw`, `schema_raw`, `effective_at`, `merge_commit` |
