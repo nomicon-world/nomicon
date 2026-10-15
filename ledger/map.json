@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792034471,
+ "computed_at": 1792036335,
  "nodes": [
   {
    "id": "agents",
@@ -1100,8 +1100,8 @@
    "files": [
     "agent/src/pay.ts",
     "agent/src/payer.ts",
-    "site/pay.html",
-    "site/x402pay.js"
+    "agent/web/pay.page",
+    "agent/web/x402pay.js"
    ],
    "children": 0
   },
