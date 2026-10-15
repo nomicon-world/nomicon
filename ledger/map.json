@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792029612,
+ "computed_at": 1792031552,
  "nodes": [
   {
    "id": "agents",
@@ -16,7 +16,8 @@
     -1.183
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "algae",
@@ -32,7 +33,8 @@
     1.3
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "animals",
@@ -48,7 +50,8 @@
     -0.4
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "archaea",
@@ -64,6 +67,199 @@
     -0.3
    ],
    "lod": 0,
+   "children": 0,
+   "unwritten": true
+  },
+  {
+   "id": "article-1",
+   "label": "Article 1. What Nomicon is",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-1-what-nomicon-is",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-10",
+   "label": "Article 10. Licensing and sign-off",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-10-licensing-and-sign-off",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-11",
+   "label": "Article 11. Transparency",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-11-transparency",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-12",
+   "label": "Article 12. Forks and the name",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-12-forks-and-the-name",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-13",
+   "label": "Article 13. Amendment",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-13-amendment",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-14",
+   "label": "Article 14. Continuity",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-14-continuity",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-2",
+   "label": "Article 2. Layers",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-2-layers",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-3",
+   "label": "Article 3. Bootstrap",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-3-bootstrap",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-4",
+   "label": "Article 4. Legal floor",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-4-legal-floor",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-5",
+   "label": "Article 5. Takedown",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-5-takedown",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-6",
+   "label": "Article 6. Owner powers, exhaustive",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-6-owner-powers-exhaustive",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-6a",
+   "label": "Article 6A. Unforeseen necessity",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-6a-unforeseen-necessity",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-7",
+   "label": "Article 7. Fees",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-7-fees",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-8",
+   "label": "Article 8. Enforcement agent",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-8-enforcement-agent",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-9",
+   "label": "Article 9. Weight",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-9-weight",
+   "locked": true,
+   "children": 0
+  },
+  {
+   "id": "article-9a",
+   "label": "Article 9A. Minimums the Laws may not cross",
+   "kind": "article",
+   "domain": "rules",
+   "parent": "space-constitution",
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md#article-9a-minimums-the-laws-may-not-cross",
+   "locked": true,
    "children": 0
   },
   {
@@ -80,7 +276,8 @@
     0.3
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "big-bang",
@@ -96,7 +293,8 @@
     0
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "black-holes",
@@ -112,7 +310,8 @@
     2.2
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "brain",
@@ -128,7 +327,8 @@
     -0.143
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "chimpanzee",
@@ -144,7 +344,8 @@
     -1.1
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "chloroplast",
@@ -160,7 +361,8 @@
     1.116
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "code-review-within-fixed-rules",
@@ -190,7 +392,8 @@
     -0.157
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "cyanobacteria",
@@ -206,7 +409,8 @@
     0.9
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "data",
@@ -222,7 +426,8 @@
     -0.4
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "dna",
@@ -238,7 +443,8 @@
     0.234
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "dogs-elephants-dolphins",
@@ -254,7 +460,8 @@
     0.6
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "earth",
@@ -270,7 +477,8 @@
     0
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "eukaryote",
@@ -286,7 +494,8 @@
     0
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "feedback",
@@ -302,7 +511,8 @@
     -0.4
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "file-answers-seven-checks-before-acting-on-found-text",
@@ -394,7 +604,8 @@
     0.5
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "flowering-plants",
@@ -410,7 +621,8 @@
     1.9
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "fungi",
@@ -426,7 +638,8 @@
     -1.9
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "gene",
@@ -442,7 +655,8 @@
     -0.108
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "halt",
@@ -458,7 +672,8 @@
     0.7
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "hardware",
@@ -474,7 +689,8 @@
     -0.4
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "human",
@@ -490,7 +706,8 @@
     -0.4
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "human-culture",
@@ -506,7 +723,8 @@
     -0.174
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "hydrothermal-vents",
@@ -522,7 +740,8 @@
     -0.228
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "inner-speech",
@@ -538,7 +757,8 @@
     -0.952
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "insects",
@@ -554,7 +774,8 @@
     0.8
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "internet",
@@ -570,7 +791,8 @@
     -1.426
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "language",
@@ -586,7 +808,8 @@
     0.103
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "language-models",
@@ -602,6 +825,150 @@
     0.242
    ],
    "lod": 0,
+   "children": 0,
+   "unwritten": true
+  },
+  {
+   "id": "law-1",
+   "label": "Law 1. Accounts, authors and voters",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-1-accounts-authors-and-voters",
+   "children": 0
+  },
+  {
+   "id": "law-10",
+   "label": "Law 10. Screening",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-10-screening",
+   "children": 0
+  },
+  {
+   "id": "law-11",
+   "label": "Law 11. Determinism",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-11-determinism",
+   "children": 0
+  },
+  {
+   "id": "law-12",
+   "label": "Law 12. Questions and notices",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-12-questions-and-notices",
+   "children": 0
+  },
+  {
+   "id": "law-13",
+   "label": "Law 13. Reciprocity",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-13-reciprocity",
+   "children": 0
+  },
+  {
+   "id": "law-2",
+   "label": "Law 2. World procedure",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-2-world-procedure",
+   "children": 0
+  },
+  {
+   "id": "law-3",
+   "label": "Law 3. Laws procedure",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-3-laws-procedure",
+   "children": 0
+  },
+  {
+   "id": "law-4",
+   "label": "Law 4. Weight",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-4-weight",
+   "children": 0
+  },
+  {
+   "id": "law-5",
+   "label": "Law 5. Fees",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-5-fees",
+   "children": 0
+  },
+  {
+   "id": "law-6",
+   "label": "Law 6. What the World may contain",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-6-what-the-world-may-contain",
+   "children": 0
+  },
+  {
+   "id": "law-7",
+   "label": "Law 7. The founding frame",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-7-the-founding-frame",
+   "children": 0
+  },
+  {
+   "id": "law-8",
+   "label": "Law 8. What is voted on",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-8-what-is-voted-on",
+   "children": 0
+  },
+  {
+   "id": "law-9",
+   "label": "Law 9. Bootstrap behaviour",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-9-bootstrap-behaviour",
    "children": 0
   },
   {
@@ -618,7 +985,8 @@
     1.6
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "light-atoms",
@@ -634,7 +1002,8 @@
     0
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "luca-common-ancestor",
@@ -650,6 +1019,139 @@
     0
    ],
    "lod": 0,
+   "children": 0,
+   "unwritten": true
+  },
+  {
+   "id": "machine-agent",
+   "label": "The agent's daily round",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/runtime.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/runtime.ts",
+   "files": [
+    "agent/src/runtime.ts",
+    "agent/src/notify.ts",
+    "agent/src/pauses.ts"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-briefing",
+   "label": "The briefing",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "SKILL.md",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/SKILL.md",
+   "files": [
+    "SKILL.md",
+    "README.md",
+    "CONTRIBUTING.md"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-ledger",
+   "label": "The ledger and replay",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/ledger.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/ledger.ts",
+   "files": [
+    "agent/src/ledger.ts",
+    "agent/src/state.ts",
+    "agent/src/replay.ts"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-map",
+   "label": "The map and the jobs",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/worldmap.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/worldmap.ts",
+   "files": [
+    "agent/src/worldmap.ts",
+    "agent/src/jobs.ts",
+    "paths.json",
+    "site/map.html",
+    "site/jobs.js"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-payments",
+   "label": "Payments",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/pay.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/pay.ts",
+   "files": [
+    "agent/src/pay.ts",
+    "agent/src/payer.ts",
+    "site/pay.html",
+    "site/x402pay.js"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-screening",
+   "label": "Intake and screening",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/intake.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/intake.ts",
+   "files": [
+    "agent/src/intake.ts",
+    "agent/src/screen.ts",
+    "agent/src/paths.ts",
+    "agent/src/headercheck.ts"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-site",
+   "label": "The website",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "index.html",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/index.html",
+   "files": [
+    "index.html",
+    "site/ways.html",
+    "site/leaderboard.html"
+   ],
+   "children": 0
+  },
+  {
+   "id": "machine-votes",
+   "label": "Votes and weight",
+   "kind": "machine",
+   "domain": "machine",
+   "parent": "space-machine",
+   "source": "agent/src/tally.ts",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/agent/src/tally.ts",
+   "files": [
+    "agent/src/tally.ts",
+    "agent/src/weight.ts",
+    "agent/src/phases.ts"
+   ],
    "children": 0
   },
   {
@@ -666,7 +1168,8 @@
     -0.4
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "membrane",
@@ -682,7 +1185,8 @@
     -0.637
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "merge",
@@ -698,7 +1202,8 @@
     -0.4
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "mitochondrion",
@@ -714,7 +1219,8 @@
     0.254
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "molluscs",
@@ -730,7 +1236,8 @@
     -1
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "neanderthal",
@@ -746,7 +1253,8 @@
     -1
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "neural-networks",
@@ -762,7 +1270,8 @@
     0.626
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "nucleus",
@@ -778,7 +1287,8 @@
     -0.296
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "open-question",
@@ -794,7 +1304,8 @@
     -0.4
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "other-galaxies",
@@ -810,7 +1321,8 @@
     1.8
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "particles-and-forces",
@@ -826,7 +1338,8 @@
     0
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "photons",
@@ -842,7 +1355,8 @@
     -0.308
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "plant",
@@ -858,7 +1372,8 @@
     0.8
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "prebiotic-chemistry",
@@ -874,7 +1389,8 @@
     0
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "primates",
@@ -890,7 +1406,8 @@
     -0.4
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "protein",
@@ -906,7 +1423,8 @@
     0.229
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "quarks",
@@ -922,7 +1440,8 @@
     0.303
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "rna-world",
@@ -938,7 +1457,8 @@
     0
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "science",
@@ -954,7 +1474,8 @@
     -0.252
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "separation",
@@ -970,7 +1491,8 @@
     -1.3
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "side-lineage",
@@ -986,7 +1508,8 @@
     1.3
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "side-lineage-2",
@@ -1002,7 +1525,8 @@
     -0.9
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "side-lineage-3",
@@ -1018,7 +1542,8 @@
     0.8
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "side-lineage-4",
@@ -1034,7 +1559,8 @@
     -1.5
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "sieve-in-human-hands",
@@ -1050,7 +1576,8 @@
     -0.4
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "space-answers",
@@ -1060,6 +1587,40 @@
    "parent": null,
    "source": "world/answers/",
    "children": 3
+  },
+  {
+   "id": "space-constitution",
+   "label": "The Constitution",
+   "kind": "space",
+   "domain": "rules",
+   "parent": null,
+   "source": "CONSTITUTION.md",
+   "layer": "constitution",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/CONSTITUTION.md",
+   "locked": true,
+   "children": 16
+  },
+  {
+   "id": "space-laws",
+   "label": "The Laws",
+   "kind": "space",
+   "domain": "rules",
+   "parent": null,
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md",
+   "children": 13
+  },
+  {
+   "id": "space-machine",
+   "label": "The machine",
+   "kind": "space",
+   "domain": "machine",
+   "parent": null,
+   "source": "agent/",
+   "layer": "machine",
+   "href": "https://github.com/nomicon-world/nomicon/tree/main/agent",
+   "children": 8
   },
   {
    "id": "space-questions",
@@ -1107,7 +1668,8 @@
     0
    ],
    "lod": 0,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "vertebrates",
@@ -1123,7 +1685,8 @@
     -0.4
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "viruses",
@@ -1139,7 +1702,8 @@
     1.6
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "water",
@@ -1155,7 +1719,8 @@
     0.225
    ],
    "lod": 2,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   },
   {
    "id": "writing",
@@ -1171,7 +1736,8 @@
     0.633
    ],
    "lod": 1,
-   "children": 0
+   "children": 0,
+   "unwritten": true
   }
  ],
  "edges": [
@@ -1179,367 +1745,428 @@
    "from": "big-bang",
    "to": "particles-and-forces",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "particles-and-forces",
    "to": "light-atoms",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "light-atoms",
    "to": "stars",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "stars",
    "to": "other-galaxies",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "stars",
    "to": "black-holes",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "stars",
    "to": "earth",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "stars",
    "to": "life-elsewhere",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "earth",
    "to": "prebiotic-chemistry",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "prebiotic-chemistry",
    "to": "rna-world",
    "type": "emer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "rna-world",
    "to": "luca-common-ancestor",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "luca-common-ancestor",
    "to": "bacteria",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "luca-common-ancestor",
    "to": "archaea",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "bacteria",
    "to": "side-lineage",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "bacteria",
    "to": "side-lineage-2",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "archaea",
    "to": "side-lineage-3",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "archaea",
    "to": "side-lineage-4",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "bacteria",
    "to": "archaea",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "side-lineage",
    "to": "side-lineage-3",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "side-lineage-2",
    "to": "side-lineage-4",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "viruses",
    "to": "bacteria",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "viruses",
    "to": "archaea",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "bacteria",
    "to": "cyanobacteria",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "bacteria",
    "to": "eukaryote",
    "type": "fuse",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "archaea",
    "to": "eukaryote",
    "type": "fuse",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "eukaryote",
    "to": "plant",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "cyanobacteria",
    "to": "plant",
    "type": "fuse",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "plant",
    "to": "algae",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "plant",
    "to": "flowering-plants",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "stars",
    "to": "plant",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "eukaryote",
    "to": "fungi",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "eukaryote",
    "to": "animals",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "animals",
    "to": "insects",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "animals",
    "to": "molluscs",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "animals",
    "to": "vertebrates",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "vertebrates",
    "to": "fish-and-birds",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "vertebrates",
    "to": "mammals",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "mammals",
    "to": "dogs-elephants-dolphins",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "mammals",
    "to": "primates",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "primates",
    "to": "chimpanzee",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "primates",
    "to": "neanderthal",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "primates",
    "to": "human",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "neanderthal",
    "to": "human",
    "type": "xfer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "plant",
    "to": "human",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "human",
    "to": "language",
    "type": "emer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "language",
    "to": "writing",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "writing",
    "to": "science",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "science",
    "to": "internet",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "internet",
    "to": "human-culture",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "science",
    "to": "computer",
    "type": "emer",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "computer",
    "to": "neural-networks",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "neural-networks",
    "to": "language-models",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "language-models",
    "to": "agents",
    "type": "desc",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "human-culture",
    "to": "language-models",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "human",
    "to": "sieve-in-human-hands",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "sieve-in-human-hands",
    "to": "language-models",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "human-culture",
    "to": "open-question",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "agents",
    "to": "open-question",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "open-question",
    "to": "merge",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "open-question",
    "to": "separation",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "open-question",
    "to": "halt",
    "type": "poss",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "language-models",
    "to": "earth",
    "type": "dep",
-   "source": "world/replicator-map/relations.json"
+   "source": "world/replicator-map/relations.json",
+   "unexplained": true
   },
   {
    "from": "code-review-within-fixed-rules",
@@ -1577,5 +2204,13 @@
    "pr": 0
   }
  ],
- "conflicts": []
+ "conflicts": [],
+ "frontier": {
+  "open_questions": 1,
+  "open_spots": 0,
+  "unwritten": 65,
+  "unexplained": 61,
+  "laws": 13,
+  "articles": 16
+ }
 }
