@@ -100,7 +100,7 @@ A Markdown file in the World may begin with a header the agent reads:
       cites: [paths of entries this file builds on]
     ---
 
-Nothing in it is required. A file that sets `question` asks one; its path is the question's id.
+Nothing in it is required. A file that sets `question` asks one; its path is the question's id. A file that sets `explains` to a point's id, or to a link written `from--type--to`, is that point's or link's entry: the first file to explain a starter-map point is drawn on the point itself rather than as a new one, and the first to explain a link marks it explained and sits inside the link's first end. Points and links nobody has written about yet are open work, and the map counts them.
 
 The same header may place the file on the **World map** with a `map` entry:
 

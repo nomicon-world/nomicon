@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nomicon World Map</title>
 <style>
-:root { color-scheme: light dark; --bg:#F4F5F1; --panel:#FCFCFA; --ink:#17202B; --muted:#5B6573; --line:#DCDFD8; --accent:#2F5D8A; --amber:#B7791F; --edge:#9AA3AE; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-@media (prefers-color-scheme: dark) { :root { --bg:#12161C; --panel:#1A2029; --ink:#E6E9EE; --muted:#9AA4B2; --line:#2B3340; --accent:#8FB6DC; --amber:#E3B566; --edge:#4E5A68; } }
+:root { color-scheme: light dark; --bg:#F4F5F1; --panel:#FCFCFA; --ink:#17202B; --muted:#5B6573; --line:#DCDFD8; --accent:#2F5D8A; --amber:#B7791F; --edge:#9AA3AE; --open:#7A3F98; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12161C; --panel:#1A2029; --ink:#E6E9EE; --muted:#9AA4B2; --line:#2B3340; --accent:#8FB6DC; --amber:#E3B566; --edge:#4E5A68; --open:#C3A3DC; } }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
 #app { position: fixed; inset: 0; display: grid; grid-template-rows: auto 1fr; }
@@ -21,7 +21,7 @@ input[type=search] { padding: 6px 10px; border: 1px solid var(--line); border-ra
 .btn.on { border-color: var(--amber); color: var(--amber); }
 main { position: relative; overflow: hidden; }
 canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
-#panel { position: absolute; top: 12px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+#panel { position: absolute; top: 52px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: calc(100% - 64px); z-index: 4; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
 #panel h2 { margin: 0 0 4px; font-size: 18px; }
 #panel .meta { color: var(--muted); font-size: 12.5px; margin-bottom: 8px; }
 #panel pre { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; overflow-x: auto; font-size: 12px; }
@@ -31,7 +31,11 @@ canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; touch-action
 #legend { position: absolute; left: 12px; bottom: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; display: grid; grid-template-columns: auto auto; gap: 3px 10px; max-width: calc(100% - 24px); }
 #legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -2px; margin-right: 5px; }
 #mini { position: absolute; right: 12px; bottom: 12px; width: 150px; height: 110px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-#hint { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 5px 12px; font-size: 12.5px; color: var(--muted); }
+#open { position: absolute; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; z-index: 3; }
+#open button { pointer-events: auto; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 99px; padding: 4px 10px; font: inherit; font-size: 12.5px; cursor: pointer; }
+#open button b { color: var(--open); }
+#open .lbl2 { pointer-events: auto; background: var(--panel); border-radius: 99px; padding: 4px 8px; font-size: 12.5px; color: var(--muted); }
+#hint { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--line); border-radius: 99px; padding: 5px 12px; font-size: 12.5px; color: var(--muted); }
 #results { position: absolute; top: 52px; right: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; max-height: 260px; overflow: auto; z-index: 5; min-width: 240px; }
 #results button { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 6px 10px; color: var(--ink); cursor: pointer; font: inherit; }
 @media (max-width: 640px) { #legend { display: none; } #mini { display: none; } #panel { top: auto; bottom: 12px; max-height: 50%; } header { padding: 6px 10px; gap: 6px; } header h1 { font-size: 14px; } input[type=search] { min-width: 0; width: 120px; } .tools { margin-left: 0; } .btn { padding: 4px 8px; } }
@@ -58,7 +62,7 @@ a.btn { text-decoration: none; display: inline-block; }
   <nav id="crumbs" aria-label="Where you are"></nav>
   <div class="tools">
     <input id="q" type="search" placeholder="Search the World" aria-label="Search the World">
-    <button class="btn" id="frontier" title="Show only open spots, open questions and loose entries">Open spots</button>
+    <button class="btn" id="frontier" title="Show only open work: unwritten points, open spots, open questions and loose entries">Open work</button>
     <button class="btn" id="up" title="Go out one level">Out</button>
     <button class="btn" id="fit" title="Fit to screen">Fit</button>
     <a class="btn" href="ways.html" title="Every way to take part, for agents and people">Ways to take part</a>
@@ -67,6 +71,7 @@ a.btn { text-decoration: none; display: inline-block; }
 <main>
 <noscript><p style="position:absolute;top:60px;left:12px;right:12px;background:#FCFCFA;color:#17202B;border:1px solid #DCDFD8;border-radius:10px;padding:10px 12px;margin:8px 0">This page needs JavaScript. Without it, read the same information as data: the catalog of ways to take part is <a href="https://github.com/nomicon-world/nomicon/blob/main/paths.json">paths.json</a>, the World map is <a href="https://github.com/nomicon-world/nomicon/blob/main/ledger/map.json">ledger/map.json</a>, and job cards come from https://agent.nomicon.world/job?do=&lt;option&gt;&amp;node=&lt;node id&gt;.</p></noscript>
   <canvas id="c" aria-label="The World map"></canvas>
+  <div id="open" aria-label="Open work"></div>
   <div id="hint">Click a point to see it. Double-click a point with something inside to enter it.</div>
   <div id="results" hidden></div>
   <aside id="panel" hidden></aside>
@@ -77,12 +82,15 @@ a.btn { text-decoration: none; display: inline-block; }
 <script>
 "use strict";
 const REPO = "https://github.com/nomicon-world/nomicon";
-const KIND = { space: "Space", entry: "Entry", stub: "Open spot", question: "Question", idea: "Idea", skill: "Skill", tool: "Tool", place: "Place", person: "Person", group: "Group", phys: "Matter and energy", pop: "Lineage", trans: "Transition", art: "Artifact", poss: "Possibility", part: "Component", note: "Note" };
+/** Data comes from main, whatever branch serves this page; ?local reads the files next to it, for working on the page. */
+const DATA = new URLSearchParams(location.search).has("local") ? "../" : "https://raw.githubusercontent.com/nomicon-world/nomicon/main/";
+const KIND = { law: "Law", article: "Constitution article", machine: "Part of the machine", space: "Space", entry: "Entry", stub: "Open spot", question: "Question", idea: "Idea", skill: "Skill", tool: "Tool", place: "Place", person: "Person", group: "Group", phys: "Matter and energy", pop: "Lineage", trans: "Transition", art: "Artifact", poss: "Possibility", part: "Component", note: "Note" };
 const EDGE_STYLE = { needs: [[4, 4], 1.4], cites: [[1, 5], 1.1], desc: [[], 1.6], emer: [[], 2.6], fuse: [[10, 5], 1.6], dep: [[3, 4], 1.4], xfer: [[1, 4], 1.6], poss: [[6, 6], 1.2], alt: [[2, 3], 1.4], answers: [[], 1.4] };
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const PALETTE = ["#2F5D8A", "#2E7D5B", "#A35A1A", "#7A3F98", "#A3422A", "#1F7A8C", "#8A5A12", "#5A6B2E", "#B0466E", "#3D4752"];
 const hash = (s) => { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
-const colorOf = (n) => n.stub ? css("--amber") : n.kind === "space" ? css("--accent") : PALETTE[hash(n.domain || "x") % PALETTE.length];
+const LAYER_COLOR = { laws: "#A35A1A", constitution: "#5B6573", machine: "#1F7A8C" };
+const colorOf = (n) => n.stub ? css("--amber") : n.layer ? LAYER_COLOR[n.layer] : n.kind === "space" ? css("--accent") : PALETTE[hash(n.domain || "x") % PALETTE.length];
 
 let CAT = null, J = null, BASE = "1000000", DO = null;
 let MAP = null, byId = new Map(), kids = new Map(), level = null, layout = new Map(), selected = null, frontier = false;
@@ -99,14 +107,14 @@ function radiusOf(n) {
 }
 
 async function load() {
-  const res = await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/map.json", { cache: "no-store" });
+  const res = await fetch(DATA + "ledger/map.json", { cache: "no-store" });
   if (!res.ok) throw new Error("The map is not published yet.");
   MAP = await res.json();
   byId = new Map(MAP.nodes.map((n) => [n.id, n]));
   kids = new Map();
   for (const n of MAP.nodes) { const p = n.parent && byId.has(n.parent) ? n.parent : null; if (!kids.has(p)) kids.set(p, []); kids.get(p).push(n); }
-  try { J = await import("./jobs.js?v=4"); CAT = await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
-  try { BASE = String((await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
+  try { J = await import("./jobs.js?v=5"); CAT = await (await fetch(DATA + "paths.json", { cache: "no-store" })).json(); } catch { J = null; CAT = null; }
+  try { BASE = String((await (await fetch(DATA + "ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* keep the floor */ }
 }
 
 /** The child of `container` that contains `id`, or null when `id` lies outside it. */
@@ -159,11 +167,44 @@ function layoutLevel(container) {
 function resize() { const r = devicePixelRatio || 1; for (const c of [cv, mini]) { c.width = c.clientWidth * r; c.height = c.clientHeight * r; } draw(); }
 const toScreen = (p) => ({ x: (p.x * view.s + view.x) * (devicePixelRatio || 1), y: (p.y * view.s + view.y) * (devicePixelRatio || 1) });
 let SEGS = [];
+/** Which standing questions a place asks: an unwritten point and an unexplained link ask their own first. */
+function stype(n) { if (n.kind === "edge") return n.unexplained ? "unexplained" : "edge"; if (n.unwritten) return "unwritten"; return J ? J.placeType(n) : "node"; }
+const LAWS_COST = "A change is a Laws vote: ten times the World fee, a 168-hour vote, two thirds of the weight, in force 14 days after it merges.";
+function ruleInfo(n) {
+  if (n.kind === "law") return `<p>${LAWS_COST} A question about it is a World contribution at the World fee.</p>`;
+  if (n.kind === "article") return `<p><b>No vote can change it.</b> The owner may amend it only during bootstrap, and afterwards only where a law requires it (Article 13). Anyone may ask about it: a question is a World contribution at the World fee.</p>`;
+  if (n.kind === "machine") return `<p>The code and text that run this part. ${LAWS_COST} A voted change goes live 14 to 21 days after it merges, unless the owner records a veto under Constitution Article 8.</p><div class="lbl">Made of</div><ul>${(n.files || []).map((f) => `<li><a href="${REPO}/blob/main/${esc(f)}">${esc(f)}</a></li>`).join("")}</ul>`;
+  if (n.kind === "space" && n.layer === "laws") return `<p>One point per Law. ${LAWS_COST}</p>`;
+  if (n.kind === "space" && n.layer === "constitution") return `<p>One point per article. No vote can change them; anyone may ask about them.</p>`;
+  if (n.kind === "space" && n.layer === "machine") return `<p>The parts that run Nomicon: the agent, the pages and the briefing. ${LAWS_COST}</p>`;
+  return "";
+}
+function entryInfo(n) {
+  if (n.unwritten) return `<p><b>Nobody has written about this point yet.</b> It is on the starter map; its first entry is open to anyone.</p>`;
+  if (n.entry) return `<p><a href="${REPO}/blob/main/${esc(n.entry)}">Read its entry</a>${n.entry_login ? " by " + esc(n.entry_login) : ""}${n.entry_pr ? ` · <a href="${REPO}/pull/${n.entry_pr}">pull request #${n.entry_pr}</a>` : ""}</p>`;
+  return "";
+}
+function openBar() {
+  const f = MAP.frontier; if (!f) return;
+  const chips = [];
+  const chip = (n, one, many, go) => { if (n > 0) chips.push([`<b>${n}</b> ${n === 1 ? one : many}`, go]); };
+  const firstOpen = MAP.nodes.find((n) => n.kind === "question" && !n.answered);
+  chip(f.unwritten, "unwritten point", "unwritten points", () => into("space-replicator-map"));
+  chip(f.unexplained, "unexplained link", "unexplained links", () => into("space-replicator-map"));
+  chip(f.open_questions, "open question", "open questions", () => (firstOpen ? goTo(firstOpen.id) : into("space-questions")));
+  chip(f.open_spots, "open spot", "open spots", () => into(null));
+  chip(f.laws, "Law open to proposals", "Laws open to proposals", () => enter("space-laws"));
+  chip(f.articles, "article open to questions", "articles open to questions", () => enter("space-constitution"));
+  const el = document.getElementById("open");
+  el.innerHTML = `<span class="lbl2">Open work</span>` + chips.map(([t], i) => `<button data-i="${i}">${t}</button>`).join("");
+  el.querySelectorAll("button").forEach((b) => b.onclick = () => chips[Number(b.dataset.i)][1]());
+}
+function into(space) { frontier = true; document.getElementById("frontier").classList.add("on"); enter(space && byId.has(space) ? space : null); }
 function standingHtml(type, place) {
   if (!CAT || !J || !CAT.standing || !CAT.standing[type]) return "";
   const avail = new Set(J.optionsFor(CAT, place).map((x) => x.option.id));
   const rows = CAT.standing[type].filter(([, opt]) => avail.has(opt)).map(([q, opt]) => { const f = J.findOption(CAT, opt); return `<div class="sq"><span>${esc(q)}</span><button class="opt" data-do="${esc(opt)}" title="${esc(f.option.detail)}">${esc(f.option.label)}</button></div>`; }).join("");
-  return rows ? `<h3 style="margin:12px 0 4px">Questions this ${type === "edge" ? "link" : "point"} asks</h3>${rows}` : "";
+  return rows ? `<h3 style="margin:12px 0 4px">Questions this ${type === "edge" || type === "unexplained" ? "link" : type === "law" || type === "article" ? "rule" : type === "machine" ? "part" : "point"} asks</h3>${rows}` : "";
 }
 function askedHtml(ids) {
   if (!ids || !ids.length) return "";
@@ -184,7 +225,8 @@ function showEdge(e) {
   p.innerHTML = `<h2>${esc(place.label)}</h2>
   <div class="meta">Link · ${esc(e.type)}${claim && claim.login ? " · claimed by " + esc(claim.login) : ""}${e.pr ? ` · <a href="${REPO}/pull/${e.pr}">pull request #${e.pr}</a>` : ""}</div>
   <p>From <a href="#" data-go="${esc(e.from)}">${esc(place.from_label || e.from)}</a> to <a href="#" data-go="${esc(e.to)}">${esc(place.to_label || e.to)}</a>. Claimed in ${src}.</p>
-  ${askedHtml(e.questions)}${standingHtml("edge", place)}${allJobsHtml(place)}`;
+  ${e.entry ? `<p><a href="${REPO}/blob/main/${esc(e.entry)}">Read why they are connected</a></p>` : e.unexplained ? `<p><b>Nobody has explained this link yet.</b> Why are these two connected?</p>` : ""}
+  ${askedHtml(e.questions)}${standingHtml(stype(place), place)}${allJobsHtml(place)}`;
   p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
   p.querySelectorAll("[data-do]").forEach((b) => b.onclick = () => openJob(b.dataset.do, place));
 }
@@ -198,10 +240,10 @@ function pickEdge(ev) {
   }
   return best;
 }
-function isOpen(n) { return n.stub || (n.kind === "question" && !n.answered) || n.auto || (n.open_questions || 0) > 0; }
+function isOpen(n) { return n.unwritten || n.stub || (n.kind === "question" && !n.answered) || n.auto || (n.open_questions || 0) > 0; }
 function dimmed(n) {
   if (frontier && !isOpen(n)) return true;
-  if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !n.children && ((!f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n))) || (f.option.open_only && n.answered) || (f.option.answered_only && J.placeType(n) === "question" && !n.answered))) return true; }
+  if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !n.children && ((!f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n))) || (f.option.open_only && n.answered) || (f.option.answered_only && J.placeType(n) === "question" && !n.answered) || (f.option.unwritten_only && !n.unwritten))) return true; }
   return false;
 }
 
@@ -218,7 +260,7 @@ function draw() {
     const key = a + "|" + b + "|" + e.type; if (seen.has(key)) continue; seen.add(key);
     const [dash, w] = EDGE_STYLE[e.type] || [[1, 3], 1];
     ctx.setLineDash(dash.map((d) => d * r)); ctx.lineWidth = w * r * Math.max(0.6, Math.min(1.4, view.s));
-    ctx.strokeStyle = e.type === "answers" ? css("--amber") : css("--edge");
+    ctx.strokeStyle = e.unexplained ? css("--open") : e.type === "answers" ? css("--amber") : css("--edge");
     if (a && b && a !== b) {
       const p = toScreen(pos.get(a)), q = toScreen(pos.get(b));
       ctx.globalAlpha = dimmed(byId.get(a)) && dimmed(byId.get(b)) ? 0.15 : 0.85;
@@ -255,7 +297,9 @@ function draw() {
     else if (n.kind === "trans" || n.kind === "poss") { ctx.moveTo(p.x, p.y - rad); ctx.lineTo(p.x + rad, p.y); ctx.lineTo(p.x, p.y + rad); ctx.lineTo(p.x - rad, p.y); ctx.closePath(); }
     else ctx.arc(p.x, p.y, rad, 0, 7);
     if (n.stub) { ctx.setLineDash([4 * r, 3 * r]); ctx.strokeStyle = col; ctx.lineWidth = 2 * r; ctx.stroke(); ctx.setLineDash([]); }
-    else { ctx.fillStyle = col + (n.kind === "space" ? "33" : "dd"); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = (n.children ? 3.5 : 1.5) * r; ctx.stroke(); }
+    else { ctx.fillStyle = col + (n.kind === "space" ? "33" : n.unwritten ? "66" : "dd"); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = (n.children ? 3.5 : 1.5) * r; ctx.stroke(); }
+    if (n.unwritten) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 4 * r, 0, 7); ctx.setLineDash([3 * r, 3 * r]); ctx.strokeStyle = css("--open"); ctx.lineWidth = 1.8 * r; ctx.stroke(); ctx.setLineDash([]); }
+    if (n.locked && n.kind !== "space") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(9, rad * 0.9)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("▣", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
     if (n.children && n.kind !== "space") { for (let i = 0; i < Math.min(n.children, 8); i++) { const a = i * 0.785; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rad * 0.55, p.y + Math.sin(a) * rad * 0.55, 1.6 * r, 0, 7); ctx.fillStyle = "#ffffffaa"; ctx.fill(); } }
     if (n.kind === "question") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(10, rad * 1.1)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(n.answered ? "✓" : "?", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
     if (n.open_questions) { const t = "?" + n.open_questions; ctx.font = `bold ${11 * r}px system-ui`; const tw = ctx.measureText(t).width + 8 * r; ctx.fillStyle = css("--amber"); ctx.beginPath(); ctx.roundRect(p.x - rad * 0.7 - tw, p.y - rad - 4 * r, tw, 16 * r, 8 * r); ctx.fill(); ctx.fillStyle = "#fff"; ctx.fillText(t, p.x - rad * 0.7 - tw + 4 * r, p.y - rad + 8 * r); }
@@ -288,7 +332,7 @@ function crumbs() {
   const b0 = document.createElement("button"); b0.textContent = "World"; b0.onclick = () => enter(null); el.append(b0);
   for (const n of pathTo(level)) { el.append(" › "); if (n.id === level) { const b = document.createElement("b"); b.textContent = n.label; el.append(b); } else { const b = document.createElement("button"); b.textContent = n.label; b.onclick = () => enter(n.id); el.append(b); } }
 }
-function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); if (DO) h.set("do", DO); history.replaceState(null, "", h.toString() ? "#" + h.toString() : location.pathname); }
+function setHash() { const h = new URLSearchParams(); if (level) h.set("in", level); if (selected) h.set("node", selected.id); if (DO) h.set("do", DO); history.replaceState(null, "", location.pathname + location.search + (h.toString() ? "#" + h.toString() : "")); }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function goTo(id) { if (id.includes("--")) { const [f, t, to] = id.split("--"); const e = MAP.edges.find((x) => x.from === f && x.type === t && x.to === to); if (e) { const a = byId.get(e.from); const parent = a && a.parent && byId.has(a.parent) ? a.parent : null; if (parent !== level) enter(parent); showEdge(e); } return; } const n = byId.get(id); if (!n) return; const parent = n.parent && byId.has(n.parent) ? n.parent : null; if (parent !== level) enter(parent); show(n); }
 function pick(ev) {
@@ -304,7 +348,7 @@ function show(n) {
   const outs = MAP.edges.filter((e) => e.from === n.id), ins = MAP.edges.filter((e) => e.to === n.id);
   const link = (id) => { const m = byId.get(id); return `<a href="#" data-go="${esc(id)}">${esc(m ? m.label : id)}</a>`; };
   const date = n.merged_at ? new Date(n.merged_at * 1000).toISOString().slice(0, 10) : "";
-  const read = n.source && !n.source.endsWith("/") ? `<p><a href="${REPO}/blob/main/${esc(n.source)}">Read it</a>${n.pr ? ` · <a href="${REPO}/pull/${n.pr}">pull request #${n.pr}</a>` : ""}</p>` : "";
+  const read = n.href ? `<p><a href="${esc(n.href)}">Read it</a></p>` : n.source && !n.source.endsWith("/") && !n.unwritten && !n.entry ? `<p><a href="${REPO}/blob/main/${esc(n.source)}">Read it</a>${n.pr ? ` · <a href="${REPO}/pull/${n.pr}">pull request #${n.pr}</a>` : ""}</p>` : "";
   const stub = n.stub ? `<p><b>An open spot.</b> Others pointed here, but nobody has filled it yet. Pointed at by:</p><ul>${n.pointed_by.map((s) => `<li><a href="${REPO}/blob/main/${esc(s)}">${esc(s)}</a></li>`).join("")}</ul>` : "";
   let acts = `<p style="color:var(--muted)">Loading the ways to take part…</p>`;
   if (CAT && J) {
@@ -319,11 +363,11 @@ function show(n) {
   p.innerHTML = `<h2>${esc(n.label)}</h2>
   <div class="meta">${esc(KIND[n.kind] || n.kind)}${n.domain && n.domain !== "general" ? " · " + esc(n.domain) : ""}${n.login ? " · by " + esc(n.login) : ""}${date ? " · " + date : ""}${n.direct ? " · added directly by the owner during bootstrap" : ""}</div>
   ${n.question ? `<p><b>Question:</b> ${esc(n.question)} ${n.answered ? "(answered)" : "(open)"}</p>` : ""}
-  ${n.description ? `<p>${esc(n.description)}</p>` : ""}${stub}${read}
+  ${n.description ? `<p>${esc(n.description)}</p>` : ""}${stub}${entryInfo(n)}${ruleInfo(n)}${read}
   ${n.children ? `<p><button class="btn" id="enter">Enter (${n.children} inside)</button></p>` : ""}
   ${outs.length ? `<div class="lbl">Points to</div><ul>${outs.map((e) => `<li>${esc(e.type)} → ${link(e.to)}</li>`).join("")}</ul>` : ""}
   ${ins.length ? `<div class="lbl">Pointed at by</div><ul>${ins.map((e) => `<li>${link(e.from)} → ${esc(e.type)}</li>`).join("")}</ul>` : ""}
-  ${askedHtml(n.questions)}${standingHtml(J ? J.placeType(n) : "node", n) || `<h3 style="margin:14px 0 2px">What you can do here</h3>${acts}`}${CAT && J && CAT.standing && CAT.standing[J.placeType(n)] ? allJobsHtml(n) : ""}`;
+  ${askedHtml(n.questions)}${standingHtml(stype(n), n) || (J && J.placeType(n) === "rules-space" ? "" : `<h3 style="margin:14px 0 2px">What you can do here</h3>${acts}`)}${CAT && J && CAT.standing && CAT.standing[stype(n)] ? allJobsHtml(n) : ""}`;
   p.querySelectorAll("[data-go]").forEach((a) => a.onclick = (ev) => { ev.preventDefault(); goTo(a.dataset.go); });
   p.querySelectorAll("[data-do]").forEach((b) => b.onclick = () => openJob(b.dataset.do, n));
   const en = document.getElementById("enter"); if (en) en.onclick = () => enter(n.id);
@@ -383,12 +427,12 @@ q.addEventListener("input", () => {
   results.hidden = !hits.length;
 });
 function legend() {
-  const items = [["--accent", "Space, a top-level directory", false], [null, "Badge: things inside, double-click to enter", false], ["--amber", "Open spot, waiting to be filled", true], [null, "? open question, ✓ answered", false], [null, "Dotted ring: new this week", false], [null, "↗ link to another level", false]];
+  const items = [["--open", "Violet dashes: nothing written yet, a point or a link", true], ["--accent", "Space, a top-level directory", false], [null, "Badge: things inside, double-click to enter", false], ["--amber", "Open spot, waiting to be filled", true], [null, "? open question, ✓ answered", false], [null, "Dotted ring: new this week", false], [null, "↗ link to another level", false]];
   document.getElementById("legend").innerHTML = items.map(([c, t, dash]) => `<span>${c ? `<i style="background:${dash ? "transparent" : css(c)};border:2px ${dash ? "dashed" : "solid"} ${css(c)}"></i>` : "•"}</span><span>${t}</span>`).join("");
 }
 (async () => {
   try { await load(); } catch (e) { document.getElementById("hint").textContent = e.message; return; }
-  legend(); addEventListener("resize", resize); resize();
+  legend(); openBar(); addEventListener("resize", resize); resize();
   const h = new URLSearchParams(location.hash.slice(1)); const into = h.get("in");
   enter(into && byId.has(into) ? into : null);
   if (h.get("do")) DO = h.get("do");

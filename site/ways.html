@@ -73,15 +73,17 @@ pre, code { font-family: ui-monospace, Consolas, monospace; font-size: .82rem; }
 <section id="job" hidden></section>
 </div>
 <script type="module">
-import * as J from "./jobs.js?v=4";
+import * as J from "./jobs.js?v=5";
+const DATA = new URLSearchParams(location.search).has("local") ? "../" : "https://raw.githubusercontent.com/nomicon-world/nomicon/main/";
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const COLORS = { blue: "c-blue", teal: "c-teal", olive: "c-olive", green: "c-green", rust: "c-rust", amber: "c-amber", plum: "c-plum", slate: "c-slate" };
-const cat = await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/paths.json", { cache: "no-store" })).json();
+const cat = await (await fetch(DATA + "paths.json", { cache: "no-store" })).json();
 let base = "1000000";
 let world = { nodes: [] };
-try { world = await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/map.json", { cache: "no-store" })).json(); } catch { /* counts stay unknown */ }
-const places = (o) => world.nodes.filter((n) => o.applies.includes(J.placeType(n)) && !(o.open_only && n.answered) && !(o.answered_only && !n.answered)).length;
-try { base = String((await (await fetch("https://raw.githubusercontent.com/nomicon-world/nomicon/main/ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* the floor */ }
+try { world = await (await fetch(DATA + "ledger/map.json", { cache: "no-store" })).json(); } catch { /* counts stay unknown */ }
+const places = (o) => world.nodes.filter((n) => o.applies.includes(J.placeType(n)) && !(o.open_only && n.answered) && !(o.answered_only && !n.answered) && !(o.unwritten_only && !n.unwritten)).length
+  + (o.applies.includes("edge") ? (world.edges || []).filter((e) => !(o.unexplained_only && !e.unexplained)).length : 0);
+try { base = String((await (await fetch(DATA + "ledger/state.json", { cache: "no-store" })).json()).fee.base_micro); } catch { /* the floor */ }
 const layerOf = (o) => cat.recipes[o.recipe].layer;
 const tag = (o) => `<span class="tag t-${layerOf(o)}">${layerOf(o) === "free" ? "Free" : layerOf(o) === "laws" ? "Laws" : "World"}</span>`;
 const needsPlace = (o) => !o.applies.includes("none") && !o.applies.includes("any");

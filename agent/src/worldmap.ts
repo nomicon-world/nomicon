@@ -8,8 +8,9 @@
  * from the ledger (plus the files of world/replicator-map, read as one more source) after every merge.
  */
 import type { MapDecl } from "./questions.js";
+import { MACHINE, machineHref, type RulesSource } from "./rulesmap.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number }
 export interface SourceEdge { from: string; to: string; type: string }
 
@@ -22,9 +23,15 @@ export interface WorldNode {
   questions?: string[]; open_questions?: number;
   /** For a question: the node id or from--type--to edge it is about. */
   about?: string;
+  /** A starter-map point nobody has written about yet, and the file that wrote its first entry once someone has. */
+  unwritten?: true; entry?: string; entry_pr?: number; entry_login?: string;
+  /** Rules and machine points: their layer, where to read them, the files of a machine part, and whether no vote can change them. */
+  layer?: "laws" | "constitution" | "machine"; href?: string; files?: string[]; locked?: true;
 }
-export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number }
-export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }> }
+export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string }
+/** The open work on the map, counted: what a newcomer could take on today. */
+export interface Frontier { open_questions: number; open_spots: number; unwritten: number; unexplained: number; laws: number; articles: number }
+export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }>; frontier: Frontier }
 
 export const spaceOf = (path: string): string | null => {
   const m = /^world\/([^/]+)\//.exec(path);
@@ -35,7 +42,7 @@ const niceName = (path: string) => path.split("/").pop()!.replace(/\.md$/i, "").
 const labelOf = (f: MapFile) => f.title ?? (f.question ? (f.question.length > 80 ? f.question.slice(0, 78) + "…" : f.question) : niceName(f.path));
 const fileId = (path: string) => "file-" + path.replace(/^world\//, "").replace(/\.md$/i, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 58);
 
-export function buildWorldMap(files: Record<string, MapFile>, replicator: { nodes: SourceNode[]; edges: SourceEdge[] } | null, now: number): WorldMap {
+export function buildWorldMap(files: Record<string, MapFile>, replicator: { nodes: SourceNode[]; edges: SourceEdge[] } | null, now: number, rules: RulesSource | null = null): WorldMap {
   const nodes = new Map<string, WorldNode>();
   const edges: WorldEdge[] = [];
   const conflicts: WorldMap["conflicts"] = [];
@@ -47,13 +54,23 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     for (const n of replicator.nodes) put({ id: n.id, label: n.label, kind: n.kind, domain: n.domain, parent: spaceId("replicator-map"), source: "world/replicator-map/nodes.json", ...(n.description !== undefined ? { description: n.description } : {}), ...(n.position ? { position: n.position } : {}), ...(n.lod !== undefined ? { lod: n.lod } : {}), children: 0 });
     for (const e of replicator.edges) edges.push({ from: e.from, to: e.to, type: e.type, source: "world/replicator-map/relations.json" });
   }
+  if (rules) {
+    put({ id: "space-laws", label: "The Laws", kind: "space", domain: "rules", parent: null, source: "LAWS.md", layer: "laws", href: machineHref("LAWS.md"), children: 0 });
+    for (const r of rules.laws) put({ id: r.id, label: r.label, kind: "law", domain: "rules", parent: "space-laws", source: "LAWS.md", layer: "laws", href: r.href, children: 0 });
+    put({ id: "space-constitution", label: "The Constitution", kind: "space", domain: "rules", parent: null, source: "CONSTITUTION.md", layer: "constitution", href: machineHref("CONSTITUTION.md"), locked: true, children: 0 });
+    for (const r of rules.articles) put({ id: r.id, label: r.label, kind: "article", domain: "rules", parent: "space-constitution", source: "CONSTITUTION.md", layer: "constitution", href: r.href, locked: true, children: 0 });
+    put({ id: "space-machine", label: "The machine", kind: "space", domain: "machine", parent: null, source: "agent/", layer: "machine", href: "https://github.com/nomicon-world/nomicon/tree/main/agent", children: 0 });
+    for (const m of MACHINE) put({ id: m.id, label: m.label, kind: "machine", domain: "machine", parent: "space-machine", source: m.files[0]!, layer: "machine", href: machineHref(m.files[0]!), files: m.files, children: 0 });
+  }
   const inside = new Map<string, string>();
   const ordered = Object.values(files).sort((a, b) => a.merged_at - b.merged_at || a.pr - b.pr || a.path.localeCompare(b.path));
   const nodeOfPath = new Map<string, string>();
   const pendingAbout: Array<[string, string]> = [];
+  const explaining: MapFile[] = [];
   for (const f of ordered) {
     const sp = spaceOf(f.path); if (!sp) continue;
     ensureSpace(sp);
+    if (f.explains) { explaining.push(f); continue; }
     const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at, ...(f.direct ? { direct: true as const } : {}) };
     const decl = f.map?.node;
     let id: string;
@@ -73,6 +90,37 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     nodeOfPath.set(f.path, id);
     for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", source: f.path, pr: f.pr });
     // What this entry needs and nobody has written: each becomes an open spot until a file declares it.
+    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", source: f.path, pr: f.pr });
+    for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, source: f.path, pr: f.pr });
+  }
+  // Law 12: a file that explains a starter-map point is that point's entry, drawn on the point itself; a file that
+  // explains a link marks the link explained and sits inside its first end. A point already written, a point that is
+  // a file, or a missing target: the file becomes a point of its own, inside the target where there is one.
+  for (const f of explaining) {
+    const sp = spaceOf(f.path)!;
+    const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at, ...(f.direct ? { direct: true as const } : {}) };
+    const t = f.explains!, parts = t.split("--"), isLink = parts.length === 3;
+    const target = isLink ? undefined : nodes.get(t);
+    let id: string;
+    if (target && !target.entry && !target.stub && target.kind !== "space" && !target.layer && target.source === "world/replicator-map/nodes.json") {
+      target.entry = f.path; target.entry_pr = f.pr; target.entry_login = f.login;
+      id = target.id;
+    } else {
+      id = fileId(f.path);
+      let parent = spaceId(sp);
+      if (isLink) {
+        const e = edges.find((x) => x.from === parts[0] && x.type === parts[1] && x.to === parts[2]);
+        if (!e) conflicts.push({ path: f.path, problem: `explains: ${t} names no link on the map` });
+        else if (e.entry) conflicts.push({ path: f.path, problem: `explains: ${t} is already explained by ${e.entry}; this file is shown inside ${parts[0]}` });
+        else e.entry = f.path;
+        if (nodes.has(parts[0]!)) parent = parts[0]!;
+      } else if (target) parent = target.id;
+      else conflicts.push({ path: f.path, problem: `explains: ${t} names no point on the map; placed in its space` });
+      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: "general", parent, ...meta, auto: true, children: 0 });
+      if (f.question) nodes.get(id)!.question = f.question;
+    }
+    nodeOfPath.set(f.path, id);
+    for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", source: f.path, pr: f.pr });
     for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", source: f.path, pr: f.pr });
     for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, source: f.path, pr: f.pr });
   }
@@ -123,5 +171,17 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   for (const e of edges) if (e.questions) e.open_questions = e.questions.filter(isOpen).length;
   const seen = new Set<string>();
   const uniq = edges.filter((e) => { const k = `${e.from}|${e.to}|${e.type}`; if (seen.has(k)) return false; seen.add(k); return true; });
-  return { version: 1, computed_at: now, nodes: [...nodes.values()].sort((a, b) => a.id.localeCompare(b.id)), edges: uniq, conflicts };
+  // The open work: starter-map points and links nobody has written about yet, alongside open questions and spots.
+  for (const n of nodes.values()) if (n.source === "world/replicator-map/nodes.json" && !n.entry) n.unwritten = true;
+  for (const e of uniq) if (e.source === "world/replicator-map/relations.json" && !e.entry) e.unexplained = true;
+  const all = [...nodes.values()];
+  const frontier: Frontier = {
+    open_questions: all.filter((n) => n.kind === "question" && !n.answered).length,
+    open_spots: all.filter((n) => n.stub).length,
+    unwritten: all.filter((n) => n.unwritten).length,
+    unexplained: uniq.filter((e) => e.unexplained).length,
+    laws: all.filter((n) => n.kind === "law").length,
+    articles: all.filter((n) => n.kind === "article").length,
+  };
+  return { version: 1, computed_at: now, nodes: all.sort((a, b) => a.id.localeCompare(b.id)), edges: uniq, conflicts, frontier };
 }

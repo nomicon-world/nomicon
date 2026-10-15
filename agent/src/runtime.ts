@@ -21,6 +21,7 @@ import { mentionTargets } from "./notify.js";
 import { headerReport } from "./headercheck.js";
 import { extended, pausedAt, pausesOf, type Pause, type PauseScope } from "./pauses.js";
 import { heldBack } from "./live.js";
+import { rulesFrom, type RulesSource } from "./rulesmap.js";
 import type { Notifier } from "./notifier.js";
 
 export interface RuntimeDeps {
@@ -138,7 +139,7 @@ export class Runtime {
   questionsIndex(now = this.d.clock.now()): QuestionsIndex {
     const files = this.worldFiles(now);
     const idx = this.treeLoaded ? indexFromFiles(files, now) : buildIndex(this.state(now).questions, now);
-    const nodeOf = new Map(buildWorldMap(files, this.replicatorSource ?? null, now).nodes.filter((n) => n.source && !n.stub).map((n) => [n.source!, n.id] as [string, string]));
+    const nodeOf = new Map(buildWorldMap(files, this.replicatorSource ?? null, now, this.rulesSource ?? null).nodes.filter((n) => n.source && !n.stub).map((n) => [n.source!, n.id] as [string, string]));
     for (const q of [...idx.open, ...idx.answered]) { const id = nodeOf.get(q.id); if (id) q.node = id; }
     return idx;
   }
@@ -421,7 +422,7 @@ export class Runtime {
       const md = files.filter((f) => f.status !== "removed" && f.path.startsWith("world/") && f.path.toLowerCase().endsWith(".md"));
       const changed = await Promise.all(md.map(async (f) => ({ path: f.path, content: await this.d.github.readFile(pr.headSha, f.path) })));
       const removed = files.flatMap((f) => (f.status === "removed" ? [f.path] : f.previousPath ? [f.previousPath] : []));
-      read = headerReport(changed, removed, this.worldFiles(now), await this.replicator(), pr.number, now);
+      read = headerReport(changed, removed, this.worldFiles(now), await this.replicator(), pr.number, now, await this.rules());
     } catch (e) { this.log(`pr ${pr.number}: header report skipped: ${(e as Error).message}`); }
     await this.d.github.comment(pr.number, quoteComment(ev, laws, this.d.publicBaseUrl, read));
   }
@@ -885,10 +886,18 @@ export class Runtime {
     try { this.catalogSource = JSON.parse(await this.d.github.readFile("main", "paths.json")) as Catalog; } catch { this.catalogSource = null; }
     return this.catalogSource;
   }
-  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.worldFiles(now), await this.replicator(), now); }
+  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()); }
+  /** The Laws and the Constitution's articles as map points, read from main; refreshed when either file changes. */
+  private rulesSource: RulesSource | null | undefined;
+  private async rules(): Promise<RulesSource | null> {
+    if (this.rulesSource !== undefined) return this.rulesSource;
+    try { this.rulesSource = rulesFrom(await this.d.github.readFile("main", "LAWS.md"), await this.d.github.readFile("main", "CONSTITUTION.md")); }
+    catch (e) { this.log(`rules for the map unavailable: ${(e as Error).message}`); this.rulesSource = null; }
+    return this.rulesSource;
+  }
 
   /** The World's Markdown files on main, read once per blob: the map shows what is actually there (Law 12). */
-  private mainFiles = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string }>();
+  private mainFiles = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string }>();
   private treeLoaded = false;
   private worldKey = "";
   private lastTreeCheck = 0;
@@ -898,7 +907,7 @@ export class Runtime {
     this.lastTreeCheck = now;
     const blobs = await this.d.github.listBlobs("main");
     const md = blobs.filter((b) => b.path.startsWith("world/") && b.path.toLowerCase().endsWith(".md"));
-    const watched = blobs.filter((b) => (b.path.startsWith("world/") && !b.path.toLowerCase().endsWith(".md")) || b.path === "paths.json");
+    const watched = blobs.filter((b) => (b.path.startsWith("world/") && !b.path.toLowerCase().endsWith(".md")) || b.path === "paths.json" || b.path === "LAWS.md" || b.path === "CONSTITUTION.md");
     // D38: the ledger must explain the repository. World files no merge recorded are listed once per fingerprint.
     const st = this.state(now), seen = new Set<string>();
     for (const e of this.d.ledger.events) if (e.type === "world_direct") for (const f of (e["files"] as Array<{ path: string; sha: string }> | undefined) ?? []) seen.add(`${f.path}:${f.sha}`);
@@ -906,17 +915,18 @@ export class Runtime {
     if (unexplained.length) this.d.ledger.append(now, "world_direct", { files: unexplained.map((b) => ({ path: b.path, sha: b.sha })), note: "World files on main that no merge recorded, such as files the owner committed during bootstrap (Article 3)" });
     const key = [...md, ...watched].map((b) => `${b.path}:${b.sha}`).sort().join("|");
     if (this.treeLoaded && key === this.worldKey) return false;
-    const next = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string }>();
+    const next = new Map<string, { sha: string; title?: string; map?: MapFile["map"]; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string }>();
     for (const b of md) {
       const prev = this.mainFiles.get(b.path);
       if (prev && prev.sha === b.sha) { next.set(b.path, prev); continue; }
       const content = await this.d.github.readFile("main", b.path);
       const h = parseHeader(content), t = titleOf(content);
-      next.set(b.path, { sha: b.sha, ...(t ? { title: t } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}) });
+      next.set(b.path, { sha: b.sha, ...(t ? { title: t } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}) });
     }
     const oldKeys = new Set(this.worldKey.split("|"));
     if (watched.some((b) => b.path.startsWith("world/replicator-map/") && !oldKeys.has(`${b.path}:${b.sha}`))) this.replicatorSource = undefined;
     if (watched.some((b) => b.path === "paths.json" && !oldKeys.has(`${b.path}:${b.sha}`))) this.catalogSource = undefined;
+    if (watched.some((b) => (b.path === "LAWS.md" || b.path === "CONSTITUTION.md") && !oldKeys.has(`${b.path}:${b.sha}`))) this.rulesSource = undefined;
     this.mainFiles = next; this.worldKey = key; this.treeLoaded = true;
     return true;
   }
@@ -928,7 +938,7 @@ export class Runtime {
     const out: Record<string, MapFile> = {};
     for (const [path, f] of this.mainFiles) {
       const l = st.map_files[path];
-      out[path] = { path, ...(f.title ? { title: f.title } : {}), ...(f.map ? { map: f.map } : {}), ...(f.question ? { question: f.question } : {}), answers: f.answers, ...(f.cites ? { cites: f.cites } : {}), ...(f.about ? { about: f.about } : {}),
+      out[path] = { path, ...(f.title ? { title: f.title } : {}), ...(f.map ? { map: f.map } : {}), ...(f.question ? { question: f.question } : {}), answers: f.answers, ...(f.cites ? { cites: f.cites } : {}), ...(f.about ? { about: f.about } : {}), ...(f.explains ? { explains: f.explains } : {}),
         pr: l?.pr ?? 0, by: l?.by ?? owner, login: l?.login ?? ownerLogin, merged_at: l?.merged_at ?? 0, ...(l ? {} : { direct: true }) };
     }
     return out;
@@ -979,7 +989,7 @@ export class Runtime {
       if (!this.mapDirty) return;
       await this.d.github.publishLedger([
         { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
-        { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now), null, 1) + "\n" },
+        { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()), null, 1) + "\n" },
       ], "map: World files on main changed");
       this.mapDirty = false;
       return;
@@ -993,7 +1003,7 @@ export class Runtime {
       { path: "ledger/head.json", content: this.d.ledger.headJson() },
       { path: "ledger/state.json", content: serializeState(state) },
       { path: "ledger/questions.json", content: JSON.stringify(this.questionsIndex(now), null, 2) + "\n" },
-      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now), null, 1) + "\n" },
+      { path: "ledger/map.json", content: JSON.stringify(buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()), null, 1) + "\n" },
     ], `ledger: event ${this.d.ledger.head}`);
     this.d.ledger.markPublished(names);
     this.lastPublishedHead = head;

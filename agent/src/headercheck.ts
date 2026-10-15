@@ -1,5 +1,6 @@
 import { parseHeader, titleOf } from "./questions.js";
 import { buildWorldMap, type MapFile, type SourceEdge, type SourceNode } from "./worldmap.js";
+import type { RulesSource } from "./rulesmap.js";
 
 /**
  * Law 12: what the agent read from the headers of a submission's World files, as the map would show them after
@@ -12,6 +13,7 @@ export function headerReport(
   replicator: { nodes: SourceNode[]; edges: SourceEdge[] } | null,
   pr: number,
   now: number,
+  rules: RulesSource | null = null,
 ): string[] {
   const mine = changed.filter((f) => f.path.startsWith("world/") && f.path.toLowerCase().endsWith(".md"));
   if (!mine.length) return [];
@@ -25,16 +27,19 @@ export function headerReport(
     files[f.path] = {
       path: f.path, answers: h?.answers ?? [], pr, by: 0, login: "", merged_at: now,
       ...(title ? { title } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}),
-      ...(h?.cites.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}),
+      ...(h?.cites.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}),
     };
   }
-  const m = buildWorldMap(files, replicator, now);
+  const m = buildWorldMap(files, replicator, now, rules);
   const out: string[] = [];
   for (const f of mine) {
     const parts: string[] = [];
-    const node = m.nodes.find((n) => n.source === f.path && !n.stub);
+    const node = m.nodes.find((n) => (n.source === f.path || n.entry === f.path) && !n.stub);
+    const link = m.edges.find((e) => e.entry === f.path);
     if (unreadable.has(f.path)) parts.push("its header could not be read (check the YAML and the `nomicon:` key), so it is placed by its title only");
-    if (node) parts.push(`appears on the map as "${node.label}" (id \`${node.id}\`${node.parent ? `, inside \`${node.parent}\`` : ""})`);
+    if (node && node.entry === f.path) parts.push(`writes the first entry for "${node.label}" (id \`${node.id}\`), which stops being an unwritten point`);
+    else if (node) parts.push(`appears on the map as "${node.label}" (id \`${node.id}\`${node.parent ? `, inside \`${node.parent}\`` : ""})`);
+    if (link) parts.push(`explains the link \`${link.from}--${link.type}--${link.to}\`, which stops being unexplained`);
     const mf = files[f.path]!;
     if (mf.question) parts.push("asks a question");
     for (const a of mf.answers) {

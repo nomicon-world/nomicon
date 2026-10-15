@@ -5,21 +5,22 @@
 import type { WorldNode } from "./worldmap.js";
 
 export interface Recipe { channel: string; layer: "world" | "laws" | "free"; file?: string; header?: string; pr_title?: string; link?: string; steps: string[]; ask_first?: string[]; voters_only?: boolean }
-export interface CatalogOption { id: string; label: string; detail: string; recipe: string; applies: string[]; kind?: string; rel?: string; verb?: string; template?: string; target?: string; command?: string; title?: string; open_only?: boolean; answered_only?: boolean }
+export interface CatalogOption { id: string; label: string; detail: string; recipe: string; applies: string[]; kind?: string; rel?: string; verb?: string; template?: string; target?: string; command?: string; title?: string; open_only?: boolean; answered_only?: boolean; unwritten_only?: boolean; unexplained_only?: boolean }
 export interface Catalog { version: number; first: string[]; fee_note?: string; doors: Array<{ id: string; label: string; say: string; color: string; options: CatalogOption[] }>; recipes: Record<string, Recipe> }
-type Node = Pick<WorldNode, "id" | "label" | "kind" | "parent" | "source"> & { stub?: boolean; answered?: boolean; from?: string; to?: string; rel?: string; from_label?: string; to_label?: string; open_questions?: number; questions?: string[] };
+type Node = Pick<WorldNode, "id" | "label" | "kind" | "parent" | "source"> & { stub?: boolean; answered?: boolean; from?: string; to?: string; rel?: string; from_label?: string; to_label?: string; open_questions?: number; questions?: string[]; unwritten?: boolean; unexplained?: boolean; layer?: string };
 
 /** A link on the map as a place: id from--type--to, with both ends' labels. */
-export function edgeNode(edge: { from: string; to: string; type: string; source: string; questions?: string[]; open_questions?: number }, byId: Map<string, Node>): Node {
+export function edgeNode(edge: { from: string; to: string; type: string; source: string; questions?: string[]; open_questions?: number; unexplained?: boolean }, byId: Map<string, Node>): Node {
   const a = byId.get(edge.from), b = byId.get(edge.to);
   return { id: `${edge.from}--${edge.type}--${edge.to}`, label: `${a ? a.label : edge.from} → ${b ? b.label : edge.to} (${edge.type})`, kind: "edge", parent: null, source: edge.source,
-    from: edge.from, to: edge.to, rel: edge.type, from_label: a ? a.label : edge.from, to_label: b ? b.label : edge.to, open_questions: edge.open_questions ?? 0, questions: edge.questions ?? [] };
+    from: edge.from, to: edge.to, rel: edge.type, from_label: a ? a.label : edge.from, to_label: b ? b.label : edge.to, open_questions: edge.open_questions ?? 0, questions: edge.questions ?? [], ...(edge.unexplained ? { unexplained: true } : {}) };
 }
 export function placeType(node: Node | null): string {
   if (!node) return "none";
   if (node.kind === "edge") return "edge";
   if (node.stub) return "stub";
-  if (node.kind === "space") return "space";
+  if (node.kind === "law" || node.kind === "article" || node.kind === "machine") return node.kind;
+  if (node.kind === "space") return node.layer ? "rules-space" : "space";
   if (node.kind === "question") return "question";
   return "node";
 }
@@ -56,6 +57,8 @@ export function jobCard(catalog: Catalog, optionId: string, node: Node | null, b
   const place = type === "none" ? null : node;
   if (place && option.open_only && place.answered) return { error: `${option.label} is for questions nobody has answered; this one is answered, so use "Give a competing answer"` };
   if (place && option.answered_only && !place.answered) return { error: `${option.label} is for questions already answered; this one is open, so use "Answer an open question"` };
+  if (place && option.unwritten_only && !place.unwritten) return { error: `${option.label} is for points nobody has written about yet; this one has an entry, so extend or correct it` };
+  if (place && option.unexplained_only && !place.unexplained) return { error: `${option.label} is for links nobody has explained yet; this one is explained` };
   const vals: Record<string, string> = {
     node: place ? place.id : "<node id>", node_label: place ? place.label : "<node>", space: place ? spaceOf(place, byId) : "<space>",
     source: place && place.source ? place.source : "<file>", kind: option.kind ?? "idea", rel: option.rel ?? "relates", verb: option.verb ?? "improve",
@@ -84,6 +87,8 @@ export function optionsFor(catalog: Catalog, node: Node | null) {
   for (const d of catalog.doors) for (const o of d.options) {
     if (node && o.open_only && node.answered) continue;
     if (node && o.answered_only && !node.answered) continue;
+    if (node && o.unwritten_only && !node.unwritten) continue;
+    if (node && o.unexplained_only && !node.unexplained) continue;
     if (type === "none" ? o.applies.includes("none") || o.applies.includes("any") : o.applies.includes(type)) out.push({ door: d, option: o });
   }
   return out;

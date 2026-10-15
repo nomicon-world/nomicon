@@ -16,7 +16,8 @@ export interface MapNode { id: string; label: string; kind: string; domain: stri
 export interface MapEdge { from?: string; to: string; type: string }
 export interface MapDecl { node?: MapNode; edges: MapEdge[]; place_under: string[]; needs: string[] }
 
-export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl; about?: string }
+/** explains: the node id, or the link written from--type--to, whose entry this file is (Law 12). */
+export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl; about?: string; explains?: string }
 
 /** What a question is about: a node id, or an edge written from--type--to. */
 export const ABOUT = /^[a-z0-9][a-z0-9-]{0,63}(--[a-z][a-z0-9-]{0,31}--[a-z0-9][a-z0-9-]{0,63})?$/;
@@ -83,6 +84,7 @@ export function parseHeader(content: string): Header | null {
   const map = parseMap(o["map"]);
   if (map) h.map = map;
   if (typeof o["about"] === "string" && ABOUT.test(o["about"].trim())) h.about = o["about"].trim();
+  if (typeof o["explains"] === "string" && ABOUT.test(o["explains"].trim())) h.explains = o["explains"].trim();
   return h;
 }
 
