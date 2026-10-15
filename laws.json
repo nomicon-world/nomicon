@@ -1,6 +1,6 @@
 {
   "$schema": "./laws.schema.json",
-  "version": 13,
+  "version": 14,
   "effective": "2026-10-15",
   "vote": {
     "world": {
@@ -119,7 +119,11 @@
     "structure_factor": 1.25,
     "label_window_days_after_merge": 30,
     "labeller_floor_base_fees": 1,
-    "scored_layers": ["world"]
+    "scored_layers": ["world"],
+    "new_requires_pointer": true,
+    "labellers_to_settle": 3,
+    "assessors_to_clear_challenge": 2,
+    "pointer_max_chars": 280
   },
   "notices": {
     "mention_cap_per_merge": 10,

@@ -134,22 +134,25 @@ describe("Law 14 labels in the running agent", () => {
     }
     expect(prs[0]!.comments.some((c) => c.includes("Judge it (Law 14)"))).toBe(true);
     // Bob labels Alice's work in a comment; Alice labels her own (ignored); the owner labels (ignored).
-    h.github.commentOnIssue(prs[0]!.number, B, "Solid.\nlabel: new");
+    h.github.commentOnIssue(prs[0]!.number, B, "Solid.\nlabel: new, unlike the usual survey, because it measures it directly\nchallenge: an earlier note covers the same ground");
     h.github.commentOnIssue(prs[0]!.number, A, "label: new");
     h.github.commentOnIssue(prs[0]!.number, OWNER, "label: new");
     h.clock.advance(700);
     await h.rt.tick();
     const labels = h.ledger.events.filter((e) => e.type === "label");
-    expect(labels.map((e) => [e["pr"], e["account"], e["label"]])).toEqual([[prs[0]!.number, B.id, "new"]]);
+    expect(labels.map((e) => [e["pr"], e["account"], e["label"], e["unlike"], e["because"]])).toEqual([[prs[0]!.number, B.id, "new", "the usual survey", "it measures it directly"]]);
+    expect(h.ledger.events.filter((e) => e.type === "challenge").map((e) => [e["account"], e["text"]])).toEqual([[B.id, "an earlier note covers the same ground"]]);
     const board = h.rt.progress();
-    expect(board.contributions.find((c) => c.pr === prs[0]!.number)).toMatchObject({ label: "new", labelled: true, score: 2 });
+    // One labeller: provisional, so the score keeps the default; the challenge marks it contested.
+    expect(board.contributions.find((c) => c.pr === prs[0]!.number)).toMatchObject({ state: "provisional", leading: "new", label: "builds", labelled: true, contested: true, score: 1 });
     expect(board.contributions.find((c) => c.pr === prs[1]!.number)).toMatchObject({ label: "builds", labelled: false, score: 1 });
     expect(h.github.published.some((f) => f.path === "ledger/progress.json")).toBe(true);
     const map = JSON.parse(h.github.published.find((f) => f.path === "ledger/map.json")!.content);
-    expect(map.nodes.find((n: { id: string }) => n.id === "aa").progress).toMatchObject({ label: "new", cited_by: 0, score: 2 });
+    expect(map.nodes.find((n: { id: string }) => n.id === "aa").progress).toMatchObject({ label: "builds", leading: "new", state: "provisional", contested: true, cited_by: 0, score: 1 });
     // The same comment is not recorded twice, and a review label during a later vote is recorded too.
     h.clock.advance(700); await h.rt.tick();
     expect(h.ledger.events.filter((e) => e.type === "label")).toHaveLength(1);
+    expect(h.ledger.events.filter((e) => e.type === "challenge")).toHaveLength(1);
     const r = replay(h.ledger.events, new Map([[loaded.hash, rawLaws]]), rawSchema, null, h.clock.now());
     expect(r.findings).toEqual([]);
   });

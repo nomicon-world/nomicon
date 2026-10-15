@@ -181,7 +181,10 @@ function ruleInfo(n) {
 }
 function progressInfo(p) {
   if (!p) return "";
-  return `<p class="meta" style="margin:6px 0 0">Judged <b>${esc(p.label)}</b>${p.labelled ? "" : " (nobody has labelled it yet)"} · built on by ${p.cited_by} · progress ${esc(p.score)} · <a href="https://nomicon-world.github.io/nomicon/site/leaderboard.html">the board</a></p>`;
+  const state = !p.labelled ? " (nobody has labelled it yet)"
+    : p.state === "provisional" ? ` (provisional: ${p.labellers} of ${p.settle_at} labels${p.leading && p.leading !== p.label ? `, leaning ${esc(p.leading)}` : ""})` : "";
+  const flags = (p.contested ? " · <b>contested</b>" : "") + (p.new_unsupported ? ` · <span title="Called new without naming the nearest existing work; counts as builds until someone does">new?</span>` : "");
+  return `<p class="meta" style="margin:6px 0 0">Judged <b>${esc(p.label)}</b>${state}${flags} · built on by ${p.cited_by} · progress ${esc(p.score)} · <a href="https://nomicon-world.github.io/nomicon/site/leaderboard.html">the board</a></p>`;
 }
 function entryInfo(n) {
   if (n.unwritten) return `<p><b>Nobody has written about this point yet.</b> It is on the starter map; its first entry is open to anyone.</p>`;
@@ -315,7 +318,7 @@ function draw() {
     if (n.stub) { ctx.setLineDash([4 * r, 3 * r]); ctx.strokeStyle = col; ctx.lineWidth = 2 * r; ctx.stroke(); ctx.setLineDash([]); }
     else { ctx.fillStyle = col + (n.kind === "space" ? "33" : n.unwritten ? "66" : "dd"); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = (n.children ? 3.5 : 1.5) * r; ctx.stroke(); }
     if (n.unwritten) { ctx.beginPath(); ctx.arc(p.x, p.y, rad + 4 * r, 0, 7); ctx.setLineDash([3 * r, 3 * r]); ctx.strokeStyle = css("--open"); ctx.lineWidth = 1.8 * r; ctx.stroke(); ctx.setLineDash([]); }
-    if (n.progress && n.progress.label === "new" && n.progress.labelled) { ctx.fillStyle = css("--amber"); ctx.font = `bold ${12 * r}px system-ui`; ctx.textAlign = "center"; ctx.fillText("★", p.x + rad * 0.85, p.y - rad * 0.85); ctx.textAlign = "start"; }
+    if (n.progress && n.progress.label === "new" && n.progress.state === "settled") { ctx.fillStyle = css("--amber"); ctx.font = `bold ${12 * r}px system-ui`; ctx.textAlign = "center"; ctx.fillText("★", p.x + rad * 0.85, p.y - rad * 0.85); ctx.textAlign = "start"; }
     if (n.locked && n.kind !== "space") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(9, rad * 0.9)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("▣", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
     if (n.children && n.kind !== "space") { for (let i = 0; i < Math.min(n.children, 8); i++) { const a = i * 0.785; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rad * 0.55, p.y + Math.sin(a) * rad * 0.55, 1.6 * r, 0, 7); ctx.fillStyle = "#ffffffaa"; ctx.fill(); } }
     if (n.kind === "question") { ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.max(10, rad * 1.1)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(n.answered ? "✓" : "?", p.x, p.y + 1); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; }
@@ -444,7 +447,7 @@ q.addEventListener("input", () => {
   results.hidden = !hits.length;
 });
 function legend() {
-  const items = [["--open", "Violet dashes: nothing written yet, a point or a link", true], ["--accent", "Space, a top-level directory", false], [null, "Badge: things inside, double-click to enter", false], ["--amber", "Open spot, waiting to be filled", true], [null, "? open question, ✓ answered", false], [null, "★ judged new by the commons", false], [null, "Dotted ring: new this week", false], [null, "↗ link to another level", false]];
+  const items = [["--open", "Violet dashes: nothing written yet, a point or a link", true], ["--accent", "Space, a top-level directory", false], [null, "Badge: things inside, double-click to enter", false], ["--amber", "Open spot, waiting to be filled", true], [null, "? open question, ✓ answered", false], [null, "★ judged new by the commons, settled", false], [null, "Dotted ring: new this week", false], [null, "↗ link to another level", false]];
   document.getElementById("legend").innerHTML = items.map(([c, t, dash]) => `<span>${c ? `<i style="background:${dash ? "transparent" : css(c)};border:2px ${dash ? "dashed" : "solid"} ${css(c)}"></i>` : "•"}</span><span>${t}</span>`).join("");
 }
 (async () => {

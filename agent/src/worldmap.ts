@@ -10,7 +10,7 @@
 import type { MapDecl } from "./questions.js";
 import { MACHINE, machineHref, type RulesSource } from "./rulesmap.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; challenges?: string[]; prior?: string; adds?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
 /** parent: the starter map's own nesting, an inner component of another point (world/replicator-map/README.md). */
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number; parent?: string }
 export interface SourceEdge { from: string; to: string; type: string }
@@ -31,7 +31,7 @@ export interface WorldNode {
   /** Law 14: what the commons judged the contribution that made this to be. */
   progress?: Progress;
 }
-export interface Progress { label: string; labelled: boolean; cited_by: number; score: number }
+export interface Progress { label: string; leading?: string | null; state?: string; labellers?: number; settle_at?: number; contested?: boolean; new_unsupported?: number; labelled: boolean; cited_by: number; score: number }
 export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string; progress?: Progress }
 /** The open work on the map, counted: what a newcomer could take on today. */
 export interface Frontier { open_questions: number; open_spots: number; unwritten: number; unexplained: number; laws: number; articles: number }
@@ -139,6 +139,11 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   for (const f of ordered) for (const c of f.cites ?? []) {
     const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
     if (a && b && a !== b) edges.push({ from: a, to: b, type: "cites", source: f.path, pr: f.pr });
+  }
+  // Challenges (Law 14) draw their own kind of link, so a dispute never reads as building on the work.
+  for (const f of ordered) for (const c of f.challenges ?? []) {
+    const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
+    if (a && b && a !== b) edges.push({ from: a, to: b, type: "challenges", source: f.path, pr: f.pr });
   }
   // Questions about a node or an edge: the question points at it, and it counts the questions still open.
   for (const f of ordered) {

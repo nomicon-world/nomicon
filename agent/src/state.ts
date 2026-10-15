@@ -129,8 +129,8 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
       const titles = (e["titles"] as Record<string, string> | undefined) ?? {};
       for (const p of paths) {
         if (!p.startsWith("world/") || !p.toLowerCase().endsWith(".md")) continue;
-        const h = headers[p] as { question?: string; answers?: string[]; cites?: string[]; about?: string; explains?: string; map?: MapFile["map"] } | undefined;
-        s.map_files[p] = { path: p, ...(titles[p] ? { title: titles[p] } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}), pr: num(e["pr"]), by: acct, login, merged_at: e.at };
+        const h = headers[p] as { question?: string; answers?: string[]; cites?: string[]; about?: string; explains?: string; challenges?: string[]; prior?: string; adds?: string; map?: MapFile["map"] } | undefined;
+        s.map_files[p] = { path: p, ...(titles[p] ? { title: titles[p] } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}), ...(h?.challenges?.length ? { challenges: h.challenges } : {}), ...(h?.prior && h?.adds ? { prior: h.prior, adds: h.adds } : {}), pr: num(e["pr"]), by: acct, login, merged_at: e.at };
       }
       for (const [p, h] of Object.entries(headers)) {
         if (h.question && !s.questions[p]) s.questions[p] = { id: p, question: h.question, asked_by: acct, asked_login: login, asked_at: e.at, pr: num(e["pr"]), answers: [] };

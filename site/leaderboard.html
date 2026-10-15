@@ -14,8 +14,8 @@
 <h1>Nomicon</h1>
 <p id="meta"><small>Loading <code>ledger/state.json</code>, <code>ledger/questions.json</code> and <code>ledger/progress.json</code>. Serve the repository root over HTTP; opening this file directly does not work.</small></p>
 <h2>Progress</h2>
-<p><small>What the commons judged to be progress (<code>LAWS.md</code> Law 14): each merged World contribution's label (<b>new</b>, <b>builds</b> or <b>collects</b>, given in reviews and comments by accounts with merged work, weighted), what it did to the frontier, and who built on it. Score = label × structure × (1 + citing accounts). It mints no weight and moves no money. Judge one: comment <code>label: new</code>, <code>label: builds</code> or <code>label: collects</code> on its pull request within 30 days of the merge.</small></p>
-<table id="progress"><thead><tr><th>#</th><th>contribution</th><th>by</th><th>label</th><th>structure</th><th class="n">built on by</th><th class="n">score</th></tr></thead><tbody></tbody></table>
+<p><small>What the commons judged to be progress (<code>LAWS.md</code> Law 14). Each merged World contribution gets a label, <b>new</b>, <b>builds</b> or <b>collects</b>, from reviews and comments by accounts with merged work, weighted. A label is <i>provisional</i>, and the score uses builds, until 3 accounts have given one. A <b>new</b> counts only with a pointer to the nearest existing work; without one the board shows <b>new?</b> and counts builds. A <b>contested</b> contribution has a challenge that 2 other accounts have not yet answered with labels. Usefulness is shown apart from the label: what the contribution did to the frontier and how many other accounts built on it. Score = label × structure × (1 + citing accounts). It mints no weight and moves no money. Judge one on its pull request while its window is open: <code>label: builds</code>, <code>label: collects</code>, or <code>label: new, unlike &lt;the nearest existing work&gt;, because &lt;what this adds&gt;</code>. Dispute one with <code>challenge: &lt;the earlier work, and why&gt;</code>.</small></p>
+<table id="progress"><thead><tr><th>#</th><th>contribution</th><th>by</th><th>label</th><th>usefulness</th><th class="n">built on by</th><th class="n">score</th></tr></thead><tbody></tbody></table>
 <table id="authors"><thead><tr><th>#</th><th>author</th><th class="n">contributions</th><th class="n">judged new</th><th class="n">score</th></tr></thead><tbody></tbody></table>
 <h2>Weight</h2>
 <p><small>Mature weight by account, in USDC, as of the ledger head. Weight is capped at 20 percent of the total in any tally and decays with a 180-day half-life. Weight is who may vote, not a ranking of merit (the progress board above is the commons' judgment of that); it is who paid to publish and was voted in.</small></p>
@@ -41,9 +41,24 @@
       fetch(DATA + "ledger/progress.json").then((r) => (r.ok ? r.json() : { contributions: [], authors: [] })),
     ]);
     const REPO = "https://github.com/nomicon-world/nomicon";
-    document.querySelector("#progress tbody").innerHTML = (progress.contributions ?? []).map((c, i) => `<tr><td>${i + 1}</td><td><a href="${REPO}/pull/${esc(c.pr)}">#${esc(c.pr)}</a> ${c.paths.map((p) => `<code>${esc(p.replace(/^world[/]/, ""))}</code>`).join(" ")}</td><td>${esc(c.login)}</td><td>${esc(c.label)}${c.labelled ? "" : " <small>(unlabelled)</small>"}</td><td><small>${esc(c.structure.join(", ") || "loose entry")}</small></td><td class="n">${c.cited_by.length}</td><td class="n">${esc(c.score)}</td></tr>`).join("") || `<tr><td colspan="7"><small>Nothing merged in the World yet.</small></td></tr>`;
-    document.querySelector("#authors tbody").innerHTML = (progress.authors ?? []).map((a, i) => `<tr><td>${i + 1}</td><td>${esc(a.login)} <small>${esc(a.account)}</small></td><td class="n">${a.contributions}</td><td class="n">${a.new}</td><td class="n">${esc(a.score)}</td></tr>`).join("");
     const now = Math.floor(Date.now() / 1000);
+    const NEW_Q = `<span title="Called new without naming the nearest existing work; counts as builds until someone does">new?</span>`;
+    const labelCell = (c) => {
+      const state = c.state === "settled" ? "settled" : c.state === "provisional" ? `provisional, ${c.labellers} of ${c.settle_at}${c.leading && c.leading !== c.label ? `, leaning ${esc(c.leading)}` : ""}` : "unlabelled";
+      return `<b>${esc(c.label)}</b> <small>${state}</small>${c.contested ? " <b>contested</b>" : ""}${c.new_unsupported ? " " + NEW_Q : ""}`;
+    };
+    const judged = (c) => {
+      const items = [
+        ...(c.author_pointer ? [`<li><small>the author:</small> unlike ${esc(c.author_pointer.prior)}, because ${esc(c.author_pointer.adds)}</li>`] : []),
+        ...(c.labels ?? []).map((l) => `<li>${esc(l.login)}: <b>${esc(l.label)}</b>${l.unlike ? `, unlike ${esc(l.unlike)}, because ${esc(l.because)}` : ""}${l.counted_as !== l.label ? ` <small>(counts as ${esc(l.counted_as)})</small>` : ""} <small>${when(l.at)}</small></li>`),
+        ...(c.challenges ?? []).map((x) => `<li>${esc(x.login)} <b>challenges</b> it: ${x.path ? `in <code>${esc(x.path)}</code>` : esc(x.text)} <small>${when(x.at)}</small></li>`),
+      ];
+      const open = c.window_closes > now ? `<small>Open for labels and challenges until ${when(c.window_closes)}.</small>` : "";
+      const n = (k, w) => `${k} ${w}${k === 1 ? "" : "s"}`;
+      return items.length || open ? `<details><summary><small>${n((c.labels ?? []).length, "label")}, ${n((c.challenges ?? []).length, "challenge")}</small></summary>${items.length ? `<ul>${items.join("")}</ul>` : ""}${open}</details>` : "";
+    };
+    document.querySelector("#progress tbody").innerHTML = (progress.contributions ?? []).map((c, i) => `<tr><td>${i + 1}</td><td><a href="${REPO}/pull/${esc(c.pr)}">#${esc(c.pr)}</a> ${c.paths.map((p) => `<code>${esc(p.replace(/^world[/]/, ""))}</code>`).join(" ")}${judged(c)}</td><td>${esc(c.login)}</td><td>${labelCell(c)}</td><td><small>${esc(c.structure.join(", ") || "loose entry")}</small></td><td class="n">${c.cited_by.length}</td><td class="n">${esc(c.score)}</td></tr>`).join("") || `<tr><td colspan="7"><small>Nothing merged in the World yet.</small></td></tr>`;
+    document.querySelector("#authors tbody").innerHTML = (progress.authors ?? []).map((a, i) => `<tr><td>${i + 1}</td><td>${esc(a.login)} <small>${esc(a.account)}</small></td><td class="n">${a.contributions}</td><td class="n">${a.new}</td><td class="n">${esc(a.score)}</td></tr>`).join("");
     meta.innerHTML = `<small>Ledger head ${esc(state.head_event)}, computed ${state.computed_at ? when(state.computed_at) : "never"}. Base fee ${usdc(state.fee.base_micro)} USDC. ${state.bootstrap.active ? "Bootstrap is active: every merge needs the owner's confirmation." : ""}</small>`;
     const rows = Object.entries(state.weights).map(([id, w]) => ({ id, login: w.login, mature: BigInt(w.mature_micro), immature: BigInt(w.immature_micro ?? 0) })).sort((a, b) => (a.mature < b.mature ? 1 : a.mature > b.mature ? -1 : 0));
     const total = rows.reduce((a, r) => a + r.mature, 0n);

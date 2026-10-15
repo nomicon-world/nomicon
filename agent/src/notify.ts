@@ -36,7 +36,7 @@ export function targetsOf(e: LedgerEvent, state: State): number[] {
 }
 
 /** Accounts to mention when a merge answers questions or cites entries. Capped, author excluded. */
-export function mentionTargets(author: number, headers: Record<string, { answers?: string[]; cites?: string[] }>, state: State, cap: number): Array<{ account: number; reason: string; about: string }> {
+export function mentionTargets(author: number, headers: Record<string, { answers?: string[]; cites?: string[]; challenges?: string[] }>, state: State, cap: number): Array<{ account: number; reason: string; about: string }> {
   const seen = new Set<number>();
   const out: Array<{ account: number; reason: string; about: string }> = [];
   const add = (account: number | undefined, reason: string, about: string) => {
@@ -45,6 +45,8 @@ export function mentionTargets(author: number, headers: Record<string, { answers
   };
   for (const h of Object.values(headers)) {
     for (const q of h.answers ?? []) add(state.questions[q]?.asked_by, "answered your question", q);
+    // A challenge is named before a citation, so an author both cited and challenged learns of the challenge.
+    for (const c of h.challenges ?? []) add(state.path_author[c], "challenges your contribution (Law 14); you may answer on its pull request", c);
     for (const c of h.cites ?? []) add(state.path_author[c], "built on your contribution", c);
   }
   return out;

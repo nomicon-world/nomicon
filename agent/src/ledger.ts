@@ -7,7 +7,7 @@ import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readdirSync
 import { join } from "node:path";
 
 export type EventType =
-  | "genesis" | "intake_reject" | "screen_hold" | "hold_resolved" | "quote" | "quote_lapsed" | "payment" | "vote_open" | "review" | "label"
+  | "genesis" | "intake_reject" | "screen_hold" | "hold_resolved" | "quote" | "quote_lapsed" | "payment" | "vote_open" | "review" | "label" | "challenge"
   | "vote_close" | "merge" | "withdrawal" | "expiry" | "owner_confirm" | "owner_reject" | "fee_adjust"
   | "takedown" | "redaction" | "patch" | "deploy" | "destination_change" | "agent_account_change" | "screen_deferred" | "vote_queued" | "key_rotation" | "merge_deferred" | "bar_lifted" | "owner_accounts_change" | "declare" | "correction" | "refusal"
   | "laws_snapshot" | "owner_action_applied" | "channel" | "notice" | "digest" | "world_direct";

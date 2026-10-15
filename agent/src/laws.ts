@@ -107,11 +107,20 @@ export interface Laws {
   determinism: Record<string, string | number>;
   notices: { mention_cap_per_merge: number; doorbell_retries: number; doorbell_retire_after_failures: number; digest_every_days: number; watch_poll_every_hours: number };
   /** Law 14: the progress board. Filled with defaults for Laws versions before the rule. */
-  progress: { label_factors: Record<ProgressLabel, number>; default_label: ProgressLabel; structure_factor: number; label_window_days_after_merge: number; labeller_floor_base_fees: number; scored_layers: Array<"world" | "laws"> };
+  progress: { label_factors: Record<ProgressLabel, number>; default_label: ProgressLabel; structure_factor: number; label_window_days_after_merge: number; labeller_floor_base_fees: number; scored_layers: Array<"world" | "laws">;
+    /** A "new" label needs "unlike X, because Y" (or the author's prior/adds) to count as new; without, it counts as the default. */
+    new_requires_pointer: boolean;
+    /** Eligible labellers needed before a label settles; until then the score uses the default label. */
+    labellers_to_settle: number;
+    /** Labellers, other than the author and the challenger, who must label after a challenge to clear it. */
+    assessors_to_clear_challenge: number;
+    /** Pointers and challenge texts are cut to this length when recorded. */
+    pointer_max_chars: number };
 }
 export type ProgressLabel = "new" | "builds" | "collects";
 export const PROGRESS_LABELS: readonly ProgressLabel[] = ["new", "builds", "collects"];
-export const PROGRESS_DEFAULTS: Laws["progress"] = { label_factors: { new: 2, builds: 1, collects: 0.5 }, default_label: "builds", structure_factor: 1.25, label_window_days_after_merge: 30, labeller_floor_base_fees: 1, scored_layers: ["world"] };
+/** Law 14 as first adopted (laws v13): no pointer, no settling threshold. Later fields default to that behaviour for older versions. */
+export const PROGRESS_DEFAULTS: Laws["progress"] = { label_factors: { new: 2, builds: 1, collects: 0.5 }, default_label: "builds", structure_factor: 1.25, label_window_days_after_merge: 30, labeller_floor_base_fees: 1, scored_layers: ["world"], new_requires_pointer: false, labellers_to_settle: 1, assessors_to_clear_challenge: 2, pointer_max_chars: 280 };
 
 export class LawsError extends Error {
   constructor(public readonly problems: string[]) {
@@ -184,6 +193,7 @@ export function parseLaws(rawLaws: string, rawSchema: string): LoadedLaws {
   if (laws.vote.reject_quorum_no_voters === undefined) laws.vote.reject_quorum_no_voters = 1;
   if (laws.content.max_world_growth_kb_per_month === undefined) laws.content.max_world_growth_kb_per_month = 0;
   if (!laws.progress) laws.progress = { ...PROGRESS_DEFAULTS, label_factors: { ...PROGRESS_DEFAULTS.label_factors }, scored_layers: [...PROGRESS_DEFAULTS.scored_layers] };
+  for (const k of ["new_requires_pointer", "labellers_to_settle", "assessors_to_clear_challenge", "pointer_max_chars"] as const) if (laws.progress[k] === undefined) (laws.progress as Record<string, unknown>)[k] = PROGRESS_DEFAULTS[k];
   return { laws, hash: sha256Hex(rawLaws), raw: rawLaws };
 }
 

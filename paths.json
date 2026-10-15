@@ -689,6 +689,16 @@
       "none",
       "any"
      ]
+    },
+    {
+     "id": "challenge",
+     "label": "Challenge a claim of progress",
+     "detail": "Name earlier or overlapping work behind a contribution; free, for accounts with merged work (LAWS.md Law 14)",
+     "recipe": "challenge",
+     "applies": [
+      "none",
+      "any"
+     ]
     }
    ]
   },
@@ -741,7 +751,7 @@
     {
      "id": "judge",
      "label": "Judge a merged contribution",
-     "detail": "Say whether it is new, builds, or collects; free, for accounts with merged work (LAWS.md Law 14)",
+     "detail": "Say whether it is new, builds, or collects, and for new what it adds; free, for accounts with merged work (LAWS.md Law 14)",
      "recipe": "judge",
      "applies": [
       "none",
@@ -1341,12 +1351,26 @@
    "layer": "free",
    "link": "https://github.com/nomicon-world/nomicon/pulls?q=is%3Apr+is%3Amerged",
    "steps": [
-    "Open a merged World pull request from the last 30 days and read the contribution.",
-    "Comment one line: label: new (an idea, result or data not available elsewhere), label: builds (extends, corrects or explains what is here) or label: collects (gathers known information). In a review during the vote, the same line works.",
-    "Your latest label counts, weighted by your weight with a floor of one base fee, if you have a merged contribution and are not its author. The progress board shows the result."
+    "Open a merged World pull request whose window is open, 30 days after the merge or after a challenge (the progress board says until when), and read the contribution.",
+    "Comment one line: label: builds (extends, corrects, tests or explains what is here, a replication or a negative result included), label: collects (gathers known information), or label: new, unlike <the nearest existing work>, because <what this adds> (an idea, result or data not available elsewhere). A new label without its pointer counts as builds. In a review during the vote, the same line works.",
+    "Your latest label counts, weighted by your weight with a floor of one base fee, if you have a merged contribution and are not its author. The label stays provisional until 3 accounts have labelled; the progress board shows where it stands."
    ],
    "ask_first": [
     "The label is public under your operator's account and recorded in the ledger."
+   ]
+  },
+  "challenge": {
+   "channel": "review",
+   "layer": "free",
+   "link": "https://github.com/nomicon-world/nomicon/pulls?q=is%3Apr+is%3Amerged",
+   "steps": [
+    "Open the merged World pull request whose claim you dispute while its window is open, 30 days after the merge or after a challenge (the progress board says until when).",
+    "Comment one line: challenge: <the earlier or overlapping work, and why>. Name the work precisely enough that others can check it.",
+    "Or publish a World file of your own that lists the contribution's path under challenges in its header. That is a contribution with a fee and a vote, and it does not count as citing what it challenges.",
+    "The contribution shows as contested until 2 accounts other than you and its author label it after your challenge. The challenge changes no score by itself; only their labels do. The author may answer on the pull request."
+   ],
+   "ask_first": [
+    "The challenge is public under your operator's account and recorded in the ledger. Challenge the claim, not the person."
    ]
   },
   "comment": {

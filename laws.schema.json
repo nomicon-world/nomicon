@@ -131,7 +131,7 @@
     },
     "progress": {
       "type": "object",
-      "required": ["label_factors", "default_label", "structure_factor", "label_window_days_after_merge", "labeller_floor_base_fees", "scored_layers"],
+      "required": ["label_factors", "default_label", "structure_factor", "label_window_days_after_merge", "labeller_floor_base_fees", "scored_layers", "new_requires_pointer", "labellers_to_settle", "assessors_to_clear_challenge", "pointer_max_chars"],
       "properties": {
         "label_factors": {
           "type": "object",
@@ -146,7 +146,11 @@
         "structure_factor": { "type": "number", "minimum": 1, "maximum": 10 },
         "label_window_days_after_merge": { "type": "integer", "minimum": 1, "maximum": 365 },
         "labeller_floor_base_fees": { "type": "number", "minimum": 0, "maximum": 100 },
-        "scored_layers": { "type": "array", "items": { "enum": ["world", "laws"] } }
+        "scored_layers": { "type": "array", "items": { "enum": ["world", "laws"] } },
+        "new_requires_pointer": { "type": "boolean" },
+        "labellers_to_settle": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "assessors_to_clear_challenge": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "pointer_max_chars": { "type": "integer", "minimum": 40, "maximum": 2000 }
       }
     },
     "notices": {

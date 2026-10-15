@@ -16,8 +16,10 @@ export interface MapNode { id: string; label: string; kind: string; domain: stri
 export interface MapEdge { from?: string; to: string; type: string }
 export interface MapDecl { node?: MapNode; edges: MapEdge[]; place_under: string[]; needs: string[] }
 
-/** explains: the node id, or the link written from--type--to, whose entry this file is (Law 12). */
-export interface Header { question?: string; answers: string[]; cites: string[]; map?: MapDecl; about?: string; explains?: string }
+/** explains: the node id, or the link written from--type--to, whose entry this file is (Law 12).
+ *  challenges: paths of entries this file disputes (Law 14), never counted as citing them.
+ *  prior / adds: the author's own novelty pointer, the nearest existing work and what this adds (Law 14). */
+export interface Header { question?: string; answers: string[]; cites: string[]; challenges: string[]; map?: MapDecl; about?: string; explains?: string; prior?: string; adds?: string }
 
 /** What a question is about: a node id, or an edge written from--type--to. */
 export const ABOUT = /^[a-z0-9][a-z0-9-]{0,63}(--[a-z][a-z0-9-]{0,31}--[a-z0-9][a-z0-9-]{0,63})?$/;
@@ -79,7 +81,10 @@ export function parseHeader(content: string): Header | null {
   if (!n || typeof n !== "object") return null;
   const o = n as Record<string, unknown>;
   const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.length > 0 && x.length <= 512) : []);
-  const h: Header = { answers: strs(o["answers"]), cites: strs(o["cites"]) };
+  const h: Header = { answers: strs(o["answers"]), cites: strs(o["cites"]), challenges: strs(o["challenges"]) };
+  const line = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim().replace(/\s+/g, " ").slice(0, 500) : undefined);
+  const prior = line(o["prior"]), adds = line(o["adds"]);
+  if (prior && adds) { h.prior = prior; h.adds = adds; }
   if (typeof o["question"] === "string" && o["question"].trim()) h.question = o["question"].trim().slice(0, 500);
   const map = parseMap(o["map"]);
   if (map) h.map = map;

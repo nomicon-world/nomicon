@@ -28,6 +28,7 @@ export function headerReport(
       path: f.path, answers: h?.answers ?? [], pr, by: 0, login: "", merged_at: now,
       ...(title ? { title } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}),
       ...(h?.cites.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}),
+      ...(h?.challenges.length ? { challenges: h.challenges } : {}), ...(h?.prior && h?.adds ? { prior: h.prior, adds: h.adds } : {}),
     };
   }
   const m = buildWorldMap(files, replicator, now, rules);
@@ -47,6 +48,8 @@ export function headerReport(
       parts.push(!t ? `answers \`${a}\`, which is not a file in the World, so that link would be dropped` : !t.question ? `answers \`${a}\`, which asks no question, so that link would be dropped` : `answers \`${a}\``);
     }
     for (const c of mf.cites ?? []) parts.push(files[c] ? `cites \`${c}\`` : `cites \`${c}\`, which is not a file in the World, so that link would be dropped`);
+    for (const c of mf.challenges ?? []) parts.push(files[c] ? `challenges \`${c}\` (Law 14: contests it, and does not count as citing it)` : `challenges \`${c}\`, which is not a file in the World, so that challenge would be dropped`);
+    if (mf.prior && mf.adds) parts.push(`states its novelty pointer: unlike ${mf.prior}, because ${mf.adds}`);
     if (mf.about) parts.push(`is about \`${mf.about}\``);
     if (mf.map?.needs.length) parts.push(`opens ${mf.map.needs.length === 1 ? "a spot" : "spots"} for ${mf.map.needs.map((n) => `\`${n}\``).join(", ")}`);
     for (const c of m.conflicts) if (c.path === f.path) parts.push(c.problem);

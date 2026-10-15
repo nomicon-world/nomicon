@@ -5,7 +5,7 @@ import { rawLaws, rawSchema, withLaws } from "./helpers.js";
 describe("laws.json loading", () => {
   it("accepts the repository's laws.json", () => {
     const l = parseLaws(rawLaws, rawSchema);
-    expect(l.laws.version).toBe(13);
+    expect(l.laws.version).toBe(14);
     expect(l.hash).toHaveLength(64);
   });
   const refused = (name: string, mutate: Parameters<typeof withLaws>[0], expectText: string) =>

@@ -6,7 +6,7 @@ import { emptyState } from "../src/state.js";
 describe("header convention", () => {
   it("parses a question, answers and cites", () => {
     const h = parseHeader("---\nnomicon:\n  question: \"Why?\"\n  answers: [world/a.md]\n  cites: [world/b.md, world/c.md]\n---\n\nbody");
-    expect(h).toEqual({ question: "Why?", answers: ["world/a.md"], cites: ["world/b.md", "world/c.md"] });
+    expect(h).toEqual({ question: "Why?", answers: ["world/a.md"], cites: ["world/b.md", "world/c.md"], challenges: [] });
   });
   it("ignores files without a header, malformed YAML, and headers without a nomicon key", () => {
     expect(parseHeader("# plain")).toBeNull();
