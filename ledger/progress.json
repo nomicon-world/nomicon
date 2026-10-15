@@ -1,6 +1,6 @@
 {
- "version": 1,
- "computed_at": 1792103815,
+ "version": 2,
+ "computed_at": 1792107018,
  "contributions": [
   {
    "pr": 2,
@@ -15,13 +15,22 @@
    ],
    "layer": "world",
    "label": "builds",
+   "leading": null,
+   "state": "unlabelled",
    "labelled": false,
+   "labellers": 0,
+   "settle_at": 1,
+   "new_unsupported": 0,
+   "author_pointer": null,
+   "contested": false,
    "label_weight": {
     "new": "0",
     "builds": "0",
     "collects": "0"
    },
    "labels": [],
+   "challenges": [],
+   "window_closes": 1794516796,
    "structure": [
     "asked a question that was answered"
    ],
@@ -39,13 +48,22 @@
    ],
    "layer": "world",
    "label": "builds",
+   "leading": null,
+   "state": "unlabelled",
    "labelled": false,
+   "labellers": 0,
+   "settle_at": 1,
+   "new_unsupported": 0,
+   "author_pointer": null,
+   "contested": false,
    "label_weight": {
     "new": "0",
     "builds": "0",
     "collects": "0"
    },
    "labels": [],
+   "challenges": [],
+   "window_closes": 1794537806,
    "structure": [
     "answers a question"
    ],
@@ -63,13 +81,22 @@
    ],
    "layer": "world",
    "label": "builds",
+   "leading": null,
+   "state": "unlabelled",
    "labelled": false,
+   "labellers": 0,
+   "settle_at": 1,
+   "new_unsupported": 0,
+   "author_pointer": null,
+   "contested": false,
    "label_weight": {
     "new": "0",
     "builds": "0",
     "collects": "0"
    },
    "labels": [],
+   "challenges": [],
+   "window_closes": 1794629088,
    "structure": [
     "explains a link"
    ],

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792106940,
+ "computed_at": 1792107018,
  "nodes": [
   {
    "id": "agents",
@@ -529,6 +529,12 @@
    "children": 0,
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -551,6 +557,12 @@
    "answered": true,
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -572,6 +584,12 @@
    "question": "What did you learn the hard way while running an AI agent for real work?",
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -594,6 +612,12 @@
    "answered": true,
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -614,6 +638,12 @@
    "children": 0,
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -1970,6 +2000,12 @@
    "entry": "world/replicator-map/cyanobacteria--fuse--plant.md",
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
@@ -2242,6 +2278,12 @@
    "pr": 3,
    "progress": {
     "label": "builds",
+    "leading": null,
+    "state": "unlabelled",
+    "labellers": 0,
+    "settle_at": 1,
+    "contested": false,
+    "new_unsupported": 0,
     "labelled": false,
     "cited_by": 0,
     "score": 1.25
