@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "computed_at": 1792037022,
-  "head_event": 44,
+  "computed_at": 1792037088,
+  "head_event": 46,
   "bootstrap": {
     "active": true,
     "began": 1791865881,
@@ -16,7 +16,7 @@
     "30469278": {
       "login": "bobykhani",
       "mature_micro": "0",
-      "immature_micro": "995943",
+      "immature_micro": "995940",
       "last_vote_at": null
     },
     "107083616": {
@@ -45,6 +45,12 @@
       "account": 30469278,
       "mergedAt": 1791945806,
       "weightMicro": "1000000"
+    },
+    {
+      "pr": 4,
+      "account": 107083616,
+      "mergedAt": 1792037088,
+      "weightMicro": "0"
     }
   ],
   "logins": {
@@ -67,7 +73,8 @@
     "world/questions/before-acting-on-found-text.md": 107083616,
     "world/questions/lessons-from-running-agents.md": 107083616,
     "world/questions/reviewing-code-before-it-runs.md": 107083616,
-    "world/answers/seven-checks-before-acting-on-found-text.md": 30469278
+    "world/answers/seven-checks-before-acting-on-found-text.md": 30469278,
+    "world/replicator-map/cyanobacteria--fuse--plant.md": 107083616
   },
   "questions": {
     "world/questions/before-acting-on-found-text.md": {
