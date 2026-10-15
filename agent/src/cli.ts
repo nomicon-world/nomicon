@@ -358,7 +358,7 @@ async function run(): Promise<void> {
   log(`network ${network}, facilitator ${describeFacilitator(facilitator)}`);
   const { server } = await createPayServer({
     network, facilitator,
-    quoteFor: (pr) => rt.quoteFor(pr), onPaid: (n) => rt.onPaid(n), paymentsPaused: () => rt.paused("payments"), now, publicBaseUrl,
+    quoteFor: (pr) => rt.quoteFor(pr), onPaid: (n) => rt.onPaid(n), paymentsPaused: () => rt.paused("payments"), webDir: resolve(root(), "agent", "web"), now, publicBaseUrl,
     feed: (since) => rt.feed(since), questions: () => rt.questionsIndex(), paths: () => rt.catalog(), job: (option, node) => rt.job(option, node),
     limits: { trustProxy },
   });

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pay a Nomicon quote</title>
+<style>
+:root { color-scheme: light dark; --bg:#F4F5F1; --card:#FCFCFA; --ink:#17202B; --muted:#5B6573; --line:#DCDFD8; --accent:#2F5D8A; --ok:#2E7D5B; --bad:#A3422A; --amber:#94600F; --code:#EEF0EC; font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12161C; --card:#1A2029; --ink:#E6E9EE; --muted:#9AA4B2; --line:#2B3340; --accent:#8FB6DC; --ok:#7FCFA8; --bad:#F0A58F; --amber:#E3B566; --code:#222A35; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); padding-inline: 16px; }
+.wrap { max-width: 720px; margin: 0 auto; padding-block: 32px 64px; display: grid; gap: 18px; }
+h1 { font: 650 1.8rem/1.2 Georgia, "Times New Roman", serif; margin: 0; }
+p { margin: 0; } a { color: var(--accent); }
+.lede { color: var(--muted); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.card h2 { margin: 0; font-size: 1.05rem; display: flex; gap: 10px; align-items: center; }
+.card h2 .n { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--code); font-size: .9rem; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; width: 140px; }
+button { padding: 8px 14px; border: 1px solid var(--accent); border-radius: 8px; background: var(--accent); color: var(--card); font: inherit; font-weight: 600; cursor: pointer; }
+button[disabled] { opacity: .45; cursor: default; }
+button.ghost { background: transparent; color: var(--accent); }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; font-size: .92rem; }
+dt { color: var(--muted); } dd { margin: 0; overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; font-size: .85rem; }
+ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .92rem; }
+.ok { color: var(--ok); } .bad { color: var(--bad); }
+.note { border: 1px solid var(--amber); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+#log { font-family: ui-monospace, Consolas, monospace; font-size: .82rem; background: var(--code); border-radius: 8px; padding: 10px; white-space: pre-wrap; min-height: 2em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p><a href="https://nomicon-world.github.io/nomicon/site/ways.html">Ways to take part</a> · <a href="https://nomicon-world.github.io/nomicon/site/map.html">World map</a></p>
+  <h1>Pay a quote with your wallet</h1>
+  <p class="lede">For a pull request the agent has quoted. Your wallet signs one USDC transfer of exactly the quoted fee to the fee address in force. Your private key never leaves the wallet, and nothing is paid until you approve it there.</p>
+  <p class="lede">This page is served by Nomicon's own server, the one that takes the payment: your address bar must read <b>https://agent.nomicon.world/pay.html</b>. Its source is <a href="https://github.com/nomicon-world/nomicon/blob/main/agent/web/pay.page">agent/web/pay.page</a>.</p>
+  <noscript><p class="note">This page needs JavaScript and a browser wallet such as Rabby or MetaMask. Without them, use the pay tool or any x402 client, as agent/PROTOCOL.md explains.</p></noscript>
+  <section class="card"><h2><span class="n">1</span>The quote</h2>
+    <div class="row"><label for="pr">Pull request number</label><input id="pr" inputmode="numeric" placeholder="e.g. 7"><button id="load">Check the quote</button></div>
+    <dl id="quote" hidden></dl><ul class="checks" id="checks"></ul>
+  </section>
+  <section class="card"><h2><span class="n">2</span>Your wallet</h2>
+    <div class="row"><button id="connect" disabled>Connect wallet</button><span id="who" style="color:var(--muted)">Check the quote first.</span></div>
+    <ul class="checks" id="wchecks"></ul>
+  </section>
+  <section class="card"><h2><span class="n">3</span>Pay</h2>
+    <p class="note">Paying accepts TERMS.md at the commit the quote names, and the fee is not refunded if the contribution is rejected. The paying address and the transaction are public, and the ledger links them to your GitHub account for good (TERMS.md section 5). Do not push to the pull request after paying. Agents: your operator decides this step.</p>
+    <p class="lede">Your wallet will ask for a <b>signature</b>, not a transaction: a "TransferWithAuthorization" on the USDC contract on Base. It moves exactly the fee, once, to the destination above, and stops being valid about ten minutes later. The amount shows in USDC's smallest unit, so 1 USDC reads 1000000. This page lists every field before the wallet opens; reject the request if anything differs.</p>
+    <div class="row"><button id="pay" disabled>Pay</button></div>
+    <div id="log" aria-live="polite"></div>
+  </section>
+</div>
+<script type="module">
+import * as X from "/x402pay.js?v=3";
+
+const REPO = "nomicon-world/nomicon";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+let quote = null, feeMicro = null, destination = null, account = null;
+
+function check(list, ok, text) { list.insertAdjacentHTML("beforeend", `<li class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(text)}</li>`); return ok; }
+function log(text) { $("log").textContent += ($("log").textContent ? "\n" : "") + text; }
+function toMicro(s) { const [w, f = ""] = String(s).split("."); return BigInt(w) * 1000000n + BigInt((f + "000000").slice(0, 6)); }
+function usdc(m) { const s = m.toString().padStart(7, "0"); return s.slice(0, -6) + "." + s.slice(-6); }
+
+/** The fields of the fenced nomicon-quote block, as the agent writes it. */
+function parseQuote(body) {
+  const m = /```nomicon-quote\r?\n([\s\S]*?)\r?\n```/.exec(body || "");
+  if (!m) return null;
+  const q = {};
+  for (const line of m[1].split(/\r?\n/)) { const i = line.indexOf(":"); if (i > 0) q[line.slice(0, i).trim()] = line.slice(i + 1).trim(); }
+  return q;
+}
+
+async function loadQuote() {
+  const pr = Number($("pr").value.trim());
+  const list = $("checks"); list.innerHTML = ""; $("quote").hidden = true; quote = null;
+  $("connect").disabled = true; $("pay").disabled = true;
+  if (!Number.isInteger(pr) || pr <= 0) return check(list, false, "Type a pull request number.");
+  history.replaceState(null, "", `#pr=${pr}`);
+  try {
+    // What is in force, read from the repository itself; then the latest quote posted by the agent account.
+    const state = await (await fetch(`https://raw.githubusercontent.com/${REPO}/main/ledger/state.json`, { cache: "no-store" })).json();
+    const agentId = state.agent_account; destination = state.fee && state.fee.destination;
+    if (!check(list, agentId && destination, "ledger/state.json names the agent account and the fee destination in force")) return;
+    const res = await fetch(`https://api.github.com/repos/${REPO}/issues/${pr}/comments?per_page=100`, { headers: { accept: "application/vnd.github+json" } });
+    if (!check(list, res.ok, res.ok ? `read the comments on pull request #${pr}` : `GitHub answered ${res.status} for pull request #${pr}`)) return;
+    const pull = await (await fetch(`https://api.github.com/repos/${REPO}/pulls/${pr}`, { headers: { accept: "application/vnd.github+json" } })).json();
+    if (!check(list, pull.state === "open", pull.state === "open" ? `pull request #${pr} is open` : (pull.merged ? `pull request #${pr} is already merged: nothing to pay` : `pull request #${pr} is ${pull.state || "not found"}: nothing to pay`))) return;
+    const comments = await res.json();
+    const others = comments.filter((c) => c.user && c.user.id !== agentId && /```nomicon-quote/.test(c.body || ""));
+    if (others.length) check(list, true, `ignored ${others.length} quote-like comment(s) from other accounts: only the agent issues quotes`);
+    const quotes = comments.filter((c) => c.user && c.user.id === agentId).map((c) => parseQuote(c.body)).filter(Boolean);
+    const q = quotes[quotes.length - 1];
+    if (!check(list, q, q ? "found the agent's latest quote" : "no quote from the agent yet; it posts one a few minutes after screening")) return;
+
+    let ok = true;
+    ok = check(list, Number(q.pr) === pr, `the quote names pull request ${q.pr}`) && ok;
+    ok = check(list, String(q.destination).toLowerCase() === String(destination).toLowerCase(), `destination ${q.destination} is the one in force`) && ok;
+    ok = check(list, q.network === "eip155:8453", `network ${q.network} is Base mainnet`) && ok;
+    ok = check(list, /^https:\/\//.test(q.pay || "") && q.pay.endsWith(`/pay/${pr}`), `pay address ${q.pay} is this pull request's`) && ok;
+    ok = check(list, /^\d+(\.\d{1,6})?$/.test(q.fee_usdc || ""), `the fee is ${q.fee_usdc} USDC`) && ok;
+    const mins = Math.round((Date.parse(q.expires) - Date.now()) / 60000);
+    ok = check(list, mins > 0, mins > 0 ? `valid for about ${mins} more minutes` : "the quote has expired; the agent will issue a new one") && ok;
+    const headNow = pull.head && pull.head.sha;
+    ok = check(list, headNow === q.head, headNow === q.head ? `the pull request is still the version quoted (${String(q.head).slice(0, 7)})` : `the pull request changed after the quote (quoted ${String(q.head).slice(0, 7)}, now ${String(headNow).slice(0, 7)}): paying would pay for a version that is gone. The agent quotes the current one on its next pass`) && ok;
+
+    const dl = $("quote"); dl.hidden = false;
+    dl.innerHTML = [["Fee", `${q.fee_usdc} USDC` + (q.tax && q.tax !== "none" ? ` (includes ${q.tax})` : "")], ["Layer", `${q.layer}, base ${q.base_usdc} × ${q.multiplier}`],
+      ["Destination", q.destination], ["Expires", q.expires], ["Queue ahead", q.queue_ahead || "0"], ["Terms", `TERMS.md at commit ${q.terms_commit}`]]
+      .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+    if (!ok) return;
+    quote = q; feeMicro = toMicro(q.fee_usdc);
+    $("connect").disabled = !window.ethereum;
+    $("who").textContent = window.ethereum ? "Ready to connect." : "No browser wallet found. Install Rabby or MetaMask, then reload.";
+  } catch (e) { check(list, false, `could not check the quote: ${e.message}`); }
+}
+
+async function connect() {
+  const list = $("wchecks"); list.innerHTML = ""; $("pay").disabled = true;
+  try {
+    const eth = window.ethereum;
+    [account] = await eth.request({ method: "eth_requestAccounts" });
+    $("who").textContent = account;
+    try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] }); }
+    catch (e) {
+      if (e.code !== 4902) throw e;
+      await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: "0x2105", chainName: "Base", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: ["https://mainnet.base.org"], blockExplorerUrls: ["https://basescan.org"] }] });
+    }
+    const chain = await eth.request({ method: "eth_chainId" });
+    if (!check(list, chain === "0x2105", chain === "0x2105" ? "the wallet is on Base" : `the wallet is on chain ${parseInt(chain, 16)}, not Base`)) return;
+    const data = "0x70a08231" + account.slice(2).toLowerCase().padStart(64, "0");
+    const balance = BigInt(await eth.request({ method: "eth_call", params: [{ to: X.BASE_USDC, data }, "latest"] }));
+    if (!check(list, balance >= feeMicro, `the wallet holds ${usdc(balance)} USDC on Base` + (balance >= feeMicro ? "" : `, less than the fee of ${quote.fee_usdc}`))) return;
+    check(list, true, "no ETH needed: the facilitator pays the gas");
+    $("pay").disabled = false; $("pay").textContent = `Pay ${quote.fee_usdc} USDC`;
+  } catch (e) { check(list, false, e.message || String(e)); }
+}
+
+async function payNow() {
+  $("pay").disabled = true; $("log").textContent = "";
+  try {
+    if (Date.parse(quote.expires) <= Date.now()) throw new Error("the quote expired; check again for the new one");
+    const now = await (await fetch(`https://api.github.com/repos/${REPO}/pulls/${quote.pr}`, { headers: { accept: "application/vnd.github+json" } })).json();
+    if (now.state !== "open" || !now.head || now.head.sha !== quote.head) throw new Error("the pull request changed or closed since you checked the quote; check it again");
+    log(`Asking ${quote.pay} for its payment terms...`);
+    const first = await fetch(quote.pay, { method: "POST" });
+    if (first.status !== 402) throw new Error(`expected 402 Payment Required, got ${first.status}: ${await first.text()}`);
+    const header = first.headers.get("payment-required");
+    if (!header) throw new Error("the endpoint did not send its payment terms (PAYMENT-REQUIRED header)");
+    const required = X.decodeRequired(header);
+    const acc = X.pickRequirement(required);
+    const problems = X.requirementProblems(acc, destination, feeMicro);
+    if (problems.length) throw new Error("not signing: " + problems.join("; "));
+    log(`Terms match the quote: ${quote.fee_usdc} USDC to ${acc.payTo}.`);
+    const auth = X.authorization(acc, account, Math.floor(Date.now() / 1000), X.newNonce());
+    const td = X.typedData(acc, auth);
+    log([
+      "Your wallet now asks for a signature. It must show exactly:",
+      `  type               ${td.primaryType}`,
+      `  chainId            ${td.domain.chainId} (Base)`,
+      `  verifyingContract  ${td.domain.verifyingContract} (USDC on Base)`,
+      `  from               ${auth.from} (you)`,
+      `  to                 ${auth.to} (the destination above)`,
+      `  value              ${auth.value} (= ${usdc(BigInt(auth.value))} USDC)`,
+      `  validAfter         ${auth.validAfter}`,
+      `  validBefore        ${auth.validBefore} (${new Date(Number(auth.validBefore) * 1000).toLocaleTimeString()})`,
+      `  nonce              ${auth.nonce.slice(0, 10)}... (random)`,
+      "Reject it in the wallet if anything differs.",
+    ].join("\n"));
+    const signature = await window.ethereum.request({ method: "eth_signTypedData_v4", params: [account, JSON.stringify(td)] });
+    log("Signed. Sending the payment...");
+    const res = await fetch(quote.pay, { method: "POST", headers: { "payment-signature": X.paymentHeader(required, acc, auth, signature) } });
+    const text = await res.text(); let body = {}; try { body = JSON.parse(text); } catch {}
+    if (body.transaction) {
+      log(res.ok ? "Paid and recorded." : `Paid, but: ${body.error}. Keep the transaction hash; the operator records it.`);
+      log(`Transaction: ${body.transaction}`);
+      $("log").insertAdjacentHTML("beforeend", `\n<a href="https://basescan.org/tx/${esc(body.transaction)}" target="_blank" rel="noopener">View on BaseScan</a>\nThe agent opens the vote on its next run. Do not push to the pull request.`);
+      return;
+    }
+    throw new Error(`the endpoint answered ${res.status}: ${body.error || text || "no reason given"}`);
+  } catch (e) {
+    log(`Not paid: ${e.message || e}`);
+    $("pay").disabled = false;
+  }
+}
+
+$("load").addEventListener("click", loadQuote);
+$("pr").addEventListener("keydown", (e) => { if (e.key === "Enter") loadQuote(); });
+$("connect").addEventListener("click", connect);
+$("pay").addEventListener("click", payNow);
+const m = /pr=(\d+)/.exec(location.hash);
+if (m) { $("pr").value = m[1]; loadQuote(); }
+</script>
+</body>
+</html>

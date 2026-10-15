@@ -5,6 +5,8 @@
  * The pull request number lives in the resource URL, which is what binds a
  * payment to a submission (Law 5, PROTOCOL.md).
  */
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
 import { createCdpFacilitatorClient } from "@coinbase/cdp-sdk/x402";
@@ -49,6 +51,8 @@ export interface PayServerOptions {
   paths?(): Promise<unknown>;
   /** A job card for an option at a place on the World map (paths.json, Law 12 map). */
   job?(option: string, node: string | null): Promise<Record<string, unknown>>;
+  /** Folder holding the pay page (pay.page) and its module (x402pay.js), served here rather than on the hosting platform's pages. */
+  webDir?: string;
   /** Per-client limits. `trustProxy` reads X-Forwarded-For; only behind a proxy that sets it. */
   limits?: { trustProxy?: boolean; getPerMinute?: number; payPerMinute?: number };
 }
@@ -126,6 +130,17 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
       return res.end(JSON.stringify({ since, events }, (_k, v) => (typeof v === "bigint" ? v.toString() : v)));
     }
+    // The pay page lives on this server, next to the endpoint it pays, not on the hosting platform (its pages may not host payments).
+    if (req.method === "GET" && opts.webDir && (url.pathname === "/pay.html" || url.pathname === "/x402pay.js")) {
+      const page = url.pathname === "/pay.html";
+      let body: string;
+      try { body = await readFile(join(opts.webDir, page ? "pay.page" : "x402pay.js"), "utf8"); } catch { return json(404, { error: "not found" }); }
+      res.writeHead(200, {
+        "content-type": page ? "text/html; charset=utf-8" : "text/javascript; charset=utf-8", "cache-control": "no-cache", "x-content-type-options": "nosniff",
+        ...(page ? { "content-security-policy": "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://raw.githubusercontent.com https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'", "referrer-policy": "no-referrer" } : {}),
+      });
+      return res.end(body);
+    }
     if (req.method === "GET" && url.pathname === "/questions") return json(200, opts.questions(), { "cache-control": "no-store", "access-control-allow-origin": "*" });
     if (req.method === "GET" && url.pathname === "/paths" && opts.paths) return json(200, await opts.paths(), { "cache-control": "max-age=60", "access-control-allow-origin": "*" });
     if (req.method === "GET" && url.pathname === "/job" && opts.job) {
@@ -134,7 +149,7 @@ export async function createPayServer(opts: PayServerOptions): Promise<{ server:
       const card = await opts.job(option, node);
       return json(card["error"] ? 404 : 200, card, { "cache-control": "no-store", "access-control-allow-origin": "*" });
     }
-    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /feed?since=<event id>", "GET /questions", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
+    if (req.method === "GET" && url.pathname === "/") return json(200, { service: "nomicon-agent", endpoints: ["POST /pay/{pr}", "GET /pay.html (pay a quote with a browser wallet)", "GET /feed?since=<event id>", "GET /questions", "GET /paths", "GET /job?do=<option>&node=<node id>"] });
     if (req.method !== "POST" || pr === null) return json(404, { error: "not found" });
     if (opts.paymentsPaused?.()) return json(503, { error: "payments are paused under Constitution Article 8; the quote's validity is extended by the pause, so nothing is lost by waiting" }, { "retry-after": "3600" });
     const q = opts.quoteFor(pr);

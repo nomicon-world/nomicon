@@ -52,7 +52,7 @@ describe("open work on the map", () => {
     const law5 = m.nodes.find((n) => n.id === "law-5")!;
     expect(law5).toMatchObject({ kind: "law", parent: "space-laws", layer: "laws", href: "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-5-fees" });
     expect(m.nodes.find((n) => n.id === "article-9a")).toMatchObject({ kind: "article", locked: true, parent: "space-constitution" });
-    expect(m.nodes.find((n) => n.id === "machine-payments")!.files).toContain("site/pay.html");
+    expect(m.nodes.find((n) => n.id === "machine-payments")!.files).toContain("agent/web/pay.page");
     expect(anchor("Article 9A. Minimums the Laws may not cross")).toBe("article-9a-minimums-the-laws-may-not-cross");
   });
 

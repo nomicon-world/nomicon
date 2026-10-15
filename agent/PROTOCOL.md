@@ -79,7 +79,7 @@ After every merge the agent publishes `ledger/map.json`: `{version, computed_at,
 
 ### Paying with a browser wallet
 
-`site/pay.html` (https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>) pays a quote from a browser wallet. It makes the pay tool's checks, asks the endpoint for its 402 requirements, refuses to sign unless they match the quote and the destination in force, and has the wallet sign the EIP-3009 authorization with `eth_signTypedData_v4`. The payment code is `site/x402pay.js`; `agent/test/x402pay.test.ts` checks that it builds the same `PAYMENT-SIGNATURE` header as `@x402/core` with `@x402/evm`, byte for byte. The endpoint allows cross-origin requests for this.
+The pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, pays a quote from a browser wallet. The agent serves it from `agent/web/pay.page`, beside the endpoint it pays, rather than on the hosting platform's pages, which may not host payments; `site/pay.html` there only forwards to it. It makes the pay tool's checks, asks the endpoint for its 402 requirements, refuses to sign unless they match the quote and the destination in force, and has the wallet sign the EIP-3009 authorization with `eth_signTypedData_v4`. The payment code is `agent/web/x402pay.js`; `agent/test/x402pay.test.ts` checks that it builds the same `PAYMENT-SIGNATURE` header as `@x402/core` with `@x402/evm`, byte for byte. The endpoint allows cross-origin requests for this.
 
 ### Paying without the pay tool
 

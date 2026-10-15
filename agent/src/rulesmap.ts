@@ -23,7 +23,7 @@ export function rulesFrom(lawsMd: string, constitutionMd: string): RulesSource {
 
 /** The parts of the machine, each with the files that make it. They change by the Laws procedure. */
 export const MACHINE: MachinePoint[] = [
-  { id: "machine-payments", label: "Payments", files: ["agent/src/pay.ts", "agent/src/payer.ts", "site/pay.html", "site/x402pay.js"] },
+  { id: "machine-payments", label: "Payments", files: ["agent/src/pay.ts", "agent/src/payer.ts", "agent/web/pay.page", "agent/web/x402pay.js"] },
   { id: "machine-screening", label: "Intake and screening", files: ["agent/src/intake.ts", "agent/src/screen.ts", "agent/src/paths.ts", "agent/src/headercheck.ts"] },
   { id: "machine-votes", label: "Votes and weight", files: ["agent/src/tally.ts", "agent/src/weight.ts", "agent/src/phases.ts"] },
   { id: "machine-agent", label: "The agent's daily round", files: ["agent/src/runtime.ts", "agent/src/notify.ts", "agent/src/pauses.ts"] },

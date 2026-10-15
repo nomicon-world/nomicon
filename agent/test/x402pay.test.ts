@@ -4,8 +4,8 @@ import { getAddress, verifyTypedData } from "viem";
 import { x402Client } from "@x402/core/client";
 import { decodePaymentSignatureHeader, encodePaymentRequiredHeader, encodePaymentSignatureHeader } from "@x402/core/http";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
-// The browser pay page's module (site/pay.html), checked against the libraries the agent and nomicon-pay use.
-import * as pay from "../../site/x402pay.js";
+// The browser pay page's module (agent/web/pay.page, served as /pay.html), checked against the libraries the agent and nomicon-pay use.
+import * as pay from "../web/x402pay.js";
 
 const KEY = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d" as const; // a well-known test key
 const account = privateKeyToAccount(KEY);
