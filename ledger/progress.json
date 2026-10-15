@@ -1,6 +1,6 @@
 {
  "version": 2,
- "computed_at": 1792107018,
+ "computed_at": 1792107087,
  "contributions": [
   {
    "pr": 2,
@@ -19,7 +19,7 @@
    "state": "unlabelled",
    "labelled": false,
    "labellers": 0,
-   "settle_at": 1,
+   "settle_at": 3,
    "new_unsupported": 0,
    "author_pointer": null,
    "contested": false,
@@ -52,7 +52,7 @@
    "state": "unlabelled",
    "labelled": false,
    "labellers": 0,
-   "settle_at": 1,
+   "settle_at": 3,
    "new_unsupported": 0,
    "author_pointer": null,
    "contested": false,
@@ -85,7 +85,7 @@
    "state": "unlabelled",
    "labelled": false,
    "labellers": 0,
-   "settle_at": 1,
+   "settle_at": 3,
    "new_unsupported": 0,
    "author_pointer": null,
    "contested": false,
