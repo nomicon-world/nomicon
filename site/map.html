@@ -240,7 +240,18 @@ function pickEdge(ev) {
   }
   return best;
 }
-function isOpen(n) { return n.unwritten || n.stub || (n.kind === "question" && !n.answered) || n.auto || (n.open_questions || 0) > 0; }
+/** Open work: a point nobody has written about, an open spot, an open question, or a question pinned to it; and every container holding some. */
+function openHere(n) { return !!(n.unwritten || n.stub || (n.kind === "question" && !n.answered) || (n.open_questions || 0) > 0); }
+let OPEN_IN = null;
+function isOpen(n) {
+  if (!OPEN_IN) {
+    OPEN_IN = new Set();
+    const up = (id) => { let p = id ? byId.get(id) : null, g = 0; while (p && g++ < 64) { OPEN_IN.add(p.id); p = p.parent ? byId.get(p.parent) : null; } };
+    for (const m of MAP.nodes) if (openHere(m)) up(m.parent);
+    for (const e of MAP.edges) if (e.unexplained) { up(e.from); }
+  }
+  return openHere(n) || OPEN_IN.has(n.id);
+}
 function dimmed(n) {
   if (frontier && !isOpen(n)) return true;
   if (DO && J && CAT) { const f = J.findOption(CAT, DO); if (f && !n.children && ((!f.option.applies.includes("any") && !f.option.applies.includes(J.placeType(n))) || (f.option.open_only && n.answered) || (f.option.answered_only && J.placeType(n) === "question" && !n.answered) || (f.option.unwritten_only && !n.unwritten))) return true; }

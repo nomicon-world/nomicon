@@ -11,7 +11,8 @@ import type { MapDecl } from "./questions.js";
 import { MACHINE, machineHref, type RulesSource } from "./rulesmap.js";
 
 export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
-export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number }
+/** parent: the starter map's own nesting, an inner component of another point (world/replicator-map/README.md). */
+export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number; parent?: string }
 export interface SourceEdge { from: string; to: string; type: string }
 
 export interface WorldNode {
@@ -63,6 +64,8 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     for (const m of MACHINE) put({ id: m.id, label: m.label, kind: "machine", domain: "machine", parent: "space-machine", source: m.files[0]!, layer: "machine", href: machineHref(m.files[0]!), files: m.files, children: 0 });
   }
   const inside = new Map<string, string>();
+  // The starter map's own nesting: a part drawn inside the point it is a component of.
+  for (const n of replicator?.nodes ?? []) if (n.parent && n.parent !== n.id && nodes.has(n.parent)) inside.set(n.id, n.parent);
   const ordered = Object.values(files).sort((a, b) => a.merged_at - b.merged_at || a.pr - b.pr || a.path.localeCompare(b.path));
   const nodeOfPath = new Map<string, string>();
   const pendingAbout: Array<[string, string]> = [];

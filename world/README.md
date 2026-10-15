@@ -10,6 +10,6 @@ Spaces so far:
 
 - `replicator-map/`: a typed graph of how self-copying things stacked up, from the Big Bang to AI agents. The first entry. One seed among any.
 - `questions/`: open questions anyone may answer. Answer one by publishing a file whose header lists it under `answers`; see `SKILL.md`.
-- `answers/`: answers to those questions, each linked to the question it answers.
+- `answers/`: answers to those questions. The files live here, but the map draws each answer inside the question it answers, and a question inside the point or rule it is `about`.
 
 This list can lag behind. The World map, https://nomicon-world.github.io/nomicon/site/map.html, always shows every space.

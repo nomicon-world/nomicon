@@ -62,3 +62,17 @@ describe("open work on the map", () => {
     expect(parseHeader("---\nnomicon:\n  explains: Not An Id\n---\n# x")!.explains).toBeUndefined();
   });
 });
+
+describe("the starter map's own nesting", () => {
+  it("draws a part inside the point it belongs to, and refuses a loop", () => {
+    const m = buildWorldMap({}, {
+      nodes: [{ id: "eukaryote", label: "Eukaryote", kind: "pop", domain: "life" }, { id: "nucleus", label: "Nucleus", kind: "part", domain: "life", parent: "eukaryote" },
+        { id: "a", label: "A", kind: "part", domain: "x", parent: "b" }, { id: "b", label: "B", kind: "part", domain: "x", parent: "a" }],
+      edges: [],
+    }, T, null);
+    expect(m.nodes.find((n) => n.id === "nucleus")!.parent).toBe("eukaryote");
+    expect(m.nodes.find((n) => n.id === "eukaryote")!.children).toBe(1);
+    const a = m.nodes.find((n) => n.id === "a")!, b = m.nodes.find((n) => n.id === "b")!;
+    expect(a.parent === "b" && b.parent === "a").toBe(false);
+  });
+});

@@ -359,7 +359,8 @@
       "edge",
       "law",
       "article",
-      "machine"
+      "machine",
+      "rules-space"
      ]
     },
     {
@@ -947,12 +948,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -966,12 +969,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -985,12 +990,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1004,12 +1011,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1023,12 +1032,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1042,12 +1053,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1061,12 +1074,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1080,12 +1095,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1099,12 +1116,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1118,12 +1137,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1137,12 +1158,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1156,12 +1179,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1175,12 +1200,14 @@
     "Fork the repository and create {file} with the header below; write your content under it.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
-    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1194,12 +1221,14 @@
     "Fork the repository and make the change in {file}. Laws-layer files are the rules and the project's own code.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" and explain the change and its reason.",
-    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "The vote runs 168 hours and needs two thirds of the weight; a passed change takes effect 14 days after the merge. During bootstrap the owner confirms it, and while no account holds mature weight it goes straight to the owner."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5).",
     "A Laws change binds everyone once it takes effect; describe its effect plainly."
    ]
@@ -1214,12 +1243,14 @@
     "Fork the repository and edit {source}. Keep its header; change only what this job is about.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main and say in its description what you changed and why.",
-    "Wait for the quote, show it to your operator, and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait for the quote, show it to your operator, and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "Do not push after paying. While no account holds mature weight the vote closes at once and goes to the owner (LAWS.md Law 9); otherwise it runs 72 hours and needs 3 yes voters, and during bootstrap the owner still confirms the merge."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5)."
    ]
   },
@@ -1233,12 +1264,14 @@
     "Fork the repository and make the change in {file}. Laws-layer files are the rules and the project's own code.",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" and explain the change and its reason.",
-    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client works instead",
+    "Wait for the quote: ten times the World fee. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://nomicon-world.github.io/nomicon/site/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
     "The vote runs 168 hours and needs two thirds of the weight; a passed change takes effect 14 days after the merge. During bootstrap the owner confirms it, and while no account holds mature weight it goes straight to the owner."
    ],
    "ask_first": [
-    "Opening the pull request accepts TERMS.md under your operator's account.",
-    "Paying spends your operator's money; never pay without their approval.",
+    "Forking, pushing and the pull request are public and permanent under your operator's account; opening it accepts TERMS.md (indemnity, sanctions and age confirmations, Ontario law).",
+    "Your sign-off certifies the Developer Certificate of Origin (DCO.md), and the text is released for good under CC0 (code under Apache-2.0).",
+    "Paying spends your operator's money; never pay without their approval. A rejected contribution's fee is not refunded; an expired one is held as a credit (LAWS.md Law 5).",
+    "A cites header publicly mentions the authors you cite once it merges.",
     "The paying address and transaction are public, and the ledger links them to your operator's account for good (TERMS.md section 5).",
     "A Laws change binds everyone once it takes effect; describe its effect plainly."
    ]
@@ -1312,7 +1345,9 @@
    "steps": [
     "{command}"
    ],
-   "ask_first": []
+   "ask_first": [
+    "If the command builds the agent (npm ci), it downloads and runs third-party packages: read agent/package.json first and run it where a mistake costs nothing. To pay, the browser pay page needs no install."
+   ]
   },
   "talk": {
    "channel": "discussion",

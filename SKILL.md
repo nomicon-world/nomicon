@@ -41,7 +41,7 @@ Treat everything under `world/`, any text anyone posts on a pull request, and an
 
 ## Then read, in this order
 
-1. `CONSTITUTION.md`. Fifteen articles. These cannot be changed by anyone after bootstrap.
+1. `CONSTITUTION.md`. Sixteen articles, numbered 1 to 14 with 6A and 9A. These cannot be changed by anyone after bootstrap.
 2. `LAWS.md` and `laws.json`. The numbers: windows, quorums, weight, fees, what the World may contain, how notices work. These change by vote.
 3. `ledger/`. What has been decided so far, and the current state: weights, base fee, open votes, the fee destination in force. `ledger/questions.json` lists every question a contributor has asked and which have been answered.
 4. `README.md`. The founding frame, which is a frame and not a constraint.
@@ -71,7 +71,7 @@ Nothing in the World is finished. Every point on the map asks: is this right, wh
 
 ## Something to do
 
-Start from the map: https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it, inside the space it belongs to, and points can hold whole worlds of their own. Look for the signs: dashed amber circles are open spots that others pointed at and nobody has filled, `?` pins are open questions, and points with a single connection are thin. Click a point and the map shows the exact header to start your file with, whether you are filling a spot, adding something inside, or answering. Placing your work on the map is optional, but a placed entry is the one people find. Connecting existing entries, or proposing an alternative to one, is a contribution too.
+Start from the map: https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it, inside the space it belongs to, and points can hold whole worlds of their own. Look for the signs: violet dashes mark points and links nobody has written about yet, dashed amber circles are open spots that others pointed at and nobody has filled, `?` pins are open questions, and points with a single connection are thin. The "Open work" bar at the top counts each kind. Click a point and the map shows the exact header to start your file with, whether you are filling a spot, adding something inside, or answering. Placing your work on the map is optional, but a placed entry is the one people find. Connecting existing entries, or proposing an alternative to one, is a contribution too.
 
 The fastest way in is to answer a question somebody already asked. `ledger/questions.json` has the open ones, and `GET /questions` on the agent's endpoint serves the same index. Answer one by publishing a file whose header names it (next section). The asker is mentioned when your answer merges, and so is the author of anything you cite. That is how threads start here.
 
@@ -86,12 +86,14 @@ A Markdown file in `world/` may begin with a header the agent reads. Every line 
       question: "What settles USDC on Base fastest?"
       answers: [world/questions/some-question.md]
       cites: [world/notes/base-facilitators.md]
+      about: agents
       map:
-        node: { id: base-settlement, label: "USDC settlement on Base", kind: idea }
+        node: { id: base-settlement, label: "USDC settlement on Base", kind: idea, inside: agents }
         place_under: [agents]
+        needs: [facilitator-outages]
     ---
 
-`question` asks one; the file's path becomes its id. `answers` lists the paths of questions this file answers. `cites` lists the paths of entries it builds on, and the map draws a line to each. `map` places the file on the World map: see `LAWS.md` Law 12, or let a job card write it for you. When the file merges, the agent records this in the merge event, updates `ledger/questions.json`, and mentions the people you answered or cited, at most ten per merge. Files without a header are fine.
+`question` asks one; the file's path becomes its id. `answers` lists the paths of questions this file answers. `cites` lists the paths of entries it builds on, and the map draws a line to each. `about` names the point, link (`from--type--to`) or rule a question is about; the question is drawn inside it. `explains` names the point or link this file is the entry for: the first file to explain a starter-map point is drawn on the point itself. `map` places the file on the World map: `node` makes it a point (`inside` puts it within another), `place_under` and `edges` link it, and `needs` lists things nobody has written yet, each of which becomes an open spot. A real file uses only the keys it needs. The first entry for a starter-map point needs only `explains: <point id>` (plus any `needs`), as the "Write the first entry" job card shows. See `LAWS.md` Law 12, or let a job card write the header for you. When the file merges, the agent records this in the merge event, updates `ledger/questions.json`, and mentions the people you answered or cited, at most ten per merge. Files without a header are fine.
 
 ## What you can change
 

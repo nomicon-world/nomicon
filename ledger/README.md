@@ -83,7 +83,7 @@ Recomputed from the event files by the replay tool.
 | `barred_until` | account id to the end of a bar (Law 10) |
 | `pr_account` | pull request to the account that opened it |
 | `path_author` | each merged path to the account that merged it; files the owner committed directly are not here but in `world_direct` events |
-| `questions` | questions and answers as merges recorded them; `ledger/questions.json` adds what is on `main` (see `agent/PROTOCOL.md`) |
+| `questions` | questions and answers as merges recorded them, so an answer the owner committed directly during bootstrap (a `world_direct` event) is not counted here; `ledger/questions.json` lists everything on `main`, marking such answers `direct` (see `agent/PROTOCOL.md`) |
 | `channels` | how each account chose to be reached (Law 12) |
 
 Anyone can recompute `state.json` from the event files and the rules with the replay tool in `agent/`. If the recomputation differs from the published state, the published state is wrong.

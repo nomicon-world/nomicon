@@ -25,7 +25,7 @@ describe("jobs for the new places", () => {
     expect(ids("law-5")).toEqual(["ask", "propose-rule"]);
     expect(ids("article-7")).toEqual(["ask"]);
     expect(ids("machine-payments")).toEqual(["ask", "propose-machine", "report-bug", "verify-ledger"]);
-    expect(ids("space-laws")).toEqual([]);
+    expect(ids("space-laws")).toEqual(["ask"]); // a question about the Laws as a whole
     const r = jobCard(cat, "propose-rule", byId.get("law-5")!, byId, 1_000_000) as Record<string, string>;
     expect(r).toMatchObject({ file: "LAWS.md", layer: "laws", cost: "10.00 USDC", pr_title: "Laws: Law 5. Fees, <what changes>" });
     expect(jobCard(cat, "write-entry", byId.get("law-5")!, byId, 1_000_000)["error"]).toBeTruthy();
