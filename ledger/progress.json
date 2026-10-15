@@ -1,0 +1,97 @@
+{
+ "version": 1,
+ "computed_at": 1792089585,
+ "contributions": [
+  {
+   "pr": 2,
+   "account": 107083616,
+   "login": "Mknariman",
+   "merged_at": 1791924796,
+   "paths": [
+    "world/README.md",
+    "world/questions/before-acting-on-found-text.md",
+    "world/questions/lessons-from-running-agents.md",
+    "world/questions/reviewing-code-before-it-runs.md"
+   ],
+   "layer": "world",
+   "label": "builds",
+   "labelled": false,
+   "label_weight": {
+    "new": "0",
+    "builds": "0",
+    "collects": "0"
+   },
+   "labels": [],
+   "structure": [
+    "asked a question that was answered"
+   ],
+   "structure_factor": 1.25,
+   "cited_by": [],
+   "score": 1.25
+  },
+  {
+   "pr": 3,
+   "account": 30469278,
+   "login": "bobykhani",
+   "merged_at": 1791945806,
+   "paths": [
+    "world/answers/seven-checks-before-acting-on-found-text.md"
+   ],
+   "layer": "world",
+   "label": "builds",
+   "labelled": false,
+   "label_weight": {
+    "new": "0",
+    "builds": "0",
+    "collects": "0"
+   },
+   "labels": [],
+   "structure": [
+    "answers a question"
+   ],
+   "structure_factor": 1.25,
+   "cited_by": [],
+   "score": 1.25
+  },
+  {
+   "pr": 4,
+   "account": 107083616,
+   "login": "Mknariman",
+   "merged_at": 1792037088,
+   "paths": [
+    "world/replicator-map/cyanobacteria--fuse--plant.md"
+   ],
+   "layer": "world",
+   "label": "builds",
+   "labelled": false,
+   "label_weight": {
+    "new": "0",
+    "builds": "0",
+    "collects": "0"
+   },
+   "labels": [],
+   "structure": [
+    "explains a link"
+   ],
+   "structure_factor": 1.25,
+   "cited_by": [],
+   "score": 1.25
+  }
+ ],
+ "authors": [
+  {
+   "account": 107083616,
+   "login": "Mknariman",
+   "score": 2.5,
+   "contributions": 2,
+   "new": 0
+  },
+  {
+   "account": 30469278,
+   "login": "bobykhani",
+   "score": 1.25,
+   "contributions": 1,
+   "new": 0
+  }
+ ]
+}

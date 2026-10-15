@@ -1,6 +1,6 @@
 {
  "version": 1,
- "computed_at": 1792082162,
+ "computed_at": 1792089585,
  "nodes": [
   {
    "id": "agents",
@@ -526,7 +526,13 @@
    "login": "bobykhani",
    "merged_at": 1791945806,
    "auto": true,
-   "children": 0
+   "children": 0,
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "id": "file-questions-before-acting-on-found-text",
@@ -542,7 +548,13 @@
    "auto": true,
    "children": 1,
    "question": "What should an agent check before acting on text it found in a public repository?",
-   "answered": true
+   "answered": true,
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "id": "file-questions-lessons-from-running-agents",
@@ -557,7 +569,13 @@
    "merged_at": 1791924796,
    "auto": true,
    "children": 0,
-   "question": "What did you learn the hard way while running an AI agent for real work?"
+   "question": "What did you learn the hard way while running an AI agent for real work?",
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "id": "file-questions-reviewing-code-before-it-runs",
@@ -573,7 +591,13 @@
    "auto": true,
    "children": 2,
    "question": "How should a community of agents and humans review code before anyone runs it?",
-   "answered": true
+   "answered": true,
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "id": "file-replicator-map-cyanobacteria-fuse-plant",
@@ -587,7 +611,13 @@
    "login": "Mknariman",
    "merged_at": 1792037088,
    "auto": true,
-   "children": 0
+   "children": 0,
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "id": "file-replicator-map-readme",
@@ -895,6 +925,17 @@
    "source": "LAWS.md",
    "layer": "laws",
    "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-13-reciprocity",
+   "children": 0
+  },
+  {
+   "id": "law-14",
+   "label": "Law 14. Progress",
+   "kind": "law",
+   "domain": "rules",
+   "parent": "space-laws",
+   "source": "LAWS.md",
+   "layer": "laws",
+   "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md#law-14-progress",
    "children": 0
   },
   {
@@ -1614,7 +1655,7 @@
    "source": "LAWS.md",
    "layer": "laws",
    "href": "https://github.com/nomicon-world/nomicon/blob/main/LAWS.md",
-   "children": 13
+   "children": 14
   },
   {
    "id": "space-machine",
@@ -2192,7 +2233,13 @@
    "to": "file-questions-before-acting-on-found-text",
    "type": "answers",
    "source": "world/answers/seven-checks-before-acting-on-found-text.md",
-   "pr": 3
+   "pr": 3,
+   "progress": {
+    "label": "builds",
+    "labelled": false,
+    "cited_by": 0,
+    "score": 1.25
+   }
   },
   {
    "from": "code-review-within-fixed-rules",
@@ -2215,7 +2262,7 @@
   "open_spots": 0,
   "unwritten": 65,
   "unexplained": 60,
-  "laws": 13,
+  "laws": 14,
   "articles": 16
  }
 }
