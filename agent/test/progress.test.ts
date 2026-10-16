@@ -136,4 +136,24 @@ describe("the Law 14 board", () => {
     expect(b.map((x) => x.pr)).toEqual([2]);
     expect(b[0]!.structure).toEqual(["writes a first entry"]);
   });
+  it("gives structure only for real targets: a question someone asked, a point or link that exists", () => {
+    const q = "world/questions/q.md";
+    const ms = [
+      m(1, 1, { [q]: { question: "Why?", answers: [] } }),
+      m(2, 2, { "world/answers/real.md": { answers: [q] }, "world/notes/fake.md": { answers: ["world/README.md"] } }, ["world/answers/real.md"]),
+      m(3, 3, { "world/notes/fake.md": { answers: ["world/README.md"] } }),
+      m(4, 4, { "world/notes/e1.md": { answers: [], explains: "big-bang" } }),
+      m(5, 5, { "world/notes/e2.md": { answers: [], explains: "no-such-point" } }),
+      m(6, 1, { "world/notes/e3.md": { answers: [], explains: "x--feeds--y" } }),
+    ];
+    const onMap = (t: string) => t === "big-bang";
+    const by = (pr: number) => progressBoard(ms, weights, merged, owners, BASE, laws, T + 20 * D, onMap).contributions.find((x) => x.pr === pr)!;
+    expect(by(2).structure).toEqual(["answers a question"]);
+    expect(by(3).structure).toEqual([]); // README.md is not a question
+    expect(by(4).structure).toEqual(["writes a first entry"]);
+    expect(by(5).structure).toEqual([]); // not on the map
+    expect(by(6).structure).toEqual([]); // no such link
+    const withDirect = progressBoard([ev("world_direct", T, { files: [{ path: "world/questions/seed.md", sha: "x" }] }), m(7, 2, { "world/answers/s.md": { answers: ["world/questions/seed.md"] } })], weights, merged, owners, BASE, laws, T + 20 * D, onMap);
+    expect(withDirect.contributions[0]!.structure).toEqual(["answers a question"]); // the owner's seed questions have no header in the ledger
+  });
 });

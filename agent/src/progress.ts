@@ -67,7 +67,7 @@ export function windowOpen(mergedAt: number, challengeTimes: number[], windowDay
 }
 
 /** A file's header as its merge recorded it (`headers` in the merge event). */
-interface MergedHeader { question?: string; answers?: string[]; cites?: string[]; challenges?: string[]; explains?: string; prior?: string; adds?: string; map?: { node?: { id?: string }; needs?: string[] } }
+interface MergedHeader { question?: string; answers?: string[]; cites?: string[]; challenges?: string[]; explains?: string; prior?: string; adds?: string; map?: { node?: { id?: string }; needs?: string[]; edges?: Array<{ from?: string; to: string; type: string }> } }
 
 /**
  * The board, from the ledger alone: `events` the ledger, `weights` each account's weight (mature plus maturing),
@@ -77,8 +77,10 @@ interface MergedHeader { question?: string; answers?: string[]; cites?: string[]
  * A contribution is judged as it merged: its paths, and the headers its merge recorded. A later edit to one of its
  * files is a contribution of its own and takes nothing from it. Structure counts only what a merge added to the map,
  * and a citation or a challenge of a path names every contribution that wrote the path before the citing file merged.
+ * Structure counts only real targets: an answer to a question someone asked, and an entry for a point or a link
+ * that exists, either declared by an earlier merge or, when `onMap` is given, on the World map (the starter map, the rules).
  */
-export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint>, merged: Set<number>, owners: Set<number>, baseMicro: bigint, laws: Laws, now: number): ProgressBoard {
+export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint>, merged: Set<number>, owners: Set<number>, baseMicro: bigint, laws: Laws, now: number, onMap?: (target: string) => boolean): ProgressBoard {
   const p = laws.progress;
   const revoked = new Set<number>();
   for (const e of events) {
@@ -99,7 +101,11 @@ export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint
   // Walk the merges in order: what each added to the map, and which earlier contributions its files cite or challenge.
   const writers = new Map<string, number[]>();                    // path -> the merges that wrote it so far
   const lastHeader = new Map<string, MergedHeader | undefined>();  // path -> its header at the latest write
-  const explained = new Set<string>(), defined = new Set<string>(), needed = new Set<string>();
+  const explained = new Set<string>(), defined = new Set<string>(), needed = new Set<string>(), linked = new Set<string>();
+  // Files the owner committed directly (Article 3) are on main without a header in the ledger; an answer to one counts.
+  const direct = new Set<string>();
+  for (const e of events) if (e.type === "world_direct") for (const f of (e["files"] as Array<{ path: string }> | undefined) ?? []) direct.add(f.path);
+  const real = (t: string) => (t.includes("--") ? linked.has(t) : defined.has(t)) || (onMap ? onMap(t) : true);
   const asker = new Map<string, number>();                         // question path -> the merge that asked it
   const structure = new Map<number, Set<string>>(), edits = new Map<number, string[]>();
   const citedBy = new Map<number, Set<number>>(), fileChallenges = new Map<number, ChallengeEntry[]>();
@@ -107,12 +113,14 @@ export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint
     const s = new Set<string>(), changed: string[] = [];
     structure.set(m.pr, s); edits.set(m.pr, changed);
     const wrote = (paths: string[] | undefined) => new Set((paths ?? []).flatMap((x) => writers.get(x) ?? []));
+    const askedHere = new Set(m.paths.filter((x) => m.headers[x]?.question));
+    const isQuestion = (q: string) => asker.has(q) || askedHere.has(q) || direct.has(q);
     for (const path of m.paths) {
       if (writers.has(path)) changed.push(path);
       const h = m.headers[path], before = lastHeader.get(path);
       if (!h) continue;
-      if (h.explains && !explained.has(h.explains)) s.add(h.explains.includes("--") ? "explains a link" : "writes a first entry");
-      if ((h.answers ?? []).some((q) => !(before?.answers ?? []).includes(q))) s.add("answers a question");
+      if (h.explains && !explained.has(h.explains) && real(h.explains)) s.add(h.explains.includes("--") ? "explains a link" : "writes a first entry");
+      if ((h.answers ?? []).some((q) => q !== path && isQuestion(q) && !(before?.answers ?? []).includes(q))) s.add("answers a question");
       const node = h.map?.node?.id;
       if (node && needed.has(node) && !defined.has(node)) s.add("fills an open spot");
       if (h.question && !before?.question && !asker.has(path)) asker.set(path, m.pr);
@@ -129,6 +137,8 @@ export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint
       const h = m.headers[path];
       if (h?.explains) explained.add(h.explains);
       if (h?.map?.node?.id) defined.add(h.map.node.id);
+      const own = h?.map?.node?.id;
+      for (const e of h?.map?.edges ?? []) { const from = e.from ?? own; if (from) linked.add(`${from}--${e.type}--${e.to}`); }
       for (const n of h?.map?.needs ?? []) needed.add(n);
       writers.set(path, [...(writers.get(path) ?? []), m.pr]);
       lastHeader.set(path, h);

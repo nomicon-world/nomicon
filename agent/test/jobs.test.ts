@@ -31,6 +31,18 @@ describe("paths.json", () => {
 });
 
 describe("job cards", () => {
+  it("offer judge and challenge only where a merged contribution made the place, and point at its pull request", () => {
+    const made = { id: "aa", label: "A", kind: "idea", parent: "space-questions", source: "world/notes/a.md", pr: 4 };
+    const starter = { id: "stars", label: "Stars", kind: "phys", parent: "space-replicator-map", source: "world/replicator-map/nodes.json", entry: "world/replicator-map/stars.md", entry_pr: 7 };
+    const j = jobCard(catalog, "judge", made as never, byId as never, 1000000n);
+    expect(j).toMatchObject({ pull_request: 4, link: "https://github.com/nomicon-world/nomicon/pull/4", channel: "comment" });
+    expect((j["steps"] as string[])[0]).toContain("pull request #4");
+    expect((jobCard(catalog, "challenge", starter as never, byId as never, 1000000n)["steps"] as string[])[2]).toContain("lists world/replicator-map/stars.md under challenges");
+    expect(jobCard(catalog, "judge", byId.get("file-questions-why") as never, byId as never, 1000000n)["error"]).toMatch(/merged contribution made/);
+    expect(optionsFor(catalog, made as never).map((x) => x.option.id)).toEqual(expect.arrayContaining(["judge", "challenge"]));
+    expect(optionsFor(catalog, byId.get("ocr-skill") as never).map((x) => x.option.id)).not.toContain("judge");
+    expect(site.jobCard(catalog, "judge", made, byId, 1000000n)).toEqual(j);
+  });
   it("are identical from the site and the agent, for every option at every kind of place", () => {
     for (const d of catalog.doors) for (const o of d.options) for (const n of [null, ...nodes]) {
       expect(site.jobCard(catalog, o.id, n, byId, 1000000n, MAP), `${o.id} at ${n?.id}`).toEqual(jobCard(catalog, o.id, n as never, byId as never, 1000000n, MAP));

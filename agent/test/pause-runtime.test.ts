@@ -156,4 +156,26 @@ describe("Law 14 labels in the running agent", () => {
     const r = replay(h.ledger.events, new Map([[loaded.hash, rawLaws]]), rawSchema, null, h.clock.now());
     expect(r.findings).toEqual([]);
   });
+  it("counts a review label given while a merge waits for the owner, and takes challenges only from comments after the merge", async () => {
+    const h = harness();
+    const B = { id: 2, login: "bob" };
+    const submit = async (who: { id: number; login: string }, path: string) => {
+      const pr = h.github.open(who, { [path]: `---\nnomicon:\n  map:\n    node: { id: ${path.replace(/\W/g, "")}, label: "X", kind: idea }\n---\n# X\n` });
+      await h.rt.tick();
+      await h.rt.onPaid({ pr: pr.number, tx: "0x" + String(pr.number).padStart(64, "0"), payer: "0xp", amountMicro: h.rt.quoteFor(pr.number)!.feeMicro, network: "eip155:84532" });
+      await h.rt.tick(); await h.rt.tick();
+      return pr;
+    };
+    const confirm = async (n: number) => { h.ledger.append(h.clock.now(), "owner_confirm", { pr: n, reason: "t", by: OWNER.id }); await h.rt.tick(); };
+    for (const [who, path] of [[A, "world/notes/a.md"], [B, "world/notes/b.md"]] as const) await confirm((await submit(who, path)).number);
+    // Alice's second contribution waits for the owner; Bob reviews it meanwhile, with a label and a challenge line.
+    const pr = await submit(A, "world/notes/c.md");
+    h.clock.advance(60);
+    h.github.review(pr.number, B.id, "APPROVED", h.clock.now(), "Fine.\nlabel: collects\nchallenge: this repeats an earlier note");
+    h.clock.advance(60);
+    await confirm(pr.number);
+    h.clock.advance(700); await h.rt.tick();
+    expect(h.ledger.events.filter((e) => e.type === "label" && e["pr"] === pr.number).map((e) => [e["account"], e["label"], e["source"]])).toEqual([[B.id, "collects", "review"]]);
+    expect(h.ledger.events.filter((e) => e.type === "challenge")).toHaveLength(0);
+  });
 });

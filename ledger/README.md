@@ -28,11 +28,11 @@ Types:
 | `quote` | fee quoted | `pr`, `head`, `layer`, `fee_micro`, `base_micro`, `multiplier`, `concurrency`, `size_kb`, `terms_commit`, `destination`, `expires`, `screening` (`model`, `reused`, `released`), `screened_bytes`, `bytes` (diff bytes, for Law 6), `queue_ahead`, `tax`, `tax_registration` |
 | `payment` | payment verified | `pr`, `tx`, `block`, `block_time`, `amount_micro`, `from`, `cad_value`, `cad_rate` (USD/CAD used), `matched` |
 | `vote_open` | window opened | `pr`, `head`, `opened`, `closes`, `laws_hash`, `qualified` (list of account ids), `authors`, `commits` (sha, author, verified) |
-| `label` | a Law 14 label given in a review or a comment, from an account with a merged contribution | `pr`, `account`, `login`, `label`, `unlike` and `because` (a new label's pointer, or null), `source`, `source_id`, `submitted` |
-| `challenge` | a Law 14 challenge given in a review or a comment, from an account with a merged contribution | `pr`, `account`, `login`, `text`, `source`, `source_id`, `submitted` |
+| `label` | a Law 14 label given in a review once the vote opened, or in a comment on the merged pull request, from an account with a merged contribution | `pr`, `account`, `login`, `label`, `unlike` and `because` (a new label's pointer, or null), `source`, `source_id`, `submitted` |
+| `challenge` | a Law 14 challenge given in a comment on the merged pull request, from an account with a merged contribution | `pr`, `account`, `login`, `text`, `source`, `source_id`, `submitted` |
 | `review` | a review by a qualified voter, recorded when the agent sees it during the window (Law 13) and complete at close | `pr`, `account`, `login`, `review_id`, `state`, `submitted` |
 | `vote_close` | tally | `pr`, `yes_voters`, `yes_micro`, `no_micro`, `tie` (equal weight, no decision), `tally_result`, `result` (`merge`, `reject`, `expire`, `await_owner`) |
-| `merge` | merged | `pr`, `head`, `merge_commit`, `weight_micro`, `account`, `paths`, `headers` (per path, the header as read: question, answers, cites, challenges, about, explains, prior, adds, map), `bytes` (files added or changed) |
+| `merge` | merged | `pr`, `head`, `merge_commit`, `weight_micro`, `account`, `login`, `layer`, `paths`, `titles` (per path, the file's first heading), `headers` (per path, the header as read: question, answers, cites, challenges, about, explains, prior, adds, map), `bytes` (files added or changed) |
 | `withdrawal` | author pushed, closed or drafted after open | `pr`, `fee_disposition` |
 | `expiry` | expired | `pr`, `held_until` (90 days, or 365 when the owner caused the expiry), `reason` |
 | `merge_deferred` | passed, waiting for the World growth budget (Law 2.6) | `pr`, `reason` |
@@ -40,7 +40,7 @@ Types:
 | `owner_accounts_change` | an owner account named under Article 6, effective fourteen days later | `account`, `effective_at`, `reason`, `by` |
 | `owner_confirm` / `owner_reject` | bootstrap decision | `pr`, `reason` |
 | `fee_adjust` | base fee changed | `base_micro`, `submissions_24h`, `target`, `anchor_tx` |
-| `takedown` | Article 5 | `paths`, `notice_hash`, `weight_revoked` |
+| `takedown` | Article 5 | `prs`, `reason`, `notice_hash` |
 | `redaction` | content removed from ledger | `event_id`, `hash` |
 | `patch` / `deploy` | agent code | `commit`, `reason` |
 | `destination_change` | Article 7 | `destination`, `by` |
@@ -76,7 +76,7 @@ Recomputed from the event files by the replay tool.
 | `fee` | `base_micro`, `destination`, `last_adjusted_at` |
 | `weights` | map of account id to `{login, mature_micro, immature_micro, last_vote_at}` |
 | `weighted_accounts` | count of accounts with mature weight above zero |
-| `open_votes` | list of `{pr, closes, laws_hash}` |
+| `open_votes` | list of `{pr, head, layer, opened, closes, laws_hash, qualified, authors, weightedAccountsAtOpen}` |
 | `held_fees`, `held_in_use` (held fees applied to submissions still undecided, by pull request) | list of `{account, layer, micro, until}` |
 | `deployed_agent` | commit hash |
 | `version` | format version of this file |

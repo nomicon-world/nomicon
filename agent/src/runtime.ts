@@ -141,7 +141,8 @@ export class Runtime {
     const st = this.state(now), laws = this.laws!.laws;
     const weights = new Map<number, bigint>(Object.entries(st.weights).map(([k, w]) => [Number(k), w.mature_micro + w.immature_micro]));
     const merged = new Set(st.merges.filter((m) => !m.revoked).map((m) => m.account));
-    return progressBoard(this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now);
+    const targets = this.mapTargets;
+    return progressBoard(this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now, targets ? (t) => targets.has(t) : undefined);
   }
   /** Law 14: labels and challenges in reviews or comments, from accounts with a merged contribution, while the window is open; each recorded once per source. */
   private recordLabels(pr: number, texts: Array<{ id: number; account: number; login: string; body: string; source: "review" | "comment"; at: number }>, now: number): void {
@@ -150,12 +151,17 @@ export class Runtime {
     const author = st.pr_account[String(pr)];
     const c = this.progress(now).contributions.find((x) => x.pr === pr);
     const challengeTimes = c ? c.challenges.map((x) => x.at) : [];
+    const open = [...this.events].reverse().find((e) => e.type === "vote_open" && Number(e["pr"]) === pr);
+    const opened = open ? Number(open["opened"] ?? open.at) : undefined;
     const recorded = (type: string, t: { source: string; id: number }) => this.events.some((e) => e.type === type && Number(e["pr"]) === pr && e["source"] === t.source && Number(e["source_id"]) === t.id);
     for (const t of [...texts].sort((a, b) => a.at - b.at || a.id - b.id)) {
       if (t.account === author || !may.has(t.account) || st.owner_accounts.includes(t.account)) continue;
-      // Before the merge only a review during the vote may label; after it, labels and challenges need an open window.
-      if (!(c ? windowOpen(c.merged_at, challengeTimes, progress.label_window_days_after_merge, t.at) : t.source === "review")) continue;
-      const challenge = c ? parseChallenge(t.body, max) : null;
+      // A review labels from the moment its vote opens until the merge (the owner's confirmation may come later);
+      // after the merge, labels and challenges in comments need an open window.
+      const inReview = t.source === "review" && opened !== undefined && t.at >= opened && (!c || t.at <= c.merged_at);
+      const inWindow = !!c && windowOpen(c.merged_at, challengeTimes, progress.label_window_days_after_merge, t.at);
+      if (!inReview && !inWindow) continue;
+      const challenge = inWindow && t.source === "comment" ? parseChallenge(t.body, max) : null;
       if (challenge && !recorded("challenge", t)) {
         this.d.ledger.append(now, "challenge", { pr, account: t.account, login: t.login, text: challenge, source: t.source, source_id: t.id, submitted: t.at });
         challengeTimes.push(t.at);
@@ -934,7 +940,13 @@ export class Runtime {
     try { this.catalogSource = JSON.parse(await this.d.github.readFile("main", "paths.json")) as Catalog; } catch { this.catalogSource = null; }
     return this.catalogSource;
   }
-  async worldMap(now: number): Promise<WorldMap> { return buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules()); }
+  async worldMap(now: number): Promise<WorldMap> {
+    const m = buildWorldMap(this.worldFiles(now), await this.replicator(), now, await this.rules());
+    // What is really on the map, so the progress board counts an entry only for a point or link that exists (Law 14).
+    this.mapTargets = new Set([...m.nodes.filter((n) => !n.stub && n.kind !== "space").map((n) => n.id), ...m.edges.map((e) => `${e.from}--${e.type}--${e.to}`)]);
+    return m;
+  }
+  private mapTargets: Set<string> | undefined;
   /** The Laws and the Constitution's articles as map points, read from main; refreshed when either file changes. */
   private rulesSource: RulesSource | null | undefined;
   private async rules(): Promise<RulesSource | null> {

@@ -12,9 +12,9 @@
   .err { color: #b00; }
 </style>
 <h1>Nomicon</h1>
-<p id="meta"><small>Loading <code>ledger/state.json</code>, <code>ledger/questions.json</code> and <code>ledger/progress.json</code>. Serve the repository root over HTTP; opening this file directly does not work.</small></p>
+<p id="meta"><small>Loading <code>ledger/state.json</code>, <code>ledger/questions.json</code> and <code>ledger/progress.json</code>.</small></p>
 <h2>Progress</h2>
-<p><small>What the commons judged to be progress (<code>LAWS.md</code> Law 14). Each merged World contribution gets a label, <b>new</b>, <b>builds</b> or <b>collects</b>, from reviews and comments by accounts with merged work, weighted. A label is <i>provisional</i>, and the score uses builds, until 3 accounts have given one. A <b>new</b> counts only with a pointer to the nearest existing work; without one the board shows <b>new?</b> and counts builds. A <b>contested</b> contribution has a challenge that 2 other accounts have not yet answered with labels. Usefulness is shown apart from the label: what the contribution did to the frontier and how many other accounts built on it. Score = label × structure × (1 + citing accounts). It mints no weight and moves no money. Judge one on its pull request while its window is open: <code>label: builds</code>, <code>label: collects</code>, or <code>label: new, unlike &lt;the nearest existing work&gt;, because &lt;what this adds&gt;</code>. Dispute one with <code>challenge: &lt;the earlier work, and why&gt;</code>.</small></p>
+<p><small>What the commons judged to be progress (<code>LAWS.md</code> Law 14). Each merged World contribution gets a label, <b>new</b>, <b>builds</b> or <b>collects</b>, from reviews and comments by accounts with merged work, weighted. A label is <i>provisional</i>, and the score uses builds, until 3 accounts have given one. A <b>new</b> counts only with a pointer to the nearest existing work; without one the board shows <b>new?</b> and counts builds. A <b>contested</b> contribution has a challenge that 2 other accounts have not yet answered with labels. Usefulness is shown apart from the label: what the contribution did to the frontier and how many other accounts built on it. Score = label × structure × (1 + citing accounts). It mints no weight and moves no money. Judge one on its pull request while its window is open: <code>label: builds</code>, <code>label: collects</code>, or <code>label: new, unlike &lt;the nearest existing work&gt;, because &lt;what this adds&gt;</code>. Dispute one with <code>challenge: &lt;the earlier work, and why&gt;</code>. During bootstrap few accounts can label (it takes a merged contribution, and the owner's labels never count), so most contributions show as not judged yet.</small></p>
 <table id="progress"><thead><tr><th>#</th><th>contribution</th><th>by</th><th>label</th><th>usefulness</th><th class="n">built on by</th><th class="n">score</th></tr></thead><tbody></tbody></table>
 <table id="authors"><thead><tr><th>#</th><th>author</th><th class="n">contributions</th><th class="n">judged new</th><th class="n">score</th></tr></thead><tbody></tbody></table>
 <h2>Weight</h2>
@@ -44,7 +44,7 @@
     const now = Math.floor(Date.now() / 1000);
     const NEW_Q = `<span title="Called new without naming the nearest existing work; counts as builds until someone does">new?</span>`;
     const labelCell = (c) => {
-      const state = c.state === "settled" ? "settled" : c.state === "provisional" ? `provisional, ${c.labellers} of ${c.settle_at}${c.leading && c.leading !== c.label ? `, leaning ${esc(c.leading)}` : ""}` : "unlabelled";
+      const state = c.state === "settled" ? "settled" : c.state === "provisional" ? `provisional, ${c.labellers} of ${c.settle_at}${c.leading && c.leading !== c.label ? `, leaning ${esc(c.leading)}` : ""}` : "not judged yet";
       return `<b>${esc(c.label)}</b> <small>${state}</small>${c.contested ? " <b>contested</b>" : ""}${c.new_unsupported ? " " + NEW_Q : ""}`;
     };
     const judged = (c) => {

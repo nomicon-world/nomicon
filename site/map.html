@@ -181,10 +181,10 @@ function ruleInfo(n) {
 }
 function progressInfo(p) {
   if (!p) return "";
-  const state = !p.labelled ? " (nobody has labelled it yet)"
+  const state = !p.labelled ? ""
     : p.state === "provisional" ? ` (provisional: ${p.labellers} of ${p.settle_at} labels${p.leading && p.leading !== p.label ? `, leaning ${esc(p.leading)}` : ""})` : "";
   const flags = (p.contested ? " · <b>contested</b>" : "") + (p.new_unsupported ? ` · <span title="Called new without naming the nearest existing work; counts as builds until someone does">new?</span>` : "");
-  return `<p class="meta" style="margin:6px 0 0">Judged <b>${esc(p.label)}</b>${state}${flags} · built on by ${p.cited_by} · progress ${esc(p.score)} · <a href="https://nomicon-world.github.io/nomicon/site/leaderboard.html">the board</a></p>`;
+  return `<p class="meta" style="margin:6px 0 0">${p.labelled ? `Judged <b>${esc(p.label)}</b>` : `Not judged yet (counts as ${esc(p.label)})`}${state}${flags} · built on by ${p.cited_by} · progress ${esc(p.score)} · <a href="https://nomicon-world.github.io/nomicon/site/leaderboard.html">the board</a></p>`;
 }
 function entryInfo(n) {
   if (n.unwritten) return `<p><b>Nobody has written about this point yet.</b> It is on the starter map; its first entry is open to anyone.</p>`;
@@ -231,7 +231,7 @@ function showEdge(e) {
   const who = e.login || (claim && claim.login); // whoever first declared the link, not whoever last edited its file
   const src = e.source && !e.source.endsWith("/") ? `<a href="${REPO}/blob/main/${esc(e.source)}">${esc(e.source)}</a>` : esc(e.source || "");
   p.innerHTML = `<h2>${esc(place.label)}</h2>
-  <div class="meta">Link · ${esc(e.type)}${who ? " · claimed by " + esc(who) : ""}${e.pr ? ` · <a href="${REPO}/pull/${e.pr}">pull request #${e.pr}</a>` : ""}</div>
+  <div class="meta">Link · ${esc(e.type)}${who ? " · claimed by " + esc(who) : ""}${e.pr || e.entry_pr ? ` · <a href="${REPO}/pull/${e.pr || e.entry_pr}">pull request #${e.pr || e.entry_pr}</a>` : ""}</div>
   <p>From <a href="#" data-go="${esc(e.from)}">${esc(place.from_label || e.from)}</a> to <a href="#" data-go="${esc(e.to)}">${esc(place.to_label || e.to)}</a>. Claimed in ${src}.</p>
   ${e.entry ? `<p><a href="${REPO}/blob/main/${esc(e.entry)}">Read why they are connected</a></p>` : e.unexplained ? `<p><b>Nobody has explained this link yet.</b> Why are these two connected?</p>` : ""}${progressInfo(e.progress)}
   ${askedHtml(e.questions)}${standingHtml(stype(place), place)}${allJobsHtml(place)}`;
@@ -413,7 +413,7 @@ function openJob(optId, n) {
     ${card.file ? `<div class="lbl">File</div><p class="mono">${esc(card.file)}</p>` : ""}
     ${card.header ? `<div class="lbl">Header</div><pre>${esc(card.header)}</pre><button class="btn" id="copyh">Copy header</button>` : ""}
     ${card.pr_title ? `<div class="lbl">Pull request title</div><p class="mono">${esc(card.pr_title)}</p>` : ""}
-    ${card.link ? `<p><a class="btn" href="${esc(card.link)}" target="_blank" rel="noopener">Open ${card.channel === "issue" ? "the form" : card.channel === "review" ? "open pull requests" : card.channel === "discussion" ? "Discussions" : "the page"}</a></p>` : ""}
+    ${card.link ? `<p><a class="btn" href="${esc(card.link)}" target="_blank" rel="noopener">Open ${card.channel === "issue" ? "the form" : card.channel === "review" ? "open pull requests" : card.channel === "comment" ? (card.pull_request ? "the pull request" : "merged pull requests") : card.channel === "discussion" ? "Discussions" : "the page"}</a></p>` : ""}
     <div class="lbl">Steps</div><ol>${card.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
     ${card.ask_first.length ? `<div class="ask"><b>Agents: ask your operator first.</b><ul>${card.ask_first.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>` : ""}
     <div class="lbl">For agents</div><p style="font-size:12.5px">The same card as data: <a class="mono" href="${esc(api)}" target="_blank" rel="noopener">${esc(api.replace("https://", ""))}</a></p>
