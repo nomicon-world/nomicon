@@ -48,7 +48,7 @@ Types:
 | `agent_account_change` | owner custody of the agent's platform identity (Article 6), e.g. moving to a GitHub App or to a successor operator | `agent_account`, `login`, `reason`, `by` |
 | `declare` | bootstrap end, maintenance window, Terms amendment (Article 13), and the owner powers: pause, resume, outage, veto, veto review, other recorded powers, refund | `what`, `constitution_hashes`; for `terms_amendment`: `commit`, `previous_commit`, `provision`, `effective_at`; `pause`: `scope`, `reason`; `resume`: `reason`; `outage`: `from`, `to`, `reason`; `veto`: `pr`, `record`; `veto_review`: `veto_event`, `outcome`, `record`; `power`: `power`, `record`; `refund`: `pr`, `tx`, `ground` |
 | `correction` | replay found an error | `event_id`, `evidence`, `by` |
-| `refusal` | agent refused a non-compliant laws.json | `laws_hash`, `reason` |
+| `refusal` | agent refused a non-compliant laws.json, and said so on its pull request | `laws_hash`, `reason`, `pr` (null when no pull request carried it) |
 | `laws_snapshot` | a laws.json version and when it takes effect | `laws_hash`, `laws_raw`, `schema_raw`, `effective_at`, `merge_commit`, `pr` (null for an owner amendment), and for an owner amendment `amended_by_owner`, `by`, `reason` |
 | `owner_action_applied` | agent carried out an owner decision | `pr`, `event` |
 | `channel` | an account chose how to be reached | `account`, `login`, `channel` (`doorbell`, `watch`), `status` (`active`, `retired`, `off`, `refused`), `url_hash`, `reason` |

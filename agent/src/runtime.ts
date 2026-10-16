@@ -90,10 +90,10 @@ export class Runtime {
   async refreshLaws(): Promise<Laws> {
     const now = this.d.clock.now();
     const snapshots = this.events.filter((e) => e.type === "laws_snapshot" && Number(e["effective_at"]) <= now);
-    const candidates: Array<{ rawLaws: string; rawSchema: string; label: string }> = [];
+    const candidates: Array<{ rawLaws: string; rawSchema: string; label: string; pr?: number }> = [];
     for (let i = snapshots.length - 1; i >= 0; i--) {
       const s = snapshots[i]!;
-      candidates.push({ rawLaws: String(s["laws_raw"]), rawSchema: String(s["schema_raw"]), label: `snapshot ${s.id}` });
+      candidates.push({ rawLaws: String(s["laws_raw"]), rawSchema: String(s["schema_raw"]), label: `snapshot ${s.id}`, ...(typeof s["pr"] === "number" ? { pr: s["pr"] as number } : {}) });
     }
     if (candidates.length === 0) {
       const f = await this.d.loadLaws();
@@ -110,8 +110,13 @@ export class Runtime {
         if (!(e instanceof LawsError)) throw e;
         const hash = sha256(c.rawLaws);
         if (!this.events.some((ev) => ev.type === "refusal" && ev["laws_hash"] === hash)) {
-          this.d.ledger.append(now, "refusal", { laws_hash: hash, reason: e.problems.join("; ") });
+          this.d.ledger.append(now, "refusal", { laws_hash: hash, reason: e.problems.join("; "), pr: c.pr ?? null });
           this.log(`refused laws ${hash.slice(0, 12)}: ${e.problems.join("; ")}`);
+          // Article 9A: voters can see why the change they passed never took effect.
+          if (c.pr !== undefined) {
+            try { await this.d.github.comment(c.pr, `This change to the Laws passed its vote but cannot take effect: ${e.problems.join("; ")}. The agent keeps running on the last valid Laws, and the refusal is recorded in the ledger (Constitution Article 9A).`); }
+            catch (err) { this.log(`could not comment on #${c.pr}: ${(err as Error).message}`); }
+          }
         }
       }
     }
@@ -142,7 +147,9 @@ export class Runtime {
     const weights = new Map<number, bigint>(Object.entries(st.weights).map(([k, w]) => [Number(k), w.mature_micro + w.immature_micro]));
     const merged = new Set(st.merges.filter((m) => !m.revoked).map((m) => m.account));
     const targets = this.mapTargets;
-    return progressBoard(this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now, targets ? (t) => targets.has(t) : undefined);
+    const b = progressBoard(this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now, targets ? (t) => targets.has(t) : undefined);
+    // Which Laws produced the scores, so a change in the settings is never silent.
+    return { version: b.version, computed_at: b.computed_at, laws_version: laws.version, laws_hash: this.laws!.hash, contributions: b.contributions, authors: b.authors };
   }
   /** Law 14: labels and challenges in reviews or comments, from accounts with a merged contribution, while the window is open; each recorded once per source. */
   private recordLabels(pr: number, texts: Array<{ id: number; account: number; login: string; body: string; source: "review" | "comment"; at: number }>, now: number): void {
@@ -1061,6 +1068,7 @@ export class Runtime {
     // a starter-map point or link carries the merge that first explained it.
     const of = (x: { pr?: number; entry_pr?: number }) => (x.pr ? byPr.get(x.pr) : x.entry_pr ? byPr.get(x.entry_pr) : undefined);
     const brief = (c: (typeof board)[number]) => ({ label: c.label, leading: c.leading, state: c.state, labellers: c.labellers, settle_at: c.settle_at, contested: c.contested, new_unsupported: c.new_unsupported, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score });
+    if (this.laws) m.laws = { version: this.laws.laws.version, hash: this.laws.hash };
     for (const n of m.nodes) { const c = of(n); if (c) n.progress = brief(c); }
     for (const e of m.edges) { const c = of(e); if (c) e.progress = brief(c); }
     return m;

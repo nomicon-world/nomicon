@@ -31,7 +31,7 @@ export interface Contribution {
   window_closes: number;
   structure: string[]; structure_factor: number; cited_by: number[]; score: number;
 }
-export interface ProgressBoard { version: 2; computed_at: number; contributions: Contribution[]; authors: Array<{ account: number; login: string; score: number; contributions: number; new: number }> }
+export interface ProgressBoard { version: 2; computed_at: number; laws_version?: number; laws_hash?: string; contributions: Contribution[]; authors: Array<{ account: number; login: string; score: number; contributions: number; new: number }> }
 
 const clip = (s: string, max: number) => s.trim().replace(/\s+/g, " ").slice(0, max);
 

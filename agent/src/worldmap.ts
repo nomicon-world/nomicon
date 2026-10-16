@@ -54,7 +54,7 @@ export interface Progress { label: string; leading?: string | null; state?: stri
 export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; by?: number; login?: string; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string; entry_pr?: number; progress?: Progress }
 /** The open work on the map, counted: what a newcomer could take on today. */
 export interface Frontier { open_questions: number; open_spots: number; unwritten: number; unexplained: number; laws: number; articles: number }
-export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }>; frontier: Frontier }
+export interface WorldMap { version: 1; computed_at: number; /** The Laws in force when it was built. */ laws?: { version: number; hash: string }; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }>; frontier: Frontier }
 
 export const spaceOf = (path: string): string | null => {
   const m = /^world\/([^/]+)\//.exec(path);
