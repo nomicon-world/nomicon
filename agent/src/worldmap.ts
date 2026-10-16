@@ -10,7 +10,26 @@
 import type { MapDecl } from "./questions.js";
 import { MACHINE, machineHref, type RulesSource } from "./rulesmap.js";
 
-export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; challenges?: string[]; prior?: string; adds?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean }
+export interface MapFile { path: string; title?: string; map?: MapDecl; question?: string; answers: string[]; cites?: string[]; about?: string; explains?: string; challenges?: string[]; prior?: string; adds?: string; pr: number; by: number; login: string; merged_at: number; direct?: boolean;
+  /** The merge that first added each thing the file declares, by `declarationKeys`, and the file itself under `file`; a later edit changes none of them. */
+  origin?: Record<string, Origin> }
+/** A merge that added something: its pull request, its author and when. */
+export interface Origin { pr: number; by: number; login: string; merged_at: number }
+
+/** The keys of what a header declares, so the merge that first added each can be remembered (`MapFile.origin`). */
+export function declarationKeys(h: { map?: MapDecl | undefined; answers?: string[] | undefined; cites?: string[] | undefined; challenges?: string[] | undefined; about?: string | undefined; explains?: string | undefined }): string[] {
+  const k: string[] = [];
+  if (h.map?.node) k.push(`node:${h.map.node.id}`);
+  for (const u of h.map?.place_under ?? []) k.push(`under:${u}`);
+  for (const n of h.map?.needs ?? []) k.push(`needs:${n}`);
+  for (const e of h.map?.edges ?? []) k.push(`edge:${e.from ?? ""}|${e.type}|${e.to}`);
+  for (const q of h.answers ?? []) k.push(`answers:${q}`);
+  for (const c of h.cites ?? []) k.push(`cites:${c}`);
+  for (const c of h.challenges ?? []) k.push(`challenges:${c}`);
+  if (h.about) k.push(`about:${h.about}`);
+  if (h.explains) k.push(`explains:${h.explains}`);
+  return k;
+}
 /** parent: the starter map's own nesting, an inner component of another point (world/replicator-map/README.md). */
 export interface SourceNode { id: string; label: string; kind: string; domain: string; description?: string; position?: number[]; lod?: number; parent?: string }
 export interface SourceEdge { from: string; to: string; type: string }
@@ -32,7 +51,7 @@ export interface WorldNode {
   progress?: Progress;
 }
 export interface Progress { label: string; leading?: string | null; state?: string; labellers?: number; settle_at?: number; contested?: boolean; new_unsupported?: number; labelled: boolean; cited_by: number; score: number }
-export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string; progress?: Progress }
+export interface WorldEdge { from: string; to: string; type: string; source: string; pr?: number; by?: number; login?: string; questions?: string[]; open_questions?: number; unexplained?: true; entry?: string; entry_pr?: number; progress?: Progress }
 /** The open work on the map, counted: what a newcomer could take on today. */
 export interface Frontier { open_questions: number; open_spots: number; unwritten: number; unexplained: number; laws: number; articles: number }
 export interface WorldMap { version: 1; computed_at: number; nodes: WorldNode[]; edges: WorldEdge[]; conflicts: Array<{ path: string; problem: string }>; frontier: Frontier }
@@ -70,6 +89,10 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
   // The starter map's own nesting: a part drawn inside the point it is a component of.
   for (const n of replicator?.nodes ?? []) if (n.parent && n.parent !== n.id && nodes.has(n.parent)) inside.set(n.id, n.parent);
   const ordered = Object.values(files).sort((a, b) => a.merged_at - b.merged_at || a.pr - b.pr || a.path.localeCompare(b.path));
+  // A point or a link carries the merge that first added it to its file, so a later edit takes nothing from its maker.
+  const made = (f: MapFile, key: string): Origin => f.origin?.[key] ?? { pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at };
+  const meta = (f: MapFile, key: string) => { const o = made(f, key); return { source: f.path, pr: o.pr, by: o.by, login: o.login, merged_at: o.merged_at, ...(f.direct ? { direct: true as const } : {}) }; };
+  const claim = (f: MapFile, key: string) => { const o = made(f, key); return { source: f.path, pr: o.pr, by: o.by, login: o.login }; };
   const nodeOfPath = new Map<string, string>();
   const pendingAbout: Array<[string, string]> = [];
   const explaining: MapFile[] = [];
@@ -77,39 +100,38 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
     const sp = spaceOf(f.path); if (!sp) continue;
     ensureSpace(sp);
     if (f.explains) { explaining.push(f); continue; }
-    const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at, ...(f.direct ? { direct: true as const } : {}) };
     const decl = f.map?.node;
     let id: string;
     if (decl && nodes.has(decl.id) && nodes.get(decl.id)!.source !== f.path && !nodes.get(decl.id)!.stub) {
       conflicts.push({ path: f.path, problem: `node id ${decl.id} is already declared by ${nodes.get(decl.id)!.source}; this file is shown as an entry instead` });
       id = fileId(f.path);
-      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: decl.domain, parent: spaceId(sp), ...meta, auto: true, children: 0 });
+      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: decl.domain, parent: spaceId(sp), ...meta(f, "file"), auto: true, children: 0 });
     } else if (decl) {
       id = decl.id;
-      put({ id, label: decl.label, kind: f.question ? "question" : decl.kind, domain: decl.domain, parent: spaceId(sp), ...meta, children: 0 });
+      put({ id, label: decl.label, kind: f.question ? "question" : decl.kind, domain: decl.domain, parent: spaceId(sp), ...meta(f, `node:${decl.id}`), children: 0 });
       if (decl.inside) inside.set(id, decl.inside);
     } else {
       id = fileId(f.path);
-      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: "general", parent: spaceId(sp), ...meta, auto: true, children: 0 });
+      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: "general", parent: spaceId(sp), ...meta(f, "file"), auto: true, children: 0 });
     }
     if (f.question) nodes.get(id)!.question = f.question;
     nodeOfPath.set(f.path, id);
-    for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", source: f.path, pr: f.pr });
+    for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", ...claim(f, `under:${u}`) });
     // What this entry needs and nobody has written: each becomes an open spot until a file declares it.
-    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", source: f.path, pr: f.pr });
-    for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, source: f.path, pr: f.pr });
+    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", ...claim(f, `needs:${n}`) });
+    for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, ...claim(f, `edge:${e.from ?? ""}|${e.type}|${e.to}`) });
   }
   // Law 12: a file that explains a starter-map point is that point's entry, drawn on the point itself; a file that
   // explains a link marks the link explained and sits inside its first end. A point already written, a point that is
   // a file, or a missing target: the file becomes a point of its own, inside the target where there is one.
   for (const f of explaining) {
     const sp = spaceOf(f.path)!;
-    const meta = { source: f.path, pr: f.pr, by: f.by, login: f.login, merged_at: f.merged_at, ...(f.direct ? { direct: true as const } : {}) };
     const t = f.explains!, parts = t.split("--"), isLink = parts.length === 3;
+    const first = made(f, `explains:${t}`);
     const target = isLink ? undefined : nodes.get(t);
     let id: string;
     if (target && !target.entry && !target.stub && target.kind !== "space" && !target.layer && target.source === "world/replicator-map/nodes.json") {
-      target.entry = f.path; target.entry_pr = f.pr; target.entry_login = f.login;
+      target.entry = f.path; target.entry_pr = first.pr; target.entry_login = first.login;
       id = target.id;
     } else {
       id = fileId(f.path);
@@ -118,32 +140,32 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
         const e = edges.find((x) => x.from === parts[0] && x.type === parts[1] && x.to === parts[2]);
         if (!e) conflicts.push({ path: f.path, problem: `explains: ${t} names no link on the map` });
         else if (e.entry) conflicts.push({ path: f.path, problem: `explains: ${t} is already explained by ${e.entry}; this file is shown inside ${parts[0]}` });
-        else e.entry = f.path;
+        else { e.entry = f.path; e.entry_pr = first.pr; }
         if (nodes.has(parts[0]!)) parent = parts[0]!;
       } else if (target) parent = target.id;
       else conflicts.push({ path: f.path, problem: `explains: ${t} names no point on the map; placed in its space` });
-      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: "general", parent, ...meta, auto: true, children: 0 });
+      put({ id, label: labelOf(f), kind: f.question ? "question" : "entry", domain: "general", parent, ...meta(f, `explains:${t}`), auto: true, children: 0 });
       if (f.question) nodes.get(id)!.question = f.question;
     }
     nodeOfPath.set(f.path, id);
-    for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", source: f.path, pr: f.pr });
-    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", source: f.path, pr: f.pr });
-    for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, source: f.path, pr: f.pr });
+    for (const u of f.map?.place_under ?? []) edges.push({ from: u, to: id, type: "desc", ...claim(f, `under:${u}`) });
+    for (const n of f.map?.needs ?? []) if (n !== id) edges.push({ from: id, to: n, type: "needs", ...claim(f, `needs:${n}`) });
+    for (const e of f.map?.edges ?? []) edges.push({ from: e.from ?? id, to: e.to, type: e.type, ...claim(f, `edge:${e.from ?? ""}|${e.type}|${e.to}`) });
   }
   // Answers draw an edge from the answer to its question, and mark the question answered.
   for (const f of ordered) for (const q of f.answers) {
     const a = nodeOfPath.get(f.path), qn = nodeOfPath.get(q);
-    if (a && qn) { edges.push({ from: a, to: qn, type: "answers", source: f.path, pr: f.pr }); nodes.get(qn)!.answered = true; }
+    if (a && qn) { edges.push({ from: a, to: qn, type: "answers", ...claim(f, `answers:${q}`) }); nodes.get(qn)!.answered = true; }
   }
   // Citations draw an edge from the citing file to each cited file it can find.
   for (const f of ordered) for (const c of f.cites ?? []) {
     const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
-    if (a && b && a !== b) edges.push({ from: a, to: b, type: "cites", source: f.path, pr: f.pr });
+    if (a && b && a !== b) edges.push({ from: a, to: b, type: "cites", ...claim(f, `cites:${c}`) });
   }
   // Challenges (Law 14) draw their own kind of link, so a dispute never reads as building on the work.
   for (const f of ordered) for (const c of f.challenges ?? []) {
     const a = nodeOfPath.get(f.path), b = nodeOfPath.get(c);
-    if (a && b && a !== b) edges.push({ from: a, to: b, type: "challenges", source: f.path, pr: f.pr });
+    if (a && b && a !== b) edges.push({ from: a, to: b, type: "challenges", ...claim(f, `challenges:${c}`) });
   }
   // Questions about a node or an edge: the question points at it, and it counts the questions still open.
   for (const f of ordered) {
@@ -155,7 +177,7 @@ export function buildWorldMap(files: Record<string, MapFile>, replicator: { node
       const e = edges.find((x) => x.from === parts[0] && x.type === parts[1] && x.to === parts[2]);
       if (e) { (e.questions ??= []).push(qid); } else conflicts.push({ path: f.path, problem: `about: ${f.about} names no edge on the map` });
     } else {
-      edges.push({ from: qid, to: f.about, type: "about", source: f.path, pr: f.pr });
+      edges.push({ from: qid, to: f.about, type: "about", ...claim(f, `about:${f.about}`) });
       pendingAbout.push([f.about, qid]);
     }
   }

@@ -228,9 +228,10 @@ function showEdge(e) {
   place._edge = e; selected = place; setHash(); draw();
   const p = document.getElementById("panel"); p.hidden = false;
   const claim = MAP.nodes.find((n) => n.source === e.source && !n.stub);
+  const who = e.login || (claim && claim.login); // whoever first declared the link, not whoever last edited its file
   const src = e.source && !e.source.endsWith("/") ? `<a href="${REPO}/blob/main/${esc(e.source)}">${esc(e.source)}</a>` : esc(e.source || "");
   p.innerHTML = `<h2>${esc(place.label)}</h2>
-  <div class="meta">Link · ${esc(e.type)}${claim && claim.login ? " · claimed by " + esc(claim.login) : ""}${e.pr ? ` · <a href="${REPO}/pull/${e.pr}">pull request #${e.pr}</a>` : ""}</div>
+  <div class="meta">Link · ${esc(e.type)}${who ? " · claimed by " + esc(who) : ""}${e.pr ? ` · <a href="${REPO}/pull/${e.pr}">pull request #${e.pr}</a>` : ""}</div>
   <p>From <a href="#" data-go="${esc(e.from)}">${esc(place.from_label || e.from)}</a> to <a href="#" data-go="${esc(e.to)}">${esc(place.to_label || e.to)}</a>. Claimed in ${src}.</p>
   ${e.entry ? `<p><a href="${REPO}/blob/main/${esc(e.entry)}">Read why they are connected</a></p>` : e.unexplained ? `<p><b>Nobody has explained this link yet.</b> Why are these two connected?</p>` : ""}${progressInfo(e.progress)}
   ${askedHtml(e.questions)}${standingHtml(stype(place), place)}${allJobsHtml(place)}`;

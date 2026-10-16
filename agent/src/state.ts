@@ -6,7 +6,7 @@ import type { LedgerEvent } from "./ledger.js";
 import type { Laws } from "./laws.js";
 import { weightsAt, type Merge } from "./weight.js";
 import type { Question } from "./questions.js";
-import type { MapFile } from "./worldmap.js";
+import { declarationKeys, type MapFile, type Origin } from "./worldmap.js";
 import { extended, pausesOf, type Pause } from "./pauses.js";
 
 /** since: when the fee was held; until: when it is forfeited, before any pause pushes that back (Article 8). */
@@ -130,7 +130,12 @@ export function applyEvent(s: State, e: LedgerEvent, laws: Laws): State {
       for (const p of paths) {
         if (!p.startsWith("world/") || !p.toLowerCase().endsWith(".md")) continue;
         const h = headers[p] as { question?: string; answers?: string[]; cites?: string[]; about?: string; explains?: string; challenges?: string[]; prior?: string; adds?: string; map?: MapFile["map"] } | undefined;
-        s.map_files[p] = { path: p, ...(titles[p] ? { title: titles[p] } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}), ...(h?.challenges?.length ? { challenges: h.challenges } : {}), ...(h?.prior && h?.adds ? { prior: h.prior, adds: h.adds } : {}), pr: num(e["pr"]), by: acct, login, merged_at: e.at };
+        // The merge that first added the file and each thing its header declares; an edit keeps them, a revoked merge is forgotten.
+        const prev = s.map_files[p], here: Origin = { pr: num(e["pr"]), by: acct, login, merged_at: e.at };
+        const kept = (o: Origin | undefined) => (o && !s.merges.some((m) => m.pr === o.pr && m.revoked) ? o : undefined);
+        const origin: Record<string, Origin> = { file: kept(prev?.origin?.["file"]) ?? here };
+        for (const k of declarationKeys(h ?? {})) origin[k] = kept(prev?.origin?.[k]) ?? here;
+        s.map_files[p] = { path: p, ...(titles[p] ? { title: titles[p] } : {}), ...(h?.map ? { map: h.map } : {}), ...(h?.question ? { question: h.question } : {}), answers: h?.answers ?? [], ...(h?.cites?.length ? { cites: h.cites } : {}), ...(h?.about ? { about: h.about } : {}), ...(h?.explains ? { explains: h.explains } : {}), ...(h?.challenges?.length ? { challenges: h.challenges } : {}), ...(h?.prior && h?.adds ? { prior: h.prior, adds: h.adds } : {}), pr: num(e["pr"]), by: acct, login, merged_at: e.at, origin };
       }
       for (const [p, h] of Object.entries(headers)) {
         if (h.question && !s.questions[p]) s.questions[p] = { id: p, question: h.question, asked_by: acct, asked_login: login, asked_at: e.at, pr: num(e["pr"]), answers: [] };
