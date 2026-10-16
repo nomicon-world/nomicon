@@ -59,4 +59,25 @@ describe("progress on the map (Law 14)", () => {
     expect(map.nodes.find((n: { id: string }) => n.id === "stars").progress).toMatchObject({ label: "builds", score: 1.25 });
     expect(map.edges.find((e: { from: string }) => e.from === "stars").progress).toMatchObject({ label: "builds", score: 1.25 });
   });
+
+  it("keeps the first writer's progress on a point after someone else edits its file, and lists the edit on its own", async () => {
+    const clock = new FakeClock(t0), github = new FakeGitHub(clock), ledger = new Ledger(mkdtempSync(join(tmpdir(), "nomicon-edit-")));
+    const rt = new Runtime({ github, chain: new FakeChain(clock), screen: new FakeScreen(), oracle: new FixedOracle(), clock, ledger, publicBaseUrl: "https://pay.example", loadLaws: async () => ({ rawLaws, rawSchema }), termsCommit: async () => "tt".repeat(20) });
+    ledger.append(t0, "genesis", { head: "aa".repeat(20), laws_hash: loaded.hash, owner_accounts: [100], owner_keys: [], agent_account: 101, fee_destination: "0xdest", network: "eip155:84532" });
+    github.repoFiles["world/replicator-map/nodes.json"] = JSON.stringify({ nodes: [{ id: "stars", label: "Stars", kind: "phys", domain: "c" }] });
+    github.repoFiles["world/replicator-map/relations.json"] = JSON.stringify({ relations: [] });
+    await rt.tick();
+    const path = "world/replicator-map/stars.md";
+    for (const [who, body] of [[{ id: 1, login: "alice" }, "# Stars\n"], [{ id: 2, login: "bob" }, "# Stars\n\nA correction.\n"]] as const) {
+      const pr = github.open(who, { [path]: `---\nnomicon:\n  explains: stars\n---\n${body}` });
+      await rt.tick();
+      await rt.onPaid({ pr: pr.number, tx: "0x" + String(pr.number).padStart(64, "0"), payer: "0xp", amountMicro: rt.quoteFor(pr.number)!.feeMicro, network: "eip155:84532" });
+      await rt.tick(); await rt.tick();
+      ledger.append(clock.now(), "owner_confirm", { pr: pr.number, reason: "t", by: 100 });
+      await rt.tick();
+    }
+    expect(rt.progress().contributions.map((c) => [c.login, c.structure, c.edits])).toEqual([["alice", ["writes a first entry"], []], ["bob", [], [path]]]);
+    const map = JSON.parse(github.published.filter((f) => f.path === "ledger/map.json").at(-1)!.content);
+    expect(map.nodes.find((n: { id: string }) => n.id === "stars").progress).toMatchObject({ score: 1.25 });
+  });
 });

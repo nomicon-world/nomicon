@@ -141,7 +141,7 @@ export class Runtime {
     const st = this.state(now), laws = this.laws!.laws;
     const weights = new Map<number, bigint>(Object.entries(st.weights).map(([k, w]) => [Number(k), w.mature_micro + w.immature_micro]));
     const merged = new Set(st.merges.filter((m) => !m.revoked).map((m) => m.account));
-    return progressBoard(st.map_files, this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now);
+    return progressBoard(this.events, weights, merged, new Set(st.owner_accounts), st.fee.base_micro, laws, now);
   }
   /** Law 14: labels and challenges in reviews or comments, from accounts with a merged contribution, while the window is open; each recorded once per source. */
   private recordLabels(pr: number, texts: Array<{ id: number; account: number; login: string; body: string; source: "review" | "comment"; at: number }>, now: number): void {
@@ -1044,11 +1044,14 @@ export class Runtime {
   private annotatedMap(m: WorldMap, now: number): WorldMap {
     const board = this.progress(now).contributions;
     const byPr = new Map(board.map((c) => [c.pr, c] as const));
-    const byPath = new Map(board.flatMap((c) => c.paths.map((p) => [p, c] as const)));
+    // A point or a link shows the contribution that first wrote its file; a later edit is a contribution of its own on the board.
+    const creator = new Map<string, (typeof board)[number]>();
+    for (const c of [...board].sort((a, b) => a.merged_at - b.merged_at || a.pr - b.pr)) for (const p of c.paths) if (!creator.has(p)) creator.set(p, c);
+    const of = (x: { source?: string | null; pr?: number; entry?: string }) => (x.pr ? (x.source ? creator.get(x.source) : undefined) ?? byPr.get(x.pr) : x.entry ? creator.get(x.entry) : undefined);
     const brief = (c: (typeof board)[number]) => ({ label: c.label, leading: c.leading, state: c.state, labellers: c.labellers, settle_at: c.settle_at, contested: c.contested, new_unsupported: c.new_unsupported, labelled: c.labelled, cited_by: c.cited_by.length, score: c.score });
-    for (const n of m.nodes) { const c = n.pr ? byPr.get(n.pr) : n.entry ? byPath.get(n.entry) : undefined; if (c) n.progress = brief(c); }
+    for (const n of m.nodes) { const c = of(n); if (c) n.progress = brief(c); }
     // A starter-map link has no pull request of its own; the file that explains it does.
-    for (const e of m.edges) { const c = e.pr ? byPr.get(e.pr) : e.entry ? byPath.get(e.entry) : undefined; if (c) e.progress = brief(c); }
+    for (const e of m.edges) { const c = of(e); if (c) e.progress = brief(c); }
     return m;
   }
   private async publish(now: number): Promise<void> {

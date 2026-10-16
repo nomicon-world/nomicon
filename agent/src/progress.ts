@@ -7,13 +7,14 @@
 import type { LedgerEvent } from "./ledger.js";
 import type { Laws, ProgressLabel } from "./laws.js";
 import { PROGRESS_LABELS } from "./laws.js";
-import type { MapFile } from "./worldmap.js";
 
 export interface ParsedLabel { label: ProgressLabel; unlike: string | null; because: string | null }
 export interface LabelEntry { account: number; login: string; label: ProgressLabel; counted_as: ProgressLabel; unlike: string | null; because: string | null; at: number }
 export interface ChallengeEntry { account: number; login: string; text: string | null; path: string | null; source: string; at: number }
 export interface Contribution {
   pr: number; account: number; login: string; merged_at: number; paths: string[]; layer: string;
+  /** Paths it changed that an earlier merged contribution wrote: an edit, which takes nothing from the earlier one. */
+  edits: string[];
   /** The label the score uses: the settled label, or the default while provisional. */
   label: ProgressLabel;
   /** The label ahead among counted labels, settled or not; null when nobody has labelled. */
@@ -65,24 +66,74 @@ export function windowOpen(mergedAt: number, challengeTimes: number[], windowDay
   return challengeTimes.some((c) => c <= t && t <= c + w);
 }
 
+/** A file's header as its merge recorded it (`headers` in the merge event). */
+interface MergedHeader { question?: string; answers?: string[]; cites?: string[]; challenges?: string[]; explains?: string; prior?: string; adds?: string; map?: { node?: { id?: string }; needs?: string[] } }
+
 /**
- * The board. `files` are the merged World files as the ledger recorded them (state.map_files), `events` the ledger,
- * `weights` each account's weight (mature plus maturing), `merged` the accounts with a merged contribution that was
- * not revoked, `owners` the owner accounts, whose labels and challenges never count (Article 1).
+ * The board, from the ledger alone: `events` the ledger, `weights` each account's weight (mature plus maturing),
+ * `merged` the accounts with a merged contribution that was not revoked, `owners` the owner accounts, whose labels
+ * and challenges never count (Article 1).
+ *
+ * A contribution is judged as it merged: its paths, and the headers its merge recorded. A later edit to one of its
+ * files is a contribution of its own and takes nothing from it. Structure counts only what a merge added to the map,
+ * and a citation or a challenge of a path names every contribution that wrote the path before the citing file merged.
  */
-export function progressBoard(files: Record<string, MapFile>, events: LedgerEvent[], weights: Map<number, bigint>, merged: Set<number>, owners: Set<number>, baseMicro: bigint, laws: Laws, now: number): ProgressBoard {
+export function progressBoard(events: LedgerEvent[], weights: Map<number, bigint>, merged: Set<number>, owners: Set<number>, baseMicro: bigint, laws: Laws, now: number): ProgressBoard {
   const p = laws.progress;
   const revoked = new Set<number>();
   for (const e of events) {
     if (e.type === "takedown") for (const pr of (e["prs"] as number[]) ?? []) revoked.add(pr);
     if (e.type === "declare" && e["what"] === "refund") revoked.add(Number(e["pr"]));
   }
-  const byPr = new Map<number, MapFile[]>();
-  for (const f of Object.values(files)) { if (!f.pr || revoked.has(f.pr)) continue; if (!byPr.has(f.pr)) byPr.set(f.pr, []); byPr.get(f.pr)!.push(f); }
-  const layerOf = new Map<number, string>();
-  for (const e of events) if (e.type === "merge") layerOf.set(Number(e["pr"]), String(e["layer"] ?? "world"));
-  const pathPr = new Map<string, number>();
-  for (const [pr, fs] of byPr) for (const f of fs) pathPr.set(f.path, pr);
+  // The merges that stand, in ledger order, and each account's latest login.
+  const logins = new Map<number, string>();
+  const merges: Array<{ pr: number; account: number; at: number; layer: string; paths: string[]; headers: Record<string, MergedHeader> }> = [];
+  const seen = new Set<number>();
+  for (const e of events) {
+    if (typeof e["login"] === "string" && e["account"] !== undefined) logins.set(Number(e["account"]), e["login"]);
+    const pr = Number(e["pr"]);
+    if (e.type !== "merge" || revoked.has(pr) || seen.has(pr)) continue;
+    seen.add(pr);
+    merges.push({ pr, account: Number(e["account"]), at: e.at, layer: String(e["layer"] ?? "world"), paths: [...((e["paths"] as string[] | undefined) ?? [])].sort(), headers: (e["headers"] as Record<string, MergedHeader> | undefined) ?? {} });
+  }
+  // Walk the merges in order: what each added to the map, and which earlier contributions its files cite or challenge.
+  const writers = new Map<string, number[]>();                    // path -> the merges that wrote it so far
+  const lastHeader = new Map<string, MergedHeader | undefined>();  // path -> its header at the latest write
+  const explained = new Set<string>(), defined = new Set<string>(), needed = new Set<string>();
+  const asker = new Map<string, number>();                         // question path -> the merge that asked it
+  const structure = new Map<number, Set<string>>(), edits = new Map<number, string[]>();
+  const citedBy = new Map<number, Set<number>>(), fileChallenges = new Map<number, ChallengeEntry[]>();
+  for (const m of merges) {
+    const s = new Set<string>(), changed: string[] = [];
+    structure.set(m.pr, s); edits.set(m.pr, changed);
+    const wrote = (paths: string[] | undefined) => new Set((paths ?? []).flatMap((x) => writers.get(x) ?? []));
+    for (const path of m.paths) {
+      if (writers.has(path)) changed.push(path);
+      const h = m.headers[path], before = lastHeader.get(path);
+      if (!h) continue;
+      if (h.explains && !explained.has(h.explains)) s.add(h.explains.includes("--") ? "explains a link" : "writes a first entry");
+      if ((h.answers ?? []).some((q) => !(before?.answers ?? []).includes(q))) s.add("answers a question");
+      const node = h.map?.node?.id;
+      if (node && needed.has(node) && !defined.has(node)) s.add("fills an open spot");
+      if (h.question && !before?.question && !asker.has(path)) asker.set(path, m.pr);
+      for (const q of h.answers ?? []) { const a = asker.get(q); if (a !== undefined && a !== m.pr) structure.get(a)!.add("asked a question that was answered"); }
+      // A file that lists a path under `challenges` does not cite the contributions that wrote it.
+      const challenged = wrote(h.challenges);
+      for (const w of wrote(h.cites)) if (!challenged.has(w)) { if (!citedBy.has(w)) citedBy.set(w, new Set()); citedBy.get(w)!.add(m.account); }
+      for (const w of challenged) {
+        if (!fileChallenges.has(w)) fileChallenges.set(w, []);
+        fileChallenges.get(w)!.push({ account: m.account, login: logins.get(m.account) ?? "", text: null, path, source: "file", at: m.at });
+      }
+    }
+    for (const path of m.paths) {
+      const h = m.headers[path];
+      if (h?.explains) explained.add(h.explains);
+      if (h?.map?.node?.id) defined.add(h.map.node.id);
+      for (const n of h?.map?.needs ?? []) needed.add(n);
+      writers.set(path, [...(writers.get(path) ?? []), m.pr]);
+      lastHeader.set(path, h);
+    }
+  }
   // The latest label per account per pull request, and every challenge, as recorded.
   const labelsOf = new Map<number, Map<number, LedgerEvent>>();
   const challengeEvents = new Map<number, LedgerEvent[]>();
@@ -94,19 +145,17 @@ export function progressBoard(files: Record<string, MapFile>, events: LedgerEven
   const floor = BigInt(Math.round(p.labeller_floor_base_fees * Number(baseMicro)));
   const capNum = BigInt(Math.round(laws.weight.per_account_cap_percent * 1000));
   const atOf = (e: LedgerEvent) => (e["submitted"] !== undefined && e["submitted"] !== null ? Number(e["submitted"]) : e.at);
-  const ordered = [...byPr.entries()].sort((a, b) => a[1][0]!.merged_at - b[1][0]!.merged_at || a[0] - b[0]);
   const contributions: Contribution[] = [];
-  for (const [pr, fs] of ordered) {
-    const layer = layerOf.get(pr) ?? "world";
-    if (!p.scored_layers.includes(layer as "world" | "laws")) continue;
-    const first = fs[0]!, author = first.by, mergedAt = Math.min(...fs.map((f) => f.merged_at));
+  for (const m of merges) {
+    if (!p.scored_layers.includes(m.layer as "world" | "laws")) continue;
+    const pr = m.pr, author = m.account, mergedAt = m.at;
     const eligible = (acct: number) => acct !== author && !owners.has(acct) && merged.has(acct);
-    const pointerFile = fs.find((f) => f.prior && f.adds);
-    const authorPointer = pointerFile ? { prior: pointerFile.prior!, adds: pointerFile.adds! } : null;
-    // Challenges: comments recorded in the ledger, and merged files that list this contribution under `challenges`.
+    const pointer = m.paths.map((x) => m.headers[x]).find((h) => h?.prior && h?.adds);
+    const authorPointer = pointer ? { prior: pointer.prior!, adds: pointer.adds! } : null;
+    // Challenges: comments recorded in the ledger, and merged files that list one of its paths under `challenges`.
     const challenges: ChallengeEntry[] = [];
     for (const e of challengeEvents.get(pr) ?? []) if (eligible(Number(e["account"]))) challenges.push({ account: Number(e["account"]), login: String(e["login"] ?? ""), text: String(e["text"] ?? ""), path: null, source: String(e["source"] ?? "comment"), at: atOf(e) });
-    for (const [other, gs] of byPr) if (other !== pr) for (const g of gs) if ((g.challenges ?? []).some((c) => pathPr.get(c) === pr) && eligible(g.by)) challenges.push({ account: g.by, login: g.login, text: null, path: g.path, source: "file", at: g.merged_at });
+    for (const x of fileChallenges.get(pr) ?? []) if (eligible(x.account)) challenges.push(x);
     challenges.sort((a, b) => a.at - b.at || a.account - b.account);
     const window_closes = Math.max(mergedAt, ...challenges.map((c) => c.at)) + p.label_window_days_after_merge * 86400;
     // Labels, each counted as given unless a "new" lacks its pointer.
@@ -137,27 +186,17 @@ export function progressBoard(files: Record<string, MapFile>, events: LedgerEven
     const last = challenges[challenges.length - 1];
     const assessors = last ? entries.filter((x) => x.account !== last.account && x.at > last.at).length : 0;
     const contested = !!last && assessors < p.assessors_to_clear_challenge;
-    const structure = new Set<string>();
-    const needed = new Set<string>();
-    for (const [, gs] of ordered) for (const g of gs) if (g.merged_at < mergedAt) for (const n of g.map?.needs ?? []) needed.add(n);
-    for (const f of fs) {
-      if (f.explains) structure.add(f.explains.includes("--") ? "explains a link" : "writes a first entry");
-      if (f.answers.length) structure.add("answers a question");
-      if (f.map?.node && needed.has(f.map.node.id)) structure.add("fills an open spot");
-      if (f.question && [...byPr.values()].some((gs) => gs.some((g) => g.pr !== pr && g.answers.includes(f.path)))) structure.add("asked a question that was answered");
-    }
-    // Citations by other accounts; a file that challenges a path does not cite it.
-    const cited = new Set<number>();
-    for (const [other, gs] of byPr) if (other !== pr) for (const g of gs) if (g.by !== author && merged.has(g.by) && (g.cites ?? []).some((c) => pathPr.get(c) === pr && !(g.challenges ?? []).includes(c))) cited.add(g.by);
-    const structureFactor = structure.size ? p.structure_factor : 1;
+    const s = structure.get(pr)!;
+    const cited = [...(citedBy.get(pr) ?? [])].filter((a) => a !== author && merged.has(a)).sort((a, b) => a - b);
+    const structureFactor = s.size ? p.structure_factor : 1;
     contributions.push({
-      pr, account: author, login: first.login, merged_at: mergedAt, paths: fs.map((f) => f.path).sort(), layer,
+      pr, account: author, login: logins.get(author) ?? "", merged_at: mergedAt, paths: m.paths, layer: m.layer, edits: edits.get(pr)!,
       label, leading, state: labellers === 0 ? "unlabelled" : settled ? "settled" : "provisional", labelled: labellers > 0, labellers, settle_at: p.labellers_to_settle,
       new_unsupported: newUnsupported, author_pointer: authorPointer, contested,
       label_weight: { new: weight.new.toString(), builds: weight.builds.toString(), collects: weight.collects.toString() },
       labels: entries, challenges, window_closes,
-      structure: [...structure], structure_factor: structureFactor, cited_by: [...cited].sort((a, b) => a - b),
-      score: Math.round(p.label_factors[label] * structureFactor * (1 + cited.size) * 100) / 100,
+      structure: [...s], structure_factor: structureFactor, cited_by: cited,
+      score: Math.round(p.label_factors[label] * structureFactor * (1 + cited.length) * 100) / 100,
     });
   }
   contributions.sort((a, b) => b.score - a.score || a.merged_at - b.merged_at || a.pr - b.pr);
