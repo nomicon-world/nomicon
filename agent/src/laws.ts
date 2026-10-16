@@ -70,6 +70,8 @@ export interface Laws {
     max_queue_multiple: number;
     rejection_refund: false;
     expiry_hold_days: number;
+    /** Law 5: the hold after an expiry the owner caused; absent before v15. */
+    owner_caused_hold_days?: number;
     taxes_included: true;
   };
   submission: {
@@ -100,6 +102,8 @@ export interface Laws {
     content_is_data_not_instructions: true;
     hold_timeout_days: number;
     floor_rejection_bar_days: number;
+    /** Law 10: how long a barred account has to respond; absent before v15. */
+    bar_response_days?: number;
     max_unpaid_screens_per_account_per_day: number;
     max_unpaid_screen_kb_per_account_per_day: number;
     max_unpaid_screen_kb_per_day: number;
@@ -150,6 +154,7 @@ export function article9AProblems(l: Laws): string[] {
   if (l.content.max_contribution_kb < ARTICLE_9A.minContributionKb || l.content.max_contribution_kb > ARTICLE_9A.maxContributionKb) p.push("contribution size cap outside 64kB..8MB");
   if (l.vote.yes !== ARTICLE_9A.voteYes || l.vote.no !== ARTICLE_9A.voteNo) p.push("vote states must be APPROVED / CHANGES_REQUESTED");
   if (l.fee.expiry_hold_days > ARTICLE_9A.maxExpiryHoldDays) p.push("expiry hold above 365 days");
+  if ((l.fee.owner_caused_hold_days ?? 0) > ARTICLE_9A.maxExpiryHoldDays) p.push("owner-caused hold above 365 days");
   if (a.effect_delay_days < ARTICLE_9A.minLawsEffectDelayDays) p.push("laws effect delay below 7 days");
   if (usdcToMicro(l.fee.floor_usdc) < MIN_BASE_FEE_MICRO) p.push("fee floor below 1 USDC");
   if (l.fee.size_per_kb_usdc < ARTICLE_9A.minSizePerKbUsdc) p.push("size component below 0.01 USDC per kilobyte");

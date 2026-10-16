@@ -349,7 +349,7 @@ export class Runtime {
       }
       case "voting": return this.maybeClose(pr, p.open, p.quote, laws, now, state);
       case "await_owner":
-        if (now >= this.due(p.close.at + laws.bootstrap.owner_action_deadline_days * 86400, p.close.at, now)) await this.expire(pr.number, p.quote, laws, now, "the owner did not act within the bootstrap deadline", OWNER_CAUSED_HOLD_DAYS);
+        if (now >= this.due(p.close.at + laws.bootstrap.owner_action_deadline_days * 86400, p.close.at, now)) await this.expire(pr.number, p.quote, laws, now, "the owner did not act within the bootstrap deadline", ownerCausedHoldDays(laws));
         return;
       case "confirmed": return this.doMerge(pr.number, String(p.open["head"]), p.quote, laws, now, pr.author);
       case "merging": return this.doMerge(pr.number, String(p.open["head"]), p.quote, laws, now, pr.author);
@@ -456,7 +456,7 @@ export class Runtime {
     const ev = this.d.ledger.append(now, "quote", {
       pr: pr.number, head: pr.headSha, account: pr.author.id, login: pr.author.login, layer: result.layer, network,
       fee_micro: held ? 0n : q.feeMicro, base_micro: q.baseMicro, multiplier: q.multiplier, concurrency: q.concurrency, size_kb: q.sizeKbCharged,
-      weight_micro: q.weightMicro, terms_commit: terms, destination: state.fee.destination, expires, held_fee_pr: held?.pr ?? null, screening,
+      weight_micro: state.owner_accounts.includes(pr.author.id) ? 0n : q.weightMicro, terms_commit: terms, destination: state.fee.destination, expires, held_fee_pr: held?.pr ?? null, screening,
       bytes: files.reduce((a, f) => a + f.bytesChanged, 0), queue_ahead: this.paidWaiting(now).length,
       tax: this.d.tax?.included ?? "none", tax_registration: this.d.tax?.registration ?? "none",
       ...(screening === "model" ? { screened_bytes: screenedBytes } : {}),
@@ -686,7 +686,7 @@ export class Runtime {
       if (seen.has(pr)) continue;
       seen.add(pr);
       const p = this.phase(pr);
-      if (p.kind === "await_owner") await this.expire(pr, p.quote, laws, now, "bootstrap ended with no owner decision (Article 3)", OWNER_CAUSED_HOLD_DAYS);
+      if (p.kind === "await_owner") await this.expire(pr, p.quote, laws, now, "bootstrap ended with no owner decision (Article 3)", ownerCausedHoldDays(laws));
     }
   }
 
@@ -872,7 +872,7 @@ export class Runtime {
         const tallyResult = close ? String(close["tally_result"] ?? close["result"]) : "none";
         // Article 3: a rejection after a passing vote is an expiry for the fee; so is one before any tally.
         if (q && tallyResult !== "reject") {
-          const heldUntil = now + OWNER_CAUSED_HOLD_DAYS * 86400;
+          const heldUntil = now + ownerCausedHoldDays(this.laws!.laws) * 86400;
           this.d.ledger.append(now, "expiry", { pr, account: Number(q["account"]), layer: q["layer"], fee_micro: BigInt(String(q["fee_micro"])), held_until: heldUntil, reason: "owner rejection" });
           disposition = "held";
         } else disposition = q ? "forfeit" : "none";
@@ -1005,6 +1005,7 @@ export class Runtime {
   }
   /** A job card for an option at a node of the World map. */
   async job(option: string, nodeId: string | null): Promise<Record<string, unknown>> {
+    if (nodeId === "none" || nodeId === "") nodeId = null; // paths.json calls the no-place case "none"
     const cat = await this.catalog();
     if (!cat) return { error: "paths.json is not available yet" };
     const now = this.d.clock.now();
@@ -1101,7 +1102,6 @@ function isRateLimited(e: unknown): boolean {
 const MAP_URL = process.env["NOMICON_MAP_URL"] || "https://nomicon-world.github.io/nomicon/site/map.html";
 
 /** Law 5: an expiry the owner caused, by inaction or by ending bootstrap, holds the fee this long. */
-const OWNER_CAUSED_HOLD_DAYS = 365;
 
 /** A voter may change its review this many times during a window and have each change recorded; the final state is always recorded at close. */
 const MAX_RECORDED_REVIEWS_PER_VOTER = 10;
@@ -1134,3 +1134,6 @@ export function micro(m: bigint): string {
   return s.slice(0, -6) + "." + s.slice(-6);
 }
 export function iso(t: number): string { return new Date(t * 1000).toISOString(); }
+
+/** Law 5: how long a fee is held after an expiry the owner caused (`fee.owner_caused_hold_days`, 365 before Laws v15). */
+function ownerCausedHoldDays(laws: Laws): number { return laws.fee.owner_caused_hold_days ?? 365; }

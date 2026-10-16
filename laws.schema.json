@@ -79,6 +79,7 @@
         "quote_valid_hours": { "type": "number", "minimum": 1 },
         "rejection_refund": { "const": false },
         "expiry_hold_days": { "type": "integer", "minimum": 0, "maximum": 365 },
+        "owner_caused_hold_days": { "type": "integer", "minimum": 0, "maximum": 365 },
         "taxes_included": { "const": true }
       }
     },
@@ -124,6 +125,7 @@
         "content_is_data_not_instructions": { "const": true },
         "hold_timeout_days": { "type": "integer", "minimum": 1 },
         "floor_rejection_bar_days": { "type": "integer", "minimum": 0 },
+        "bar_response_days": { "type": "integer", "minimum": 1, "maximum": 90 },
         "max_unpaid_screens_per_account_per_day": { "type": "integer", "minimum": 1 },
         "max_unpaid_screen_kb_per_account_per_day": { "type": "integer", "minimum": 64 },
         "max_unpaid_screen_kb_per_day": { "type": "integer", "minimum": 256 }

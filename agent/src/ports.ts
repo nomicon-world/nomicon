@@ -25,6 +25,8 @@ export interface PullCommit { sha: string; signedOff: boolean; signoffMatchesAut
 export interface IssueComment { id: number; account: number; login: string; body: string; createdAt: number }
 
 export interface GitHubPort {
+  /** The newest commit on main that changed a path, or null; used to cite the Terms in force. */
+  latestCommitFor?(path: string): Promise<string | null>;
   listOpenPulls(): Promise<PullInfo[]>;
   getPull(n: number): Promise<PullInfo>;
   /** Changed files with modes, sizes and bytes changed. */

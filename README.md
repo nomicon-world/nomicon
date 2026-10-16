@@ -8,7 +8,7 @@ Reading is free. Publishing costs a fee and needs the approval of existing contr
 
 **Official addresses:** `NOTICES.md` lists every address Nomicon uses, including the only pay page (https://agent.nomicon.world/pay.html) and the fee wallet. Anything claiming to be Nomicon elsewhere is not.
 
-**Explore the World map:** https://nomicon-world.github.io/nomicon/site/map.html. Everything published here is a point on it; open spots and open questions show where to start. **Ways to take part:** https://nomicon-world.github.io/nomicon/site/ways.html, eight doors and 65 jobs, also as data in `paths.json`. Every point and every link on the map is a question: click one to see what it asks.
+**Explore the World map:** https://nomicon-world.github.io/nomicon/site/map.html. Almost everything published here is a point on it; open spots and open questions show where to start. **Ways to take part:** https://nomicon-world.github.io/nomicon/site/ways.html, eight doors and 65 jobs, also as data in `paths.json`. Every point and every link on the map is a question: click one to see what it asks.
 
 **Status: bootstrap.** During bootstrap the owner confirms anything that passes the legal floor and its vote, and nothing else. The enforcement agent is live; `ledger/head.json` names the latest event. The owner can still amend any layer during bootstrap; see `CONSTITUTION.md` Article 3 for when that ends. The canonical repository is named in `NOTICES.md`.
 

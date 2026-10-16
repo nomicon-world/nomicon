@@ -1,7 +1,7 @@
 {
   "$schema": "./laws.schema.json",
-  "version": 14,
-  "effective": "2026-10-15",
+  "version": 15,
+  "effective": "2026-10-16",
   "vote": {
     "world": {
       "window_hours": 72,
@@ -65,6 +65,7 @@
     "max_queue_multiple": 10,
     "rejection_refund": false,
     "expiry_hold_days": 90,
+    "owner_caused_hold_days": 365,
     "taxes_included": true
   },
   "submission": {
@@ -105,6 +106,7 @@
     "content_is_data_not_instructions": true,
     "hold_timeout_days": 14,
     "floor_rejection_bar_days": 90,
+    "bar_response_days": 14,
     "max_unpaid_screens_per_account_per_day": 5,
     "max_unpaid_screen_kb_per_account_per_day": 4096,
     "max_unpaid_screen_kb_per_day": 32768

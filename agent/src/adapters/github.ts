@@ -159,6 +159,11 @@ export class GitHubAdapter implements GitHubPort {
     return tree.filter((t) => t.type === "blob" && t.path && t.sha).map((t) => ({ path: t.path!, sha: t.sha! }));
   }
 
+  async latestCommitFor(path: string): Promise<string | null> {
+    const { data } = await this.octokit.repos.listCommits({ owner: this.owner, repo: this.repo, sha: "main", path, per_page: 1 });
+    return data[0]?.sha ?? null;
+  }
+
   async readFile(ref: string, path: string): Promise<string> {
     const { data } = await this.octokit.repos.getContent({ owner: this.owner, repo: this.repo, path, ref });
     if (Array.isArray(data) || data.type !== "file") throw new Error(`${path} is not a file`);

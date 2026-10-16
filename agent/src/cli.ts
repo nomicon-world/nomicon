@@ -57,7 +57,7 @@ import { BankOfCanadaOracle } from "./adapters/oracle.js";
 import { preflight } from "./check.js";
 import { loadLaws, sha256Hex } from "./laws.js";
 import { phaseOf } from "./phases.js";
-import { TERMS_AMENDMENT_NOTICE_DAYS, termsCommitAt } from "./terms.js";
+import { TERMS_AMENDMENT_NOTICE_DAYS, lastQuotedTerms, termsCommitAt, termsCommitForQuote } from "./terms.js";
 import type { PriceOracle } from "./ports.js";
 import { pausesOf } from "./pauses.js";
 import { maintenanceProblems, pauseProblems, powerWarnings, RECORDED_POWERS } from "./powers.js";
@@ -264,7 +264,7 @@ async function main(argv: string[]): Promise<void> {
       if (!/^[0-9a-f]{40}$/.test(commit) || !provision) throw new Error('usage: nomicon amend-terms <full commit of the new TERMS.md on main> "<the statute, regulation or decision that requires it>"');
       const l = ledger();
       if (!l.events.some((e) => e.type === "declare" && e["what"] === "bootstrap_end")) throw new Error("bootstrap has not ended; amend TERMS.md directly under Article 3");
-      const previous = termsCommitAt(l.events, now(), env("NOMICON_TERMS_COMMIT", "main"));
+      const previous = termsCommitAt(l.events, now(), lastQuotedTerms(l.events) ?? env("NOMICON_TERMS_COMMIT", "main"));
       if (previous === commit) throw new Error("that commit is already the Terms in force");
       const effective_at = now() + TERMS_AMENDMENT_NOTICE_DAYS * 86400;
       ownerCommand("declare", { what: "terms_amendment", commit, previous_commit: previous, provision, effective_at });
@@ -345,7 +345,7 @@ async function buildRuntime(): Promise<{ rt: Runtime; led: Ledger; chain: BaseCh
     github, chain, screen: new ClaudeScreen(process.env["NOMICON_SCREEN_MODEL"] || undefined), oracle, clock: { now }, ledger: led, publicBaseUrl, notifier,
     ...(process.env["NOMICON_TAX_INCLUDED"] ? { tax: { included: process.env["NOMICON_TAX_INCLUDED"], registration: process.env["NOMICON_TAX_REGISTRATION"] ?? "none" } } : {}),
     loadLaws: async () => ({ rawLaws: await github.readFile("main", "laws.json"), rawSchema: await github.readFile("main", "laws.schema.json") }),
-    termsCommit: async () => termsCommitAt(led.events, now(), env("NOMICON_TERMS_COMMIT", "main")),
+    termsCommit: async () => termsCommitForQuote(led.events, now(), () => github.latestCommitFor("TERMS.md"), env("NOMICON_TERMS_COMMIT", "main")),
     ...(process.env["NOMICON_LIVE_BRANCH"] ? { liveBranch: process.env["NOMICON_LIVE_BRANCH"] } : {}),
     log,
   });

@@ -2,7 +2,7 @@
 
 Laws are the rules the community can change. Every number here is also in `laws.json`, which is what the enforcement agent reads. If the two disagree, `laws.json` is wrong, and the owner may correct it under Constitution Article 8.
 
-Version 14, 15 October 2026. These are starting values. Change them by the Laws procedure in Law 3, within the minimums in Constitution Article 9A.
+Version 15, 16 October 2026. These are starting values. Change them by the Laws procedure in Law 3, within the minimums in Constitution Article 9A.
 
 ---
 
@@ -16,7 +16,7 @@ A **qualified voter** on a contribution is a non-author account whose mature wei
 
 ## Law 2. World procedure
 
-1. The enforcement agent screens the contribution (Law 10), quotes the fee (Law 5), and confirms payment. The vote then opens and a **72 hour** window starts, provided fewer than max(**10**, **6** × the throughput target of Law 5) votes are open; otherwise the paid contribution waits its turn, in order of payment, the agent posts its place in the queue, and the window starts when it opens. A paid contribution whose window has not opened within **21** days of payment may be withdrawn by closing the pull request, and its fee is then held as on expiry. The open event records the head commit of the pull request, the hash of the `laws.json` in force, and the set of qualified voters. Those rules and that set govern this vote.
+1. The enforcement agent screens the contribution (Law 10), quotes the fee (Law 5), and confirms payment. The vote then opens and a **72 hour** window starts, provided fewer than max(**10**, **6** × the throughput target of Law 5) votes are open; otherwise the paid contribution waits its turn, in order of payment, the agent posts its place in the queue, and the window starts when it opens. Before its window opens, a paid contribution may be withdrawn by closing the pull request, with its fee held as on expiry (Law 8). The open event records the head commit of the pull request, the hash of the `laws.json` in force, and the set of qualified voters. Those rules and that set govern this vote.
 2. A qualified voter votes by submitting a review on the pull request: *Approve* is yes, *Request changes* is no. A vote is the latest review in one of those two states by a qualified voter, submitted after the open event and no later than the close timestamp by the platform's own clock. Reviews that only comment are ignored and do not replace an earlier vote. Dismissal of a review is ignored.
 3. When the window closes, the agent counts distinct qualified voters who voted yes. Fewer than **3** means the contribution **expires**.
 4. Otherwise the agent sums the mature weight, as of the close and capped under Law 4, of yes votes and of no votes. More yes weight merges. More no weight rejects when at least **3** distinct qualified voters voted no; with fewer, the contribution expires and the fee is held, so that one account's weight alone can forfeit nobody's fee.
@@ -116,7 +116,7 @@ A `node` makes the file a point on the map; ids are lowercase letters, digits an
 
 An account may register a **doorbell** by commenting `doorbell: <https address>` on the issue named in `NOTICES.md`, and withdraw it with `doorbell: off`. The latest comment per account counts. The agent delivers to a registered doorbell every ledger event that concerns the account, signed with the ledger key, retrying **3** times; after **30** consecutive failed deliveries the doorbell is retired and the account is told by mention. The registering comment is public, so the address is public there; the agent keeps its working copy in a private store, and the ledger records only a hash and every delivery attempt.
 
-The agent publishes a feed of ledger events and the questions index at the endpoints in `agent/PROTOCOL.md`, records which accounts watch the repository, and every **7** days posts a digest as a discussion: merges, votes closing soon, new and unanswered questions, and the leaderboard.
+The agent publishes a feed of ledger events and the questions index at the endpoints in `agent/PROTOCOL.md`, records which accounts watch the repository, checking every **6** hours, and every **7** days posts a digest as a discussion: merges, votes closing soon, new and unanswered questions, and the leaderboard.
 
 ## Law 13. Reciprocity
 
@@ -127,9 +127,9 @@ An account that is qualified to vote receives a new quote only after it has vote
 
 Nomicon exists for progress, not for collecting what is already known, and the commons says which is which.
 
-**Labels.** Every merged World contribution carries a label the commons gives it: **new** (an idea, result or data not available elsewhere), **builds** (extends, corrects, tests or explains what is here, a replication or a negative result included) or **collects** (gathers known information). A label is one line in a review once the vote has opened, or in a comment on the merged pull request while its window is open (see Window): `label: builds`, `label: collects`, or `label: new, unlike <the nearest existing work>, because <what this adds>`. An account's latest label counts.
+**Labels.** Every merged World contribution carries a label the commons gives it: **new** (an idea, result or data not available elsewhere), **builds** (extends, corrects, tests or explains what is here, a replication or a negative result included) or **collects** (gathers known information). A label is one line in a review once the vote has opened and until the merge, or in a comment on the merged pull request while its window is open (see Window): `label: builds`, `label: collects`, or `label: new, unlike <the nearest existing work>, because <what this adds>`. An account's latest label counts.
 
-**Pointers.** A new label counts as new only with its pointer, or where the contribution's own header names one (`prior` and `adds`). Without one it counts as builds, and the board shows the claim as **new?** until its labeller adds a pointer or the author's header names one.
+**Pointers.** A new label counts as new only with its pointer, or where the contribution's own header names one (`prior` and `adds`). Without one it counts as builds, and the board shows the claim as **new?** until its labeller adds a pointer or the author's header names one. A pointer is kept to its first **280** characters.
 
 **Who labels.** Labels count from accounts with a merged contribution, weighted by the account's weight, mature or not, with a floor of **1** base fee. The author's own label and the owner's never count. Until **3** such accounts have labelled a contribution, its label is provisional and its score uses builds. From then on no account counts for more than the percentage a vote allows (Law 4), taken of the weight behind that contribution's labels; the label with the most weight wins, and a tie gives builds.
 

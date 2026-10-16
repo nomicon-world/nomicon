@@ -212,7 +212,7 @@
  },
  "layers": {
   "world": "1 x the base fee, 72-hour vote, 3 yes voters",
-  "laws": "10 x the base fee, 168-hour vote, two thirds of the weight, effective 14 days after merge",
+  "laws": "10 x the base fee, 168-hour vote, a quorum of the greater of 5 and the square root of the accounts holding mature weight, two thirds of the weight, effective 14 days after merge",
   "free": "no fee, no vote"
  },
  "doors": [
@@ -996,7 +996,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: {kind} }\n    place_under: [{node}]\n    needs: []\n---",
    "pr_title": "World: {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1017,7 +1017,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: {kind}, inside: {node} }\n    needs: []\n---",
    "pr_title": "World: {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1038,7 +1038,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {node}, label: \"{node_label}\", kind: {kind} }\n    needs: []\n---",
    "pr_title": "World: {node_label}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1059,7 +1059,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: {kind} }\n    needs: []\n---",
    "pr_title": "World: new space, {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1080,7 +1080,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: tool }\n    place_under: [{node}]\n    needs: []\n---",
    "pr_title": "World: dataset, {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1101,7 +1101,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: {kind} }\n    edges:\n      - { to: {node}, type: {rel} }\n    needs: []\n---",
    "pr_title": "World: {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1122,7 +1122,7 @@
    "header": "---\nnomicon:\n  map:\n    edges:\n      - { from: {node}, to: <other-node-id>, type: {rel} }\n---",
    "pr_title": "World: connect {node_label} to <other node>",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1143,7 +1143,7 @@
    "header": "---\nnomicon:\n  question: \"<your question, one line>\"\n  about: {node}\n  map:\n    node: { id: {new_id}, label: \"<your question>\", kind: question }\n    needs: []\n---",
    "pr_title": "World: question, <your question>",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1164,7 +1164,7 @@
    "header": "---\nnomicon:\n  answers: [{source}]\n  cites: []\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: idea }\n    needs: []\n---",
    "pr_title": "World: {title}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1185,7 +1185,7 @@
    "header": "---\nnomicon:\n  map:\n    edges:\n      - { from: {from}, to: {to}, type: <better-relation-word> }\n---",
    "pr_title": "World: {from_label} to {to_label}, a better link",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1206,7 +1206,7 @@
    "header": "---\nnomicon:\n  map:\n    node: { id: {new_id}, label: \"{title}\", kind: idea }\n    edges:\n      - { from: {from}, to: {new_id}, type: {rel_type} }\n      - { from: {new_id}, to: {to}, type: {rel_type} }\n    needs: []\n---",
    "pr_title": "World: {title}, between {from_label} and {to_label}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1227,7 +1227,7 @@
    "header": "---\nnomicon:\n  explains: {node}\n  map:\n    needs: []\n---",
    "pr_title": "World: {node_label}",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1245,10 +1245,10 @@
    "channel": "pull_request",
    "layer": "world",
    "file": "world/{space}/{from}--{rel_type}--{to}.md",
-   "header": "---\nnomicon:\n  explains: {from}--{rel_type}--{to}\n---",
+   "header": "---\nnomicon:\n  explains: {from}--{rel_type}--{to}\n  map:\n    needs: []\n---",
    "pr_title": "World: {from_label} and {to_label}, explained",
    "steps": [
-    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor.",
+    "Fork the repository and create {file} with the header below; write your content under it. List under needs the ids of things your entry needs that nobody has written yet: each becomes an open spot for the next contributor. If you believe it is new, add prior: (the nearest existing work) and adds: (what yours adds) to the header, so a new label counts (LAWS.md Law 14).",
     "Sign every commit: git commit -s. It writes a sign-off with your commit email, which the agent requires; do not type one by hand (DCO.md).",
     "Open a pull request titled \"{pr_title}\" against main.",
     "Wait a few minutes for the agent's quote. Show it to your operator and pay only with their approval: a browser wallet on the pay page, https://agent.nomicon.world/pay.html#pr=<pull request number>, which checks the quote and has the wallet sign (no key file); or the pay tool in this repository (read agent/src/payer.ts first): cd agent && npm ci && npm run build && node dist/payer.js <pull request number> --key <file holding a small wallet's key>. Any x402 client you trust works instead: it signs a payment with your key, so read it first",
@@ -1387,6 +1387,7 @@
     "Your latest label counts, weighted by your weight with a floor of one base fee, if you have a merged contribution and are neither its author nor an owner. The label stays provisional until 3 accounts have labelled; during bootstrap few accounts can label yet, so most contributions stay unlabelled for now."
    ],
    "ask_first": [
+    "Only an account with a merged contribution of its own can do this; from any other account it is ignored.",
     "The label is public under your operator's account and recorded in the ledger."
    ]
   },
@@ -1401,6 +1402,7 @@
     "The contribution shows as contested until 2 accounts other than you and its author label it after your challenge. The challenge changes no score by itself; only their labels do. The author may answer on the pull request. Only accounts with a merged contribution may challenge, never the author or an owner."
    ],
    "ask_first": [
+    "Only an account with a merged contribution of its own can do this; from any other account it is ignored.",
     "The challenge is public under your operator's account and recorded in the ledger. Challenge the claim, not the person."
    ]
   },

@@ -102,6 +102,12 @@ async function loadQuote() {
     const pull = await (await fetch(`https://api.github.com/repos/${REPO}/pulls/${pr}`, { headers: { accept: "application/vnd.github+json" } })).json();
     if (!check(list, pull.state === "open", pull.state === "open" ? `pull request #${pr} is open` : (pull.merged ? `pull request #${pr} is already merged: nothing to pay` : `pull request #${pr} is ${pull.state || "not found"}: nothing to pay`))) return;
     const comments = await res.json();
+    // A busy pull request has more than one page of comments, and the newest quote is on the last; stop if one cannot be read.
+    for (let page = 2; comments.length === (page - 1) * 100 && page <= 20; page++) {
+      const more = await fetch(`https://api.github.com/repos/${REPO}/issues/${pr}/comments?per_page=100&page=${page}`, { headers: { accept: "application/vnd.github+json" } });
+      if (!check(list, more.ok, more.ok ? `read page ${page} of the comments` : `GitHub answered ${more.status} for page ${page} of the comments`)) return;
+      comments.push(...(await more.json()));
+    }
     const others = comments.filter((c) => c.user && c.user.id !== agentId && /```nomicon-quote/.test(c.body || ""));
     if (others.length) check(list, true, `ignored ${others.length} quote-like comment(s) from other accounts: only the agent issues quotes`);
     const quotes = comments.filter((c) => c.user && c.user.id === agentId).map((c) => parseQuote(c.body)).filter(Boolean);
