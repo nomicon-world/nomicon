@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "computed_at": 1792110335,
-  "head_event": 57,
+  "computed_at": 1792110404,
+  "head_event": 58,
   "bootstrap": {
     "active": true,
     "began": 1791865881,
@@ -16,7 +16,7 @@
     "30469278": {
       "login": "bobykhani",
       "mature_micro": "0",
-      "immature_micro": "992694",
+      "immature_micro": "992691",
       "last_vote_at": null
     },
     "107083616": {
@@ -31,7 +31,7 @@
   "held_fees": [],
   "held_in_use": {},
   "pending_owner_accounts": [],
-  "deployed_agent": "cd7745d2bc8746b5515b9d56e124d75e97b386b7",
+  "deployed_agent": "2e6d3d1d2dd6220479516b00cf7d989dfeceaf47",
   "ledger_key": null,
   "merges": [
     {
