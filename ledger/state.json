@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "computed_at": 1792119633,
+  "computed_at": 1792121939,
   "head_event": 60,
   "bootstrap": {
     "active": true,
@@ -16,7 +16,7 @@
     "30469278": {
       "login": "bobykhani",
       "mature_micro": "0",
-      "immature_micro": "992283",
+      "immature_micro": "992181",
       "last_vote_at": null
     },
     "107083616": {
